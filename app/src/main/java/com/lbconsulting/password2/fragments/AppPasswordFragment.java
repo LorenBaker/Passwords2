@@ -1,35 +1,27 @@
 package com.lbconsulting.password2.fragments;
 
 
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.DialogInterface;
+import android.app.Fragment;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
 import com.lbconsulting.password2.R;
-import com.lbconsulting.password2.activities.MainActivity;
 import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
-import com.lbconsulting.password2.classes.clsUsers;
-
-import java.util.ArrayList;
+import com.lbconsulting.password2.classes.clsUser;
 
 import de.greenrobot.event.EventBus;
+
+//import android.support.v4.app.Fragment;
 
 
 public class AppPasswordFragment extends Fragment implements View.OnClickListener {
@@ -37,7 +29,7 @@ public class AppPasswordFragment extends Fragment implements View.OnClickListene
     // fragment state variables
     private static final String ARG_IS_CHANGING_PASSWORD = "isChangingPassword";
     private boolean mShowPasswordText = false;
-    private clsUsers mActiveUser;
+    private clsUser mActiveUser;
 
     private ProgressBar progressBar;
     private TextView tvProgressBarCaption;
@@ -114,7 +106,7 @@ public class AppPasswordFragment extends Fragment implements View.OnClickListene
 
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+    public void onActivityCreated( Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         MyLog.i("AppPasswordFragment", "onActivityCreated()");
         MySettings.setOnSaveInstanceState(false);
@@ -393,7 +385,7 @@ public class AppPasswordFragment extends Fragment implements View.OnClickListene
                         String newUserName = input.getText().toString().trim();
                         if (isUnique(newUserName)) {
                             int newUserID = MainActivity.getNextUserID();
-                            mActiveUser = new clsUsers();
+                            mActiveUser = new clsUser();
                             mActiveUser.setUserID(newUserID);
                             mActiveUser.setUserName(newUserName);
                             MySettings.setActiveUserID(newUserID);
@@ -428,16 +420,16 @@ public class AppPasswordFragment extends Fragment implements View.OnClickListene
                 // from Step 3a - Select user
                 if (MainActivity.getPasswordsData() != null) {
                     // Strings to Show In Dialog with Radio Buttons
-                    final ArrayList<clsUsers> users = MainActivity.getPasswordsData().getUsers();
+                    final ArrayList<clsUser> users = MainActivity.getPasswordsData().getUsers();
                     ArrayList<String> userNames = new ArrayList<>();
                     if (users != null) {
-                        for (clsUsers user : users) {
+                        for (clsUser user : users) {
                             userNames.add(user.getUserName());
                         }
                     }
                     CharSequence[] names = userNames.toArray(new CharSequence[userNames.size()]);
                     int selectedUserPosition = -1;
-                    clsUsers activeUser = MySettings.getActiveUser();
+                    clsUser activeUser = MySettings.getActiveUser();
 
                     // find selectedUserPosition
                     if (activeUser != null) {
@@ -547,7 +539,7 @@ public class AppPasswordFragment extends Fragment implements View.OnClickListene
     private boolean isUnique(String newUserName) {
         boolean result = true;
         if (MainActivity.getPasswordsData() != null) {
-            for (clsUsers user : MainActivity.getPasswordsData().getUsers()) {
+            for (clsUser user : MainActivity.getPasswordsData().getUsers()) {
                 if (user.getUserName().equalsIgnoreCase(newUserName)) {
                     result = false;
                     break;

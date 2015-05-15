@@ -27,12 +27,14 @@ public class PasswordsDatabaseHelper extends SQLiteOpenHelper {
         MyLog.i("PasswordsDatabaseHelper", "onCreate");
 
         UsersTable.onCreate(database);
+        ItemsTable.onCreate(database);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
         MyLog.i("PasswordsDatabaseHelper", "onUpgrade");
         UsersTable.onUpgrade(database, oldVersion, newVersion);
+        ItemsTable.onUpgrade(database,oldVersion,newVersion);
     }
 
     public static SQLiteDatabase getDatabase() {

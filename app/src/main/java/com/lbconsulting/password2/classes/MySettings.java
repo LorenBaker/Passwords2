@@ -3,7 +3,7 @@ package com.lbconsulting.password2.classes;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.lbconsulting.password2.activities.MainActivity;
+import com.lbconsulting.password2.fragments.AppPasswordFragment;
 
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;
@@ -14,9 +14,6 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
-import com.lbconsulting.password2.fragments.*;
-import com.lbconsulting.password2.activities.MainActivity;
-
 
 /**
  * Created by Loren on 3/5/2015.
@@ -25,7 +22,9 @@ public class MySettings {
 
     public static final String NOT_AVAILABLE = "N/A...N/A";
 
-    private static final String PASSWORDS_SAVED_STATES = "PasswordsSavedState";
+    private static final String PASSWORDS_SAVED_STATES = "passwordsSavedStates";
+    private static final String SETTING_DROPBOX_ACCESS_TOKEN = "dropboxAccessToken";
+
     private static final String SETTING_ACTIVE_LIST_VIEW_ID = "arg_active_list_view";
     private static final String SETTING_ACTIVE_USER_ID = "arg_active_user_id";
     private static final String SETTING_APP_PASSWORD = "appPasswordKey";
@@ -52,16 +51,17 @@ public class MySettings {
     public static final String ARG_IS_DIRTY = "arg_isDirty";
 
     //public static final String ARG_ACTIVE_FRAGMENT = "arg_active_fragment";
-    public static final int FRAG_ITEMS_LIST = 10;
-    public static final int FRAG_ITEM_DETAIL = 20;
-    public static final int FRAG_EDIT_CREDIT_CARD = 31;
-    public static final int FRAG_EDIT_GENERAL_ACCOUNT = 32;
-    public static final int FRAG_EDIT_SOFTWARE = 33;
-    public static final int FRAG_EDIT_WEBSITE = 34;
-    public static final int FRAG_SETTINGS = 40;
-    public static final int FRAG_APP_PASSWORD = 41;
-    public static final int FRAG_DROPBOX_LIST = 42;
-    public static final int FRAG_USER_SETTINGS = 43;
+    public static final int FRAG_APP_PASSWORD = 10;
+    public static final int FRAG_DROPBOX_LIST = 11;
+    public static final int FRAG_EDIT_CREDIT_CARD = 12;
+    public static final int FRAG_EDIT_GENERAL_ACCOUNT = 13;
+    public static final int FRAG_EDIT_SOFTWARE = 14;
+    public static final int FRAG_EDIT_WEBSITE = 15;
+    public static final int FRAG_ITEM_DETAIL = 16;
+    public static final int FRAG_ITEMS_LIST = 17;
+    public static final int FRAG_SETTINGS = 18;
+    public static final int FRAG_USER_SETTINGS = 19;
+
 
     public static final String[] CreditCardNames = {"American Express", "Diners Club", "Discover", "JCB", "MasterCard", "VISA"};
     public static final String UNKNOWN = "UNKNOWN";
@@ -82,6 +82,21 @@ public class MySettings {
 
     //public static final String SETTING_USER_LIST = "setting_user_list";
 
+
+    public static String getDropboxAccessToken() {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        return passwordsSavedState.getString(SETTING_DROPBOX_ACCESS_TOKEN, UNKNOWN);
+    }
+
+    public static void setDropboxAccessToken(String accessToken) {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        SharedPreferences.Editor editor = passwordsSavedState.edit();
+        editor.putString(SETTING_DROPBOX_ACCESS_TOKEN, accessToken);
+        editor.apply();
+    }
+
     public static int getActiveUserID() {
         SharedPreferences passwordsSavedState =
                 mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
@@ -96,11 +111,11 @@ public class MySettings {
         editor.apply();
     }
 
-    public static clsUsers getActiveUser() {
-        clsUsers result = null;
+    public static clsUser getActiveUser() {
+        clsUser result = null;
 /*        int activeUserID = getActiveUserID();
         if (activeUserID > 0) {
-            for (clsUsers user : MainActivity.getPasswordsData().getUsers()) {
+            for (clsUser user : MainActivity.getPasswordsData().getUsers()) {
                 if (user.getUserID() == activeUserID) {
                     result = user;
                 }

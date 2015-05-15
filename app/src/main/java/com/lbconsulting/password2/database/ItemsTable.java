@@ -40,6 +40,9 @@ public class ItemsTable {
     public static final String COL_WEBSITE_URL = "websiteURL";
     public static final String COL_WEBSITE_USER_ID = "websiteUserID";
     public static final String COL_WEBSITE_PASSWORD = "websitePassword";
+    public static final String COL_IS_DIRTY = "isDirty";
+    public static final String COL_IS_NEW = "isNew";
+
 
 
     public static final String[] PROJECTION_ALL = {COL_ITEM_ID, COL_ITEM_NAME,
@@ -48,7 +51,7 @@ public class ItemsTable {
             COL_CREDIT_CARD_ACCOUNT_NUMBER, COL_CREDIT_CARD_SECURITY_CODE,
             COL_CREDIT_CARD_EXPIRATION_MONTH, COL_CREDIT_CARD_EXPIRATION_YEAR,
             COL_GENERAL_ACCOUNT_NUMBER, COL_PRIMARY_PHONE_NUMBER, COL_ALTERNATE_PHONE_NUMBER,
-            COL_WEBSITE_URL, COL_WEBSITE_USER_ID, COL_WEBSITE_PASSWORD};
+            COL_WEBSITE_URL, COL_WEBSITE_USER_ID, COL_WEBSITE_PASSWORD, COL_IS_DIRTY, COL_IS_NEW};
 
     public static final String CONTENT_PATH = TABLE_ITEMS;
 
@@ -67,21 +70,23 @@ public class ItemsTable {
             + " ("
             + COL_ITEM_ID + " integer primary key autoincrement, "
             + COL_ITEM_NAME + " text collate nocase, "
-            + COL_ITEM_TYPE_ID + " integer,"
-            + COL_USER_ID + " integer,"
-            + COL_SOFTWARE_KEY_CODE + " text, "
-            + COL_SOFTWARE_SUBGROUP_LENGTH + " integer,"
-            + COL_COMMENTS + " text, "
-            + COL_CREDIT_CARD_ACCOUNT_NUMBER + " text, "
-            + COL_CREDIT_CARD_SECURITY_CODE + " text, "
-            + COL_CREDIT_CARD_EXPIRATION_MONTH + " text, "
-            + COL_CREDIT_CARD_EXPIRATION_YEAR + " text, "
-            + COL_GENERAL_ACCOUNT_NUMBER + " text, "
-            + COL_PRIMARY_PHONE_NUMBER + " text, "
-            + COL_ALTERNATE_PHONE_NUMBER + " text, "
-            + COL_WEBSITE_URL + " text, "
-            + COL_WEBSITE_USER_ID + " text, "
-            + COL_WEBSITE_PASSWORD + " text "
+            + COL_ITEM_TYPE_ID + " integer DEFAULT 1, "
+            + COL_USER_ID + " integer DEFAULT -1, "
+            + COL_SOFTWARE_KEY_CODE + " text  DEFAULT '', "
+            + COL_SOFTWARE_SUBGROUP_LENGTH + " integer DEFAULT 4, "
+            + COL_COMMENTS + " text  DEFAULT '', "
+            + COL_CREDIT_CARD_ACCOUNT_NUMBER + " text  DEFAULT '', "
+            + COL_CREDIT_CARD_SECURITY_CODE + " text  DEFAULT '', "
+            + COL_CREDIT_CARD_EXPIRATION_MONTH + " text  DEFAULT '', "
+            + COL_CREDIT_CARD_EXPIRATION_YEAR + " text  DEFAULT '', "
+            + COL_GENERAL_ACCOUNT_NUMBER + " text  DEFAULT '', "
+            + COL_PRIMARY_PHONE_NUMBER + " text  DEFAULT '', "
+            + COL_ALTERNATE_PHONE_NUMBER + " text  DEFAULT '', "
+            + COL_WEBSITE_URL + " text DEFAULT '', "
+            + COL_WEBSITE_USER_ID + " text  DEFAULT '', "
+            + COL_WEBSITE_PASSWORD + " text   DEFAULT '', "
+            + COL_IS_DIRTY + " integer DEFAULT 0, "
+            + COL_IS_NEW + " integer DEFAULT 1 "
             + ");";
 
     public static void onCreate(SQLiteDatabase database) {
@@ -109,7 +114,7 @@ public class ItemsTable {
             newUserID = cursor.getLong(cursor.getColumnIndexOrThrow(COL_ITEM_ID));
             cursor.close();
         } else {
-            // the user does not exist in the table ... so add them
+            // the item does not exist in the table ... so add it
             if (itemName != null) {
                 itemName = itemName.trim();
                 if (!itemName.isEmpty()) {
@@ -118,6 +123,7 @@ public class ItemsTable {
                         Uri uri = CONTENT_URI;
                         ContentValues values = new ContentValues();
                         values.put(COL_ITEM_NAME, itemName);
+                        values.put(COL_USER_ID,userID);
                         Uri newUserUri = cr.insert(uri, values);
                         if (newUserUri != null) {
                             newUserID = Long.parseLong(newUserUri.getLastPathSegment());
@@ -145,7 +151,7 @@ public class ItemsTable {
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-    private static Cursor getItem(Context context, long itemID) {
+    public static Cursor getItem(Context context, long itemID) {
         Cursor cursor = null;
         if (itemID > 0) {
             Uri uri = Uri.withAppendedPath(CONTENT_URI, String.valueOf(itemID));

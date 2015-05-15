@@ -7,15 +7,15 @@ import java.util.ArrayList;
  */
 public class clsLabPasswords {
 
-    private ArrayList<clsUsers> Users = new ArrayList<>();
+    private ArrayList<clsUser> Users = new ArrayList<>();
     //private ArrayList<clsItemTypes> ItemTypes = new ArrayList<>();
-    private ArrayList<clsPasswordItem> PasswordItems = new ArrayList<>();
+    private ArrayList<clsItem> PasswordItems = new ArrayList<>();
 
-    public ArrayList<clsUsers> getUsers() {
+    public ArrayList<clsUser> getUsers() {
         return Users;
     }
 
-    public void setUsers(ArrayList<clsUsers> mUsers) {
+    public void setUsers(ArrayList<clsUser> mUsers) {
         this.Users = mUsers;
     }
 
@@ -27,11 +27,11 @@ public class clsLabPasswords {
         this.ItemTypes = mItemTypes;
     }*/
 
-    public ArrayList<clsPasswordItem> getPasswordItems() {
+    public ArrayList<clsItem> getPasswordItems() {
         return PasswordItems;
     }
 
-    public void setPasswordItems(ArrayList<clsPasswordItem> mPasswordItems) {
+    public void setPasswordItems(ArrayList<clsItem> mPasswordItems) {
         this.PasswordItems = mPasswordItems;
     }
 
@@ -39,9 +39,9 @@ public class clsLabPasswords {
 
     }
 
-    public clsUsers getUser(int userID) {
-        clsUsers result = null;
-        for (clsUsers user : Users) {
+    public clsUser getUser(int userID) {
+        clsUser result = null;
+        for (clsUser user : Users) {
             if (user.getUserID() == userID) {
                 result = user;
                 break;

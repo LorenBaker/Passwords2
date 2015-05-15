@@ -2,25 +2,9 @@ package com.lbconsulting.password2.classes;
 
 import android.widget.Spinner;
 
-
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
-
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 
 
 
@@ -428,13 +412,13 @@ public class clsFormattingMethods {
     }*/
 
 
-    private static boolean comparePasswordItems(ArrayList<clsPasswordItem> passwordsItemsList1,
-                                                ArrayList<clsPasswordItem> passwordsItemsList2) {
+    private static boolean comparePasswordItems(ArrayList<clsItem> passwordsItemsList1,
+                                                ArrayList<clsItem> passwordsItemsList2) {
         boolean result = false;
         int index = 0;
 
-        for (clsPasswordItem item1 : passwordsItemsList1) {
-            clsPasswordItem item2 = passwordsItemsList2.get(index);
+        for (clsItem item1 : passwordsItemsList1) {
+            clsItem item2 = passwordsItemsList2.get(index);
             if (item1.getID() != item2.getID()) {
                 MyLog.e("clsFormattingMethods", "comparePasswordItems: password item IDs are NOT the same! index = "
                         + index + "; item1 ID = " + item1.getID() + "; item2 ID = " +item2.getID()
@@ -473,13 +457,13 @@ public class clsFormattingMethods {
     }
 
 
-    private static boolean compareUsers(ArrayList<clsUsers> userList1,
-                                        ArrayList<clsUsers> userList2) {
+    private static boolean compareUsers(ArrayList<clsUser> userList1,
+                                        ArrayList<clsUser> userList2) {
         boolean result = false;
         int index = 0;
 
-        for (clsUsers user1 : userList1) {
-            clsUsers user2 = userList2.get(index);
+        for (clsUser user1 : userList1) {
+            clsUser user2 = userList2.get(index);
             if (user1.getUserID() != user2.getUserID()) {
                 MyLog.e("clsFormattingMethods", "compareUsers: user IDs are NOT the same!");
                 break;

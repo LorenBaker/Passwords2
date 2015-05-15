@@ -8,25 +8,25 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.lbconsulting.password2.R;
-import com.lbconsulting.password2.classes.clsPasswordItem;
+import com.lbconsulting.password2.classes.clsItem;
 
 import java.util.ArrayList;
 
 
 /**
- * List view adapter for clsPasswordItem
+ * List view adapter for clsItem
  */
-public class PasswordItemsListViewAdapter extends ArrayAdapter<clsPasswordItem> {
+public class PasswordItemsListViewAdapter extends ArrayAdapter<clsItem> {
 
     private Context mContext;
-    private ArrayList<clsPasswordItem> mItems;
+    private ArrayList<clsItem> mItems;
 
     // View lookup cache
     private static class ViewHolder {
         TextView tvItemName;
     }
 
-    public PasswordItemsListViewAdapter(Context context, ArrayList<clsPasswordItem> items) {
+    public PasswordItemsListViewAdapter(Context context, ArrayList<clsItem> items) {
         super(context, R.layout.row_lv_password_item, items);
         this.mContext = context;
         this.mItems = items;
@@ -34,7 +34,7 @@ public class PasswordItemsListViewAdapter extends ArrayAdapter<clsPasswordItem> 
 
     public View getView(int position, View convertView, ViewGroup parent) {
         // Get the data item for this position
-        clsPasswordItem record = mItems.get(position);
+        clsItem record = mItems.get(position);
 
         // Check if an existing view is being reused, otherwise inflate the view
         ViewHolder viewHolder; // view lookup cache stored in tag

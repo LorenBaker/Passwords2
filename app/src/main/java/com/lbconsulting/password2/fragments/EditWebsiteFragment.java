@@ -1,10 +1,8 @@
 package com.lbconsulting.password2.fragments;
 
 
-import android.content.Context;
+import android.app.Fragment;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -13,17 +11,16 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import de.greenrobot.event.EventBus;
 import com.lbconsulting.password2.R;
-import com.lbconsulting.password2.activities.MainActivity;
 import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
-import com.lbconsulting.password2.classes.clsPasswordItem;
+import com.lbconsulting.password2.classes.clsItem;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * A fragment that allows the editing of a Credit Card
@@ -41,7 +38,7 @@ public class EditWebsiteFragment extends Fragment implements TextWatcher {
     private String mOriginalItemName = "";
     private boolean mIsNewPasswordItem = false;
 
-    private clsPasswordItem mPasswordItem;
+    private clsItem mPasswordItem;
 
     private EditText txtItemName;
     private EditText txtWebsiteURL;
@@ -129,7 +126,7 @@ public class EditWebsiteFragment extends Fragment implements TextWatcher {
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+    public void onActivityCreated( Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         MyLog.i("EditWebsiteFragment", "onActivityCreated()");
         mTextChangedListenersEnabled = false;

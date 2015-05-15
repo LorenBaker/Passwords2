@@ -1,15 +1,8 @@
 package com.lbconsulting.password2.fragments;
 
 
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.DialogInterface;
+import android.app.Fragment;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.text.Editable;
-import android.text.InputType;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,27 +10,26 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
+
+import com.lbconsulting.password2.R;
+import com.lbconsulting.password2.classes.MyLog;
+import com.lbconsulting.password2.classes.MySettings;
+import com.lbconsulting.password2.classes.clsEvents;
+import com.lbconsulting.password2.classes.clsUser;
 
 import java.util.ArrayList;
 
 import de.greenrobot.event.EventBus;
-import com.lbconsulting.password2.R;
-import com.lbconsulting.password2.activities.MainActivity;
-import com.lbconsulting.password2.classes.MyLog;
-import com.lbconsulting.password2.classes.MySettings;
-import com.lbconsulting.password2.classes.clsEvents;
-import com.lbconsulting.password2.classes.clsUsers;
 
 public class SettingsFragment extends Fragment implements View.OnClickListener {
 
     // fragment state variables
 
-    private ArrayList<clsUsers> mUsers;
-    private clsUsers mActiveUser;
+    private ArrayList<clsUser> mUsers;
+    private clsUser mActiveUser;
 
     private Button btnSelectUser;
     private Button btnUserSettings;
@@ -94,7 +86,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
 
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+    public void onActivityCreated( Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         MyLog.i("SettingsFragment", "onActivityCreated()");
         if (getActivity().getActionBar() != null) {
@@ -214,10 +206,10 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
                  Toast.makeText(getActivity(), "TO COME: btnSelectUser", Toast.LENGTH_SHORT).show();
 /*                if (MainActivity.getPasswordsData() != null) {
                     // Strings to Show In Dialog with Radio Buttons
-                    final ArrayList<clsUsers> users = MainActivity.getPasswordsData().getUsers();
+                    final ArrayList<clsUser> users = MainActivity.getPasswordsData().getUsers();
                     ArrayList<String> userNames = new ArrayList<>();
                     if (users != null) {
-                        for (clsUsers user : users) {
+                        for (clsUser user : users) {
                             if (user.getUserID() > 0) {
                                 userNames.add(user.getUserName());
                             }

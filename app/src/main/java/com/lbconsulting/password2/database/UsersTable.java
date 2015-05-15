@@ -23,9 +23,10 @@ public class UsersTable {
     public static final String TABLE_USERS = "tblUsers";
     public static final String COL_USER_ID = "_id";
     public static final String COL_USER_NAME = "UserName";
+    public static final String COL_IS_DIRTY = "isDirty";
+    public static final String COL_IS_NEW = "isNew";
 
-
-    public static final String[] PROJECTION_ALL = {COL_USER_ID, COL_USER_NAME};
+    public static final String[] PROJECTION_ALL = {COL_USER_ID, COL_USER_NAME, COL_IS_DIRTY, COL_IS_NEW};
 
     public static final String CONTENT_PATH = TABLE_USERS;
 
@@ -43,7 +44,9 @@ public class UsersTable {
             + TABLE_USERS
             + " ("
             + COL_USER_ID + " integer primary key autoincrement, "
-            + COL_USER_NAME + " text collate nocase "
+            + COL_USER_NAME + " text collate nocase, "
+            + COL_IS_DIRTY + " integer DEFAULT 0, "
+            + COL_IS_NEW + " integer DEFAULT 1 "
             + ");";
 
     public static void onCreate(SQLiteDatabase database) {
@@ -107,7 +110,7 @@ public class UsersTable {
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-    private static Cursor getUser(Context context, long userID) {
+    public static Cursor getUser(Context context, long userID) {
         Cursor cursor = null;
         if (userID > 0) {
             Uri uri = Uri.withAppendedPath(CONTENT_URI, String.valueOf(userID));
@@ -157,7 +160,23 @@ public class UsersTable {
         return userName;
     }
 
-    public static CursorLoader getAllUsers(Context context, String sortOrder) {
+    public static Cursor getAllUsersCursor(Context context, String sortOrder) {
+        Cursor cursor = null;
+        Uri uri = CONTENT_URI;
+        String[] projection = PROJECTION_ALL;
+        String selection = null;
+        String selectionArgs[] = null;
+        ContentResolver cr = context.getContentResolver();
+        try {
+            cursor = cr.query(uri, projection, selection, selectionArgs, sortOrder);
+        } catch (Exception e) {
+            MyLog.e("UsersTable", "getAllUsersCursor: Exception; " + e.getMessage());
+        }
+
+        return cursor;
+    }
+
+    public static CursorLoader getAllUsersCursorLoader(Context context, String sortOrder) {
         CursorLoader cursorLoader = null;
         Uri uri = CONTENT_URI;
         String[] projection = PROJECTION_ALL;
@@ -166,7 +185,7 @@ public class UsersTable {
         try {
             cursorLoader = new CursorLoader(context, uri, projection, selection, selectionArgs, sortOrder);
         } catch (Exception e) {
-            MyLog.e("UsersTable", "getAllUsers: Exception; " + e.getMessage());
+            MyLog.e("UsersTable", "getAllUsersCursorLoader: Exception; " + e.getMessage());
         }
         return cursorLoader;
     }
@@ -177,8 +196,8 @@ public class UsersTable {
 
     public static int updateUserName(Context context, long userID, String newUserName) {
         int numberOfUpdatedRecords = -1;
-        newUserName=newUserName.trim();
-        if(!newUserName.isEmpty()) {
+        newUserName = newUserName.trim();
+        if (!newUserName.isEmpty()) {
 
             // verify that the new user does not already exist in the table
             Cursor cursor = getUser(context, newUserName);
@@ -188,7 +207,7 @@ public class UsersTable {
                 return UPDATE_ERROR_USER_NAME_EXISTS;
             }
 
-            if (cursor != null){
+            if (cursor != null) {
                 cursor.close();
             }
 
@@ -205,7 +224,7 @@ public class UsersTable {
             } else {
                 MyLog.e("UsersTable", "updateUserName: Unable to update user name. Invalid user ID: " + userID);
             }
-        }else{
+        } else {
             MyLog.e("UsersTable", "updateUserName: Unable to update user name. The provided user name is empty!");
 
         }
@@ -223,7 +242,7 @@ public class UsersTable {
             ContentResolver cr = context.getContentResolver();
             Uri uri = CONTENT_URI;
             String where = COL_USER_ID + " = ?";
-            String[] selectionArgs = { String.valueOf(userID) };
+            String[] selectionArgs = {String.valueOf(userID)};
             numberOfDeletedRecords = cr.delete(uri, where, selectionArgs);
         }
         return numberOfDeletedRecords;

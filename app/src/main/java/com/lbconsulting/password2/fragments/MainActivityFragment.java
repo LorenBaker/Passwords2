@@ -1,6 +1,8 @@
 package com.lbconsulting.password2.fragments;
 
-import android.support.v4.app.Fragment;
+
+import android.app.Fragment;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,7 +10,11 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.lbconsulting.password2.R;
+import com.lbconsulting.password2.classes.clsUser;
+import com.lbconsulting.password2.database.ItemsTable;
 import com.lbconsulting.password2.database.UsersTable;
+
+import java.util.ArrayList;
 
 
 /**
@@ -22,7 +28,7 @@ public class MainActivityFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView =  inflater.inflate(R.layout.fragment_main, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
         Button btnTest = (Button) rootView.findViewById(R.id.btnTest);
         btnTest.setOnClickListener(new View.OnClickListener() {
@@ -31,27 +37,41 @@ public class MainActivityFragment extends Fragment {
                 testCreateNewUser();
             }
         });
-        
-        return  rootView;
-                
+
+        return rootView;
+
     }
 
     private void testCreateNewUser() {
-        long LorenBakerID = UsersTable.CreateNewUser(getActivity(), "LorenBaker");
-        long PattyBakerID = UsersTable.CreateNewUser(getActivity(), "PattyBaker");
-        long DaleBakerID = UsersTable.CreateNewUser(getActivity(), "DaleBaker");
 
-        String LorenBakerName = UsersTable.getUserName(getActivity(), LorenBakerID);
-        String PattyBakerName = UsersTable.getUserName(getActivity(), PattyBakerID);
-        String DaleBakerName = UsersTable.getUserName(getActivity(), DaleBakerID);
+        long user1ID = UsersTable.CreateNewUser(getActivity(), "Loren");
+        long user2ID = UsersTable.CreateNewUser(getActivity(), "User_2");
+        long user3ID = UsersTable.CreateNewUser(getActivity(), "User_3");
 
-        int lorenRecords = UsersTable.updateUserName(getActivity(), LorenBakerID, "LOREN");
-        int pattyRecords = UsersTable.updateUserName(getActivity(), PattyBakerID, "Patty");
-        int daleRecords = UsersTable.updateUserName(getActivity(), DaleBakerID, "Dale");
+        long item1ID = ItemsTable.CreateNewItem(getActivity(), user1ID, "Item_1");
+        long item2ID = ItemsTable.CreateNewItem(getActivity(), user2ID, "Item_2");
+        long item3ID = ItemsTable.CreateNewItem(getActivity(), user3ID, "Item_3");
+        long item4ID = ItemsTable.CreateNewItem(getActivity(), user1ID, "ITEM_4");
+        long item5ID = ItemsTable.CreateNewItem(getActivity(), user2ID, "Item_5");
+        long item6ID = ItemsTable.CreateNewItem(getActivity(), user3ID, "Item_6");
+        long item7ID = ItemsTable.CreateNewItem(getActivity(), user1ID, "Item_7");
+        long item8ID = ItemsTable.CreateNewItem(getActivity(), user2ID, "Item_8");
+        long item9ID = ItemsTable.CreateNewItem(getActivity(), user3ID, "Item_9");
 
-        LorenBakerName = UsersTable.getUserName(getActivity(), LorenBakerID);
-        PattyBakerName = UsersTable.getUserName(getActivity(), PattyBakerID);
-        DaleBakerName = UsersTable.getUserName(getActivity(), DaleBakerID);
+        Cursor allUsers = UsersTable.getAllUsersCursor(getActivity(), UsersTable.SORT_ORDER_USER_NAME);
+        ArrayList<clsUser> usersList = new ArrayList<>();
+        if (allUsers != null) {
+
+            clsUser user;
+            while (allUsers.moveToNext()) {
+                user = new clsUser(
+                        allUsers.getInt(allUsers.getColumnIndex(UsersTable.COL_USER_ID)),
+                        allUsers.getString(allUsers.getColumnIndex(UsersTable.COL_USER_NAME)));
+                if(user!=null){
+                    usersList.add(user);
+                }
+            }
+        }
 
 
         String temp = "";

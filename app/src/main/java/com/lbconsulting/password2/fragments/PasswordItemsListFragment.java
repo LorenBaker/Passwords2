@@ -1,11 +1,7 @@
 package com.lbconsulting.password2.fragments;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.DialogInterface;
+import android.app.Fragment;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -21,17 +17,17 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-
-import de.greenrobot.event.EventBus;
 import com.lbconsulting.password2.R;
-import com.lbconsulting.password2.activities.MainActivity;
 import com.lbconsulting.password2.adapters.PasswordItemsListViewAdapter;
 import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
+import com.lbconsulting.password2.classes.clsItem;
 import com.lbconsulting.password2.classes.clsItemTypes;
-import com.lbconsulting.password2.classes.clsPasswordItem;
+
+import java.util.ArrayList;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Created by Loren on 3/5/2015.
@@ -63,12 +59,12 @@ public class PasswordItemsListFragment extends Fragment
 
 
     //private int mActiveUserID;
-    private ArrayList<clsPasswordItem> mAllItems;
-    private ArrayList<clsPasswordItem> mAllUserItems;
-    private ArrayList<clsPasswordItem> mUserCreditCardItems;
-    private ArrayList<clsPasswordItem> mUserGeneralAccountItems;
-    private ArrayList<clsPasswordItem> mUserWebsiteItems;
-    private ArrayList<clsPasswordItem> mUserSoftwareItems;
+    private ArrayList<clsItem> mAllItems;
+    private ArrayList<clsItem> mAllUserItems;
+    private ArrayList<clsItem> mUserCreditCardItems;
+    private ArrayList<clsItem> mUserGeneralAccountItems;
+    private ArrayList<clsItem> mUserWebsiteItems;
+    private ArrayList<clsItem> mUserSoftwareItems;
     private PasswordItemsListViewAdapter mAllUserItemsAdapter;
 
     //</editor-fold>
@@ -95,7 +91,7 @@ public class PasswordItemsListFragment extends Fragment
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+    public void onActivityCreated( Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         MyLog.i("PasswordItemsListFragment", "onActivityCreated()");
         mSearchText = MySettings.getSearchText();
@@ -131,8 +127,8 @@ public class PasswordItemsListFragment extends Fragment
                         mAllUserItemsAdapter = new PasswordItemsListViewAdapter(getActivity(), mAllUserItems);
                         lvAllUserItems.setAdapter(mAllUserItemsAdapter);
                     } else {
-                        ArrayList<clsPasswordItem> filteredUserItems = new ArrayList<clsPasswordItem>();
-                        for (clsPasswordItem item : mAllUserItems) {
+                        ArrayList<clsItem> filteredUserItems = new ArrayList<clsItem>();
+                        for (clsItem item : mAllUserItems) {
                             if (item.getName().toLowerCase().contains(s.toString().toLowerCase())) {
                                 filteredUserItems.add(item);
                             }
@@ -199,7 +195,7 @@ public class PasswordItemsListFragment extends Fragment
         mUserWebsiteItems = new ArrayList<>();
 
         //int lastPasswordItemID = -1;
-        for (clsPasswordItem item : mAllItems) {
+        for (clsItem item : mAllItems) {
 /*            if (item.getID() > lastPasswordItemID) {
                 lastPasswordItemID = item.getID();
             }*/
@@ -269,7 +265,7 @@ public class PasswordItemsListFragment extends Fragment
             case R.id.action_new:
                 Toast.makeText(getActivity(), "TO COME: action_new", Toast.LENGTH_SHORT).show();
 
-             /*   final clsPasswordItem newPasswordItem = MainActivity.createNewPasswordItem();
+             /*   final clsItem newPasswordItem = MainActivity.createNewPasswordItem();
 
                 if (lvCreditCards.getVisibility() == View.VISIBLE) {
                     newPasswordItem.setItemType_ID(clsItemTypes.CREDIT_CARDS);
@@ -490,7 +486,7 @@ public class PasswordItemsListFragment extends Fragment
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         TextView tvItemName = (TextView) view.findViewById(R.id.tvItemName);
         if (tvItemName != null) {
-            clsPasswordItem item = (clsPasswordItem) tvItemName.getTag();
+            clsItem item = (clsItem) tvItemName.getTag();
             if (item != null) {
                 int itemID = item.getID();
                 MySettings.setActivePasswordItemID(itemID);

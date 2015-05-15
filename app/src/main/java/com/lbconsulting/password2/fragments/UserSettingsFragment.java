@@ -1,12 +1,8 @@
 package com.lbconsulting.password2.fragments;
 
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
+import android.app.Fragment;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -14,26 +10,24 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Toast;
+
+import com.lbconsulting.password2.R;
+import com.lbconsulting.password2.classes.MyLog;
+import com.lbconsulting.password2.classes.MySettings;
+import com.lbconsulting.password2.classes.clsEvents;
+import com.lbconsulting.password2.classes.clsUser;
 
 import java.util.ArrayList;
 
 import de.greenrobot.event.EventBus;
-import com.lbconsulting.password2.R;
-import com.lbconsulting.password2.activities.MainActivity;
-import com.lbconsulting.password2.classes.MyLog;
-import com.lbconsulting.password2.classes.MySettings;
-import com.lbconsulting.password2.classes.clsEvents;
-import com.lbconsulting.password2.classes.clsPasswordItem;
-import com.lbconsulting.password2.classes.clsUsers;
 
 public class UserSettingsFragment extends Fragment implements View.OnClickListener {
 
     // fragment state variables
 
-    private ArrayList<clsUsers> mUsers;
-    private clsUsers mActiveUser;
+    private ArrayList<clsUser> mUsers;
+    private clsUser mActiveUser;
 
     private Button btnCreateNewUser;
     private Button btnEditUserName;
@@ -74,7 +68,7 @@ public class UserSettingsFragment extends Fragment implements View.OnClickListen
 
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+    public void onActivityCreated( Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         MyLog.i("UserSettingsFragment", "onActivityCreated()");
         if(getActivity().getActionBar()!=null) {
@@ -177,7 +171,7 @@ public class UserSettingsFragment extends Fragment implements View.OnClickListen
                         String newUserName = input.getText().toString().trim();
                         if (isUnique(newUserName)) {
                             int newUserID = MainActivity.getNextUserID();
-                            mActiveUser = new clsUsers();
+                            mActiveUser = new clsUser();
                             mActiveUser.setUserID(newUserID);
                             mActiveUser.setUserName(newUserName);
                             MySettings.setActiveUserID(newUserID);
@@ -272,7 +266,7 @@ public class UserSettingsFragment extends Fragment implements View.OnClickListen
                                 // set the Active user to the first user
                                 if (MainActivity.getPasswordsData() != null
                                         && MainActivity.getPasswordsData().getUsers() != null) {
-                                    ArrayList<clsUsers> users = MainActivity.getPasswordsData().getUsers();
+                                    ArrayList<clsUser> users = MainActivity.getPasswordsData().getUsers();
                                     if (users.size() > 0) {
                                         MySettings.setActiveUserID(users.get(0).getUserID());
                                         mActiveUser = users.get(0);
@@ -305,7 +299,7 @@ public class UserSettingsFragment extends Fragment implements View.OnClickListen
         // Delete all Passwords items associated with the active user
 /*        ArrayList<Integer> itemIDsForDeletion = new ArrayList<>();
         // Find all items associated with the active user
-        for (clsPasswordItem item : MainActivity.getPasswordsData().getPasswordItems()) {
+        for (clsItem item : MainActivity.getPasswordsData().getPasswordItems()) {
             if (item.getUser_ID() == userID) {
                 itemIDsForDeletion.add(item.getID());
             }
@@ -320,7 +314,7 @@ public class UserSettingsFragment extends Fragment implements View.OnClickListen
     }
 
     private void deletePasswordItem(Integer itemID) {
-/*        ArrayList<clsPasswordItem> passwordItems = MainActivity.getPasswordsData().getPasswordItems();
+/*        ArrayList<clsItem> passwordItems = MainActivity.getPasswordsData().getPasswordItems();
         if (passwordItems != null) {
             for (int i = passwordItems.size() - 1; i >= 0; i--) {
                 if (passwordItems.get(i).getID() == itemID) {
@@ -332,7 +326,7 @@ public class UserSettingsFragment extends Fragment implements View.OnClickListen
     }
 
     private void deleteUser(int userID) {
-/*        ArrayList<clsUsers> users = MainActivity.getPasswordsData().getUsers();
+/*        ArrayList<clsUser> users = MainActivity.getPasswordsData().getUsers();
         if (users != null) {
             for (int i = users.size() - 1; i >= 0; i--) {
                 if (users.get(i).getUserID() == userID) {
@@ -346,7 +340,7 @@ public class UserSettingsFragment extends Fragment implements View.OnClickListen
     private boolean isUnique(String newUserName) {
         // TODO: Move to Main Activity ??
         boolean result = true;
-        for (clsUsers user : mUsers) {
+        for (clsUser user : mUsers) {
             if (user.getUserName().equalsIgnoreCase(newUserName)) {
                 result = false;
                 break;

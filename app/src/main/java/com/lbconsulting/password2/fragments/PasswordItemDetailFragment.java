@@ -1,13 +1,12 @@
 package com.lbconsulting.password2.fragments;
 
+import android.app.Fragment;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -22,21 +21,21 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import de.greenrobot.event.EventBus;
 import com.lbconsulting.password2.R;
-import com.lbconsulting.password2.activities.MainActivity;
 import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
+import com.lbconsulting.password2.classes.clsItem;
 import com.lbconsulting.password2.classes.clsItemTypes;
-import com.lbconsulting.password2.classes.clsPasswordItem;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * A fragment that shows a single PasswordItem detail screen.
  */
 public class PasswordItemDetailFragment extends Fragment implements View.OnClickListener {
 
-    private clsPasswordItem mPasswordItem;
+    private clsItem mPasswordItem;
     private boolean mIsDirty = false;
     private boolean mTextChangedListenersEnabled = false;
 
@@ -198,7 +197,7 @@ public class PasswordItemDetailFragment extends Fragment implements View.OnClick
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+    public void onActivityCreated( Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         MyLog.i("PasswordItemDetailFragment", "onActivityCreated()");
         mTextChangedListenersEnabled = false;
@@ -278,7 +277,7 @@ public class PasswordItemDetailFragment extends Fragment implements View.OnClick
 
             case R.id.action_new:
                 Toast.makeText(getActivity(), "TO COME: action_new", Toast.LENGTH_SHORT).show();
-/*                clsPasswordItem newPasswordItem = MainActivity.createNewPasswordItem();
+/*                clsItem newPasswordItem = MainActivity.createNewPasswordItem();
                 switch (mPasswordItem.getItemType_ID()) {
                     case clsItemTypes.CREDIT_CARDS:
                         newPasswordItem.setItemType_ID(clsItemTypes.CREDIT_CARDS);
