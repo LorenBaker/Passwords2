@@ -16,7 +16,9 @@ import com.lbconsulting.password2.classes.MyLog;
  */
 public class UsersTable {
 
-    public static final int UPDATE_ERROR_USER_NAME_EXISTS = -2;
+    public static final int NO_CHANGE_MADE = -1;
+    public static final int UPDATE_ERROR_USER_NOT_FOUND = -5;
+    public static final int UPDATE_ERROR_USER_NAME_EXISTS = -6;
 
     // Users data table
     // Version 1
@@ -194,7 +196,54 @@ public class UsersTable {
 // Update Methods
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public static int updateUserName(Context context, long userID, String newUserName) {
+    public static int updateUser(Context context, long userID, ContentValues newFieldValues) {
+        int numberOfUpdatedRecords = NO_CHANGE_MADE;
+
+        if (userID > 0) {
+
+            Cursor userCursor = getUser(context, userID);
+            Cursor userNameCursor = null;
+            if (userCursor != null && userCursor.getCount() > 0) {
+                // found the item
+                userCursor.moveToFirst();
+            } else {
+                // the item is not in the table ... so return return UPDATE_ERROR_USER_NOT_FOUND
+                if (userCursor != null) {
+                    userCursor.close();
+                }
+                return UPDATE_ERROR_USER_NOT_FOUND;
+            }
+
+            // if updating the user's name, verify that it does not already exist in the table
+            if (newFieldValues.containsKey(COL_USER_NAME)) {
+                String userName = newFieldValues.getAsString(COL_USER_NAME);
+                userNameCursor = getUser(context, userName);
+
+                if (userNameCursor != null && userNameCursor.getCount() > 0) {
+                    // this user's name exists in the table ... so return return UPDATE_ERROR_USER_NAME_EXISTS
+                    userCursor.close();
+                    userNameCursor.close();
+                    return UPDATE_ERROR_USER_NAME_EXISTS;
+                }
+            }
+            if (userNameCursor != null) {
+                userNameCursor.close();
+            }
+
+            // Update the user's fields
+            ContentResolver cr = context.getContentResolver();
+            Uri uri = Uri.withAppendedPath(CONTENT_URI, String.valueOf(userID));
+            String selection = null;
+            String[] selectionArgs = null;
+            numberOfUpdatedRecords = cr.update(uri, newFieldValues, selection, selectionArgs);
+
+        } else {
+            MyLog.e("UsersTable", "updateUser: Unable to update user. The provided userID = 0.");
+
+        }
+        return numberOfUpdatedRecords;
+    }
+/*    public static int updateUserName(Context context, long userID, String newUserName) {
         int numberOfUpdatedRecords = -1;
         newUserName = newUserName.trim();
         if (!newUserName.isEmpty()) {
@@ -229,7 +278,7 @@ public class UsersTable {
 
         }
         return numberOfUpdatedRecords;
-    }
+    }*/
 
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Delete Methods

@@ -3,29 +3,46 @@ package com.lbconsulting.password2.classes;
 import java.util.ArrayList;
 
 /**
- * Created by Loren on 3/8/2015.
+ * This class holds LabPassword data
  */
 public class clsLabPasswords {
 
     private ArrayList<clsUser> Users = new ArrayList<>();
-    //private ArrayList<clsItemTypes> ItemTypes = new ArrayList<>();
+    private ArrayList<clsUser> NewUsers = new ArrayList<>();
+    private ArrayList<Long> DeletedUserIDs = new ArrayList<>();
+
     private ArrayList<clsItem> PasswordItems = new ArrayList<>();
+    private ArrayList<clsItem> NewPasswordItems = new ArrayList<>();
+    private ArrayList<Long> DeletedPasswordItemIDs = new ArrayList<>();
+
+    public clsLabPasswords(){
+
+    }
 
     public ArrayList<clsUser> getUsers() {
         return Users;
     }
 
-    public void setUsers(ArrayList<clsUser> mUsers) {
-        this.Users = mUsers;
+    public void setUsers(ArrayList<clsUser> users) {
+        this.Users = users;
     }
 
-/*    public ArrayList<clsItemTypes> getItemTypes() {
-        return ItemTypes;
+    public ArrayList<clsUser> getNewUsers() {
+        return NewUsers;
     }
 
-    public void setItemTypes(ArrayList<clsItemTypes> mItemTypes) {
-        this.ItemTypes = mItemTypes;
-    }*/
+    public void setNewUsers(ArrayList<clsUser> newUsers) {
+        this.NewUsers = newUsers;
+    }
+
+    public ArrayList<Long> getDeletedUserIDs() {
+        return DeletedUserIDs;
+    }
+
+    public void setDeletedUserIDs(ArrayList<Long> deletedUserIDs) {
+        this.DeletedUserIDs = deletedUserIDs;
+    }
+
 
     public ArrayList<clsItem> getPasswordItems() {
         return PasswordItems;
@@ -35,11 +52,24 @@ public class clsLabPasswords {
         this.PasswordItems = mPasswordItems;
     }
 
-    public clsLabPasswords(){
-
+    public ArrayList<clsItem> getNewPasswordItems() {
+        return NewPasswordItems;
     }
 
-    public clsUser getUser(int userID) {
+    public void setNewPasswordItems(ArrayList<clsItem> newPasswordItems) {
+        this.NewPasswordItems = newPasswordItems;
+    }
+
+    public ArrayList<Long> getDeletedItemIDs() {
+        return DeletedPasswordItemIDs;
+    }
+
+    public void setDeletedItemIDs(ArrayList<Long> deletedPasswordItemIDs) {
+        this.DeletedPasswordItemIDs = deletedPasswordItemIDs;
+    }
+
+
+/*    public clsUser getUser(int userID) {
         clsUser result = null;
         for (clsUser user : Users) {
             if (user.getUserID() == userID) {
@@ -48,5 +78,5 @@ public class clsLabPasswords {
             }
         }
         return result;
-    }
+    }*/
 }
