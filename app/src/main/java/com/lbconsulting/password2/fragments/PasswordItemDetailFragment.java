@@ -197,7 +197,7 @@ public class PasswordItemDetailFragment extends Fragment implements View.OnClick
     }
 
     @Override
-    public void onActivityCreated( Bundle savedInstanceState) {
+    public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         MyLog.i("PasswordItemDetailFragment", "onActivityCreated()");
         mTextChangedListenersEnabled = false;
@@ -393,26 +393,26 @@ public class PasswordItemDetailFragment extends Fragment implements View.OnClick
             case R.id.btnEditItem:
                 switch (mPasswordItem.getItemType_ID()) {
                     case clsItemTypes.CREDIT_CARDS:
-                        EventBus.getDefault().post(new clsEvents.replaceFragment(mPasswordItem.getID(),
-                                MySettings.FRAG_EDIT_CREDIT_CARD, false));
+                        EventBus.getDefault().post(new clsEvents
+                                .showFragment(MySettings.FRAG_EDIT_CREDIT_CARD, false));
                         break;
 
                     case clsItemTypes.GENERAL_ACCOUNTS:
-                        EventBus.getDefault().post(new clsEvents.replaceFragment(mPasswordItem.getID(),
-                                MySettings.FRAG_EDIT_GENERAL_ACCOUNT, false));
+                        EventBus.getDefault().post(new clsEvents
+                                .showFragment(MySettings.FRAG_EDIT_GENERAL_ACCOUNT, false));
                         break;
 
                     case clsItemTypes.SOFTWARE:
-                        EventBus.getDefault().post(new clsEvents.replaceFragment(mPasswordItem.getID(),
-                                MySettings.FRAG_EDIT_SOFTWARE, false));
+                        EventBus.getDefault().post(new clsEvents
+                                .showFragment(MySettings.FRAG_EDIT_SOFTWARE, false));
                         break;
                 }
                 //Toast.makeText(getActivity(), "TO COME: btnEditItem", Toast.LENGTH_SHORT).show();
                 break;
 
             case R.id.btnEditWebsite:
-                EventBus.getDefault().post(new clsEvents.replaceFragment(mPasswordItem.getID(),
-                        MySettings.FRAG_EDIT_WEBSITE, false));
+                EventBus.getDefault().post(new clsEvents
+                        .showFragment(MySettings.FRAG_EDIT_WEBSITE, false));
                 //Toast.makeText(getActivity(), "TO COME: btnEditWebsite", Toast.LENGTH_SHORT).show();
                 break;
 

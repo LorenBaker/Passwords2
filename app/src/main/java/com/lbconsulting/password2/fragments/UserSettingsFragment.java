@@ -353,6 +353,6 @@ public class UserSettingsFragment extends Fragment implements View.OnClickListen
         MySettings.setActiveUserID(mActiveUser.getUserID());
         updateUI();
             EventBus.getDefault().post(new clsEvents.saveChangesToDropbox());
-        EventBus.getDefault().post(new clsEvents.replaceFragment(-1, MySettings.FRAG_ITEMS_LIST, false));
+        EventBus.getDefault().post(new clsEvents.showFragment( MySettings.FRAG_ITEMS_LIST, false));
     }
 }

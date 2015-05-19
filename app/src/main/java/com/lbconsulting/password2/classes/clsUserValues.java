@@ -50,35 +50,6 @@ public class clsUserValues {
         cv.put(UsersTable.COL_USER_NAME, userName);
     }
 
-    public boolean getIsDirty() {
-        boolean result = true;
-        if (mUserCursor != null) {
-            result = mUserCursor.getInt((mUserCursor.getColumnIndex(UsersTable.COL_IS_DIRTY))) > 0;
-        }
-        return result;
-    }
-
-    public void putIsDirty(boolean isDirty) {
-        if (cv.containsKey(UsersTable.COL_IS_DIRTY)) {
-            cv.remove(UsersTable.COL_IS_DIRTY);
-        }
-        cv.put(UsersTable.COL_IS_DIRTY, isDirty);
-    }
-
-    public boolean getIsNew() {
-        boolean result = true;
-        if (mUserCursor != null) {
-            result = mUserCursor.getInt((mUserCursor.getColumnIndex(UsersTable.COL_IS_NEW))) > 0;
-        }
-        return result;
-    }
-
-    public void putIsNew(boolean isNew) {
-        if (cv.containsKey(UsersTable.COL_IS_NEW)) {
-            cv.remove(UsersTable.COL_IS_NEW);
-        }
-        cv.put(UsersTable.COL_IS_NEW, isNew);
-    }
 
     @Override
     public String toString() {

@@ -17,15 +17,16 @@ import com.lbconsulting.password2.classes.MyLog;
 public class UsersTable {
 
     public static final int USER_NOT_CREATED = -1;
-    public static final int PROPOSED_USER_IS_NULL = -2;
-    public static final int PROPOSED_USER_IS_EMPTY = -3;
-    public static final int USER_ALREADY_EXISTS = -4;
+    public static final int ILLEGAL_USER_ID = -2;
+    public static final int PROPOSED_USER_IS_NULL = -3;
+    public static final int PROPOSED_USER_IS_EMPTY = -4;
+    public static final int USER_ID_ALREADY_EXISTS = -5;
+    public static final int USER_NAME_ALREADY_EXISTS = -6;
 
-    public static final int UPDATE_NOT_MADE = -5;
-    public static final int UPDATE_ERROR_USER_NOT_FOUND = -6;
-    public static final int UPDATE_ERROR_USER_NAME_EXISTS = -7;
+    public static final int UPDATE_ERROR_USER_NOT_FOUND = -7;
+    public static final int UPDATE_ERROR_USER_NAME_EXISTS = -8;
 
-    public static final int USER_NOT_DELETED = -8;
+    public static final int USER_NOT_DELETED = -9;
 
     // Users data table
     // Version 1
@@ -71,7 +72,11 @@ public class UsersTable {
     // Create Methods
     // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public static long CreateNewUser(Context context, String userName) {
+    public static long CreateNewUser(Context context, int userID, String userName) {
+
+        if (userID < 1) {
+            return ILLEGAL_USER_ID;
+        }
 
         if (userName == null) {
             return PROPOSED_USER_IS_NULL;
@@ -83,11 +88,18 @@ public class UsersTable {
         }
 
         // verify that the user does not already exist in the table
-        Cursor cursor = getUser(context, userName);
+        Cursor cursor = getUser(context, userID);
         if (cursor != null && cursor.getCount() > 0) {
-            // the item exists in the table ... so return its id
+            // the item exists in the table ...
             cursor.close();
-            return USER_ALREADY_EXISTS;
+            return USER_ID_ALREADY_EXISTS;
+        }
+
+        cursor = getUser(context, userName);
+        if (cursor != null && cursor.getCount() > 0) {
+            // the item exists in the table ...
+            cursor.close();
+            return USER_NAME_ALREADY_EXISTS;
         }
 
         if (cursor != null) {
@@ -100,6 +112,7 @@ public class UsersTable {
             ContentResolver cr = context.getContentResolver();
             Uri uri = CONTENT_URI;
             ContentValues values = new ContentValues();
+            values.put(COL_USER_ID, userID);
             values.put(COL_USER_NAME, userName);
             Uri newUserUri = cr.insert(uri, values);
             if (newUserUri != null) {
@@ -197,56 +210,88 @@ public class UsersTable {
         return cursorLoader;
     }
 
+    public static boolean userExists(Context context, long userID) {
+        boolean userExists = false;
+        if (userID > 0) {
+            Cursor cursor = getUser(context, userID);
+            if (cursor != null && cursor.getCount() > 0) {
+                userExists = true;
+            }
+
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        return userExists;
+    }
+
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Update Methods
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static int updateUser(Context context, long userID, ContentValues newFieldValues) {
-        int numberOfUpdatedRecords = UPDATE_NOT_MADE;
 
-        if (userID > 0) {
+        if (userID < 1) {
+            return ILLEGAL_USER_ID;
+        }
 
-            Cursor userCursor = getUser(context, userID);
-            Cursor userNameCursor = null;
-            if (userCursor == null || userCursor.getCount() == 0) {
-                // the user is not in the table ... so return return UPDATE_ERROR_USER_NOT_FOUND
-                if (userCursor != null) {
-                    userCursor.close();
-                }
-                return UPDATE_ERROR_USER_NOT_FOUND;
-            }
-
+        Cursor userCursor = getUser(context, userID);
+        Cursor userNameCursor = null;
+        if (userCursor == null || userCursor.getCount() == 0) {
+            // the user is not in the table ... so return return UPDATE_ERROR_USER_NOT_FOUND
             if (userCursor != null) {
                 userCursor.close();
             }
+            return UPDATE_ERROR_USER_NOT_FOUND;
+        }
 
-            // if updating the user's name, verify that it does not already exist in the table
-            if (newFieldValues.containsKey(COL_USER_NAME)) {
-                String userName = newFieldValues.getAsString(COL_USER_NAME);
-                userNameCursor = getUser(context, userName);
+        if (userCursor != null) {
+            userCursor.close();
+        }
 
-                if (userNameCursor != null && userNameCursor.getCount() > 0) {
-                    // this user's name exists in the table ... so return return UPDATE_ERROR_USER_NAME_EXISTS
+        // if updating the user's name, verify that it does not already exist in the table
+        if (newFieldValues.containsKey(COL_USER_NAME)) {
+            String userName = newFieldValues.getAsString(COL_USER_NAME);
+            userNameCursor = getUser(context, userName);
+
+            if (userNameCursor != null && userNameCursor.getCount() > 1) {
+                // this user's name exists in the table under a different IDs ...
+                userNameCursor.close();
+                return UPDATE_ERROR_USER_NAME_EXISTS;
+            }
+
+            if (userNameCursor != null && userNameCursor.getCount() == 1) {
+                //verify the userID
+                userCursor.moveToFirst();
+                long existingUserID = userCursor.getLong(userCursor.getColumnIndex(COL_USER_ID));
+                if (userID != existingUserID) {
+                    // this user's name exists in the table under a different ID ...
                     userNameCursor.close();
                     return UPDATE_ERROR_USER_NAME_EXISTS;
                 }
             }
-            if (userNameCursor != null) {
-                userNameCursor.close();
-            }
-
-            // Update the user's fields
-            ContentResolver cr = context.getContentResolver();
-            Uri uri = Uri.withAppendedPath(CONTENT_URI, String.valueOf(userID));
-            String selection = null;
-            String[] selectionArgs = null;
-            numberOfUpdatedRecords = cr.update(uri, newFieldValues, selection, selectionArgs);
-
-        } else {
-            MyLog.e("UsersTable", "updateUser: Unable to update user. The provided userID = 0.");
-
         }
-        return numberOfUpdatedRecords;
+        if (userNameCursor != null) {
+            userNameCursor.close();
+        }
+
+        // Update the user's fields
+        ContentResolver cr = context.getContentResolver();
+        Uri uri = Uri.withAppendedPath(CONTENT_URI, String.valueOf(userID));
+        String selection = null;
+        String[] selectionArgs = null;
+        return cr.update(uri, newFieldValues, selection, selectionArgs);
+    }
+
+    public static int resetUsersInTable(Context context) {
+        // Update the user's fields
+        ContentResolver cr = context.getContentResolver();
+        Uri uri = CONTENT_URI;
+        String selection = null;
+        String[] selectionArgs = null;
+        ContentValues cv = new ContentValues();
+        cv.put(COL_IS_IN_TABLE, 1);
+        return cr.update(uri, cv, selection, selectionArgs);
     }
 
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -255,8 +300,8 @@ public class UsersTable {
 
     public static int deleteUser(Context context, long userID) {
         int numberOfDeletedRecords = USER_NOT_DELETED;
-        ItemsTable.deleteAllUserItems(context, userID);
         if (userID > 0) {
+            ItemsTable.deleteAllUserItems(context, userID);
             ContentResolver cr = context.getContentResolver();
             Uri uri = CONTENT_URI;
             String where = COL_USER_ID + " = ?";
@@ -265,4 +310,6 @@ public class UsersTable {
         }
         return numberOfDeletedRecords;
     }
+
+
 }

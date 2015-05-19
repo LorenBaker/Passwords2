@@ -44,19 +44,22 @@ public class MainActivityFragment extends Fragment {
 
     private void testCreateNewUser() {
 
-        long user1ID = UsersTable.CreateNewUser(getActivity(), "Loren");
-        long user2ID = UsersTable.CreateNewUser(getActivity(), "User_2");
-        long user3ID = UsersTable.CreateNewUser(getActivity(), "User_3");
+        long user1ID = UsersTable.CreateNewUser(getActivity(), 10, "User_1");
+        if (user1ID < 0) {
+            showItemInsertError(user1ID);
+        }
+        long user2ID = UsersTable.CreateNewUser(getActivity(), 20, "User_2");
+        long user3ID = UsersTable.CreateNewUser(getActivity(), 30, "User_3");
 
-        long item1ID = ItemsTable.CreateNewItem(getActivity(), user1ID, "Item_1");
-        long item2ID = ItemsTable.CreateNewItem(getActivity(), user2ID, "Item_2");
-        long item3ID = ItemsTable.CreateNewItem(getActivity(), user3ID, "Item_3");
-        long item4ID = ItemsTable.CreateNewItem(getActivity(), user1ID, "ITEM_4");
-        long item5ID = ItemsTable.CreateNewItem(getActivity(), user2ID, "Item_5");
-        long item6ID = ItemsTable.CreateNewItem(getActivity(), user3ID, "Item_6");
-        long item7ID = ItemsTable.CreateNewItem(getActivity(), user1ID, "Item_7");
-        long item8ID = ItemsTable.CreateNewItem(getActivity(), user2ID, "Item_8");
-        long item9ID = ItemsTable.CreateNewItem(getActivity(), user3ID, "Item_9");
+        long item1ID = ItemsTable.CreateNewItem(getActivity(), user1ID, 101, "Item_1");
+        long item2ID = ItemsTable.CreateNewItem(getActivity(), user2ID, 102, "Item_2");
+        long item3ID = ItemsTable.CreateNewItem(getActivity(), user3ID, 103, "Item_3");
+        long item4ID = ItemsTable.CreateNewItem(getActivity(), user1ID, 104, "ITEM_4");
+        long item5ID = ItemsTable.CreateNewItem(getActivity(), user2ID, 105, "Item_5");
+        long item6ID = ItemsTable.CreateNewItem(getActivity(), user3ID, 106, "Item_6");
+        long item7ID = ItemsTable.CreateNewItem(getActivity(), user1ID, 107, "Item_7");
+        long item8ID = ItemsTable.CreateNewItem(getActivity(), user2ID, 108, "Item_8");
+        long item9ID = ItemsTable.CreateNewItem(getActivity(), user3ID, 109, "Item_9");
 
         Cursor allUsers = UsersTable.getAllUsersCursor(getActivity(), UsersTable.SORT_ORDER_USER_NAME);
         ArrayList<clsUser> usersList = new ArrayList<>();
@@ -67,7 +70,7 @@ public class MainActivityFragment extends Fragment {
                 user = new clsUser(
                         allUsers.getInt(allUsers.getColumnIndex(UsersTable.COL_USER_ID)),
                         allUsers.getString(allUsers.getColumnIndex(UsersTable.COL_USER_NAME)));
-                if(user!=null){
+                if (user != null) {
                     usersList.add(user);
                 }
             }
@@ -76,4 +79,15 @@ public class MainActivityFragment extends Fragment {
 
         String temp = "";
     }
+
+    private void showItemInsertError(long longErrorCode) {
+        int errorCode = (int) longErrorCode;
+        switch (errorCode) {
+            case ItemsTable.ILLEGAL_ITEM_ID:
+
+            break;
+
+        }
+    }
+
 }

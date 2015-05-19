@@ -15,18 +15,19 @@ import com.lbconsulting.password2.classes.MyLog;
  */
 public class ItemsTable {
 
-    public static final int ITEM_NOT_ADDED = -10;
-    public static final int ILLEGAL_ITEM_OR_USER_ID = -11;
-    public static final int PROPOSED_ITEM_IS_NULL = -12;
-    public static final int PROPOSED_ITEM_IS_EMPTY = -13;
-    public static final int ITEM_ID_ALREADY_EXISTS = -14;
-    public static final int ITEM_ALREADY_EXISTS = -15;
+    public static final int ITEM_NOT_CREATED = -10;
+    public static final int ILLEGAL_ITEM_ID = -11;
+    public static final int USER_DOES_NOT_EXIST = -12;
+    public static final int PROPOSED_ITEM_IS_NULL = -13;
+    public static final int PROPOSED_ITEM_IS_EMPTY = -14;
+    public static final int ITEM_ID_ALREADY_EXISTS = -15;
+    public static final int ITEM_ALREADY_EXISTS = -16;
 
-    public static final int ITEM_NOT_UPDATED = -16;
-    public static final int ITEM_UPDATE_ERROR_ITEM_NOT_FOUND = -17;
-    public static final int ITEM_UPDATE_ERROR_ITEM_NAME_EXISTS = -18;
+    public static final int ITEM_NOT_UPDATED = -17;
+    public static final int ITEM_UPDATE_ERROR_ITEM_NOT_FOUND = -18;
+    public static final int ITEM_UPDATE_ERROR_ITEM_NAME_EXISTS = -19;
 
-    public static final int ITEM_NOT_DELETED = -19;
+    public static final int ITEM_NOT_DELETED = -20;
 
     // Password Items data table
     // Version 1
@@ -112,8 +113,12 @@ public class ItemsTable {
 
     public static long CreateNewItem(Context context, long itemID, long userID, String itemName) {
 
-        if (itemID < 1 || userID < 1) {
-            return ILLEGAL_ITEM_OR_USER_ID;
+        if (itemID < 1) {
+            return ILLEGAL_ITEM_ID;
+        }
+
+        if (!UsersTable.userExists(context, userID)) {
+            return USER_DOES_NOT_EXIST;
         }
 
         if (itemName == null) {
@@ -125,7 +130,7 @@ public class ItemsTable {
             return PROPOSED_ITEM_IS_EMPTY;
         }
 
-        // verify that the provided itemID does not exist in  the table
+        // verify that the provided itemID does not exist in the table
         Cursor existingItem = getItem(context, itemID);
         if (existingItem != null && existingItem.getCount() > 0) {
             // There is already and item with this ID in the table
@@ -133,7 +138,7 @@ public class ItemsTable {
             return ITEM_ID_ALREADY_EXISTS;
         }
 
-        // verify that the User does not already have itemName the table
+        // verify that the User does not already have the proposed itemName the table
         Cursor cursor = getItem(context, userID, itemName);
         if (cursor != null && cursor.getCount() > 0) {
             // the user already has this item in the table
@@ -142,7 +147,7 @@ public class ItemsTable {
         }
 
         // the item does not exist in the table ... so add it
-        long newUserID = ITEM_NOT_ADDED;
+        long newUserID = ITEM_NOT_CREATED;
         try {
             ContentResolver cr = context.getContentResolver();
             Uri uri = CONTENT_URI;
@@ -232,54 +237,74 @@ public class ItemsTable {
     public static int updateItem(Context context, long itemID, ContentValues newFieldValues) {
         int numberOfUpdatedRecords = ITEM_NOT_UPDATED;
 
-        if (itemID > 0) {
+        if (itemID < 1) {
+            return ILLEGAL_ITEM_ID;
+        }
 
-            Cursor itemCursor = getItem(context, itemID);
-            Cursor itemNameCursor = null;
-            long itemUserID;
-            if (itemCursor != null && itemCursor.getCount() > 0) {
-                // found the item
-                itemCursor.moveToFirst();
-                itemUserID = itemCursor.getLong(itemCursor.getColumnIndexOrThrow(COL_USER_ID));
+        Cursor itemCursor = getItem(context, itemID);
+        long itemUserID;
+        if (itemCursor != null && itemCursor.getCount() > 0) {
+            // found the item
+            itemCursor.moveToFirst();
+            itemUserID = itemCursor.getLong(itemCursor.getColumnIndexOrThrow(COL_USER_ID));
+            itemCursor.close();
+
+        } else {
+            // the item is not in the table ... so return return ITEM_UPDATE_ERROR_ITEM_NOT_FOUND
+            if (itemCursor != null) {
                 itemCursor.close();
+            }
+            return ITEM_UPDATE_ERROR_ITEM_NOT_FOUND;
+        }
 
-            } else {
-                // the item is not in the table ... so return return ITEM_UPDATE_ERROR_ITEM_NOT_FOUND
-                if (itemCursor != null) {
-                    itemCursor.close();
-                }
-                return ITEM_UPDATE_ERROR_ITEM_NOT_FOUND;
+        // if updating the item's name, verify that it does not already exist in the table
+        Cursor itemNameCursor = null;
+        if (newFieldValues.containsKey(COL_ITEM_NAME)) {
+            String proposedItemName = newFieldValues.getAsString(COL_ITEM_NAME);
+            itemNameCursor = getItem(context, itemUserID, proposedItemName);
+
+            if (itemNameCursor != null && itemNameCursor.getCount() > 1) {
+                // the user has this item name in the table under a different itemID ...
+                itemNameCursor.close();
+                return ITEM_UPDATE_ERROR_ITEM_NAME_EXISTS;
             }
 
-            // if updating the item's name, verify that it does not already exist in the table
-            if (newFieldValues.containsKey(COL_ITEM_NAME)) {
-                String itemName = newFieldValues.getAsString(COL_ITEM_NAME);
-                itemNameCursor = getItem(context, itemUserID, itemName);
-
-                if (itemNameCursor != null && itemNameCursor.getCount() > 0) {
-                    // this item's name exists in the table ... so return return ITEM_UPDATE_ERROR_ITEM_NAME_EXISTS
-                    itemCursor.close();
+            if (itemNameCursor != null && itemNameCursor.getCount() == 1) {
+                // this item's name exists in the table ...
+                // verify the itemID
+                itemNameCursor.moveToFirst();
+                long existingItemID = itemNameCursor.getLong(itemNameCursor.getColumnIndex(COL_ITEM_ID));
+                if (itemID != existingItemID) {
+                    // the user has this item name in the table under a different itemID ...
                     itemNameCursor.close();
                     return ITEM_UPDATE_ERROR_ITEM_NAME_EXISTS;
                 }
             }
-
-            if (itemNameCursor != null) {
-                itemNameCursor.close();
-            }
-
-            // Update the item's fields
-            ContentResolver cr = context.getContentResolver();
-            Uri uri = Uri.withAppendedPath(CONTENT_URI, String.valueOf(itemID));
-            String selection = null;
-            String[] selectionArgs = null;
-            numberOfUpdatedRecords = cr.update(uri, newFieldValues, selection, selectionArgs);
-
-        } else {
-            MyLog.e("ItemsTable", "updateUserName: Unable to update item. The provided itemID = 0.");
-
         }
+
+        if (itemNameCursor != null) {
+            itemNameCursor.close();
+        }
+
+        // Update the item's fields
+        ContentResolver cr = context.getContentResolver();
+        Uri uri = Uri.withAppendedPath(CONTENT_URI, String.valueOf(itemID));
+        String selection = null;
+        String[] selectionArgs = null;
+        numberOfUpdatedRecords = cr.update(uri, newFieldValues, selection, selectionArgs);
+
         return numberOfUpdatedRecords;
+    }
+
+    public static int resetItemsInTable(Context context) {
+        // Update the user's fields
+        ContentResolver cr = context.getContentResolver();
+        Uri uri = CONTENT_URI;
+        String selection = null;
+        String[] selectionArgs = null;
+        ContentValues cv = new ContentValues();
+        cv.put(COL_IS_IN_TABLE, 1);
+        return cr.update(uri, cv, selection, selectionArgs);
     }
 
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////

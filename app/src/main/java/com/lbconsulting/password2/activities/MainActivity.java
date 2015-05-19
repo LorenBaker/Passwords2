@@ -24,6 +24,8 @@ import com.lbconsulting.password2.classes.clsLabPasswords;
 import com.lbconsulting.password2.classes.clsUser;
 import com.lbconsulting.password2.fragments.PasswordItemsListFragment;
 
+import de.greenrobot.event.EventBus;
+
 
 public class MainActivity extends Activity {
 
@@ -41,7 +43,7 @@ public class MainActivity extends Activity {
     private int mActiveFragmentID = -1;
 
     private clsLabPasswords mLabPasswords;
-    private boolean mArgIsNewItem=false;
+    private boolean mArgIsNewItem = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +57,7 @@ public class MainActivity extends Activity {
             mActiveFragmentID = savedInstanceState.getInt(ARG_ACTIVE_FRAGMENT_ID);
         }
 
-        //EventBus.getDefault().register(this);
+        EventBus.getDefault().register(this);
         MySettings.setContext(this);
 
         AppKeyPair appKeys = new AppKeyPair(APP_KEY, APP_SECRET);
@@ -72,7 +74,7 @@ public class MainActivity extends Activity {
     }
 
     //region onEvent
-    public void onEvent(clsEvents.onDropboxDataFileChange event){
+    public void onEvent(clsEvents.onDropboxDataFileChange event) {
         updatePasswordsData();
     }
 
@@ -80,7 +82,7 @@ public class MainActivity extends Activity {
     public void onEvent(clsEvents.showFragment event) {
         MySettings.setActiveFragmentID(event.getFragmentID());
         mArgIsNewItem = event.getIsNewPasswordItem();
-        showFragments();
+        showFragment();
     }
 
 
@@ -92,6 +94,9 @@ public class MainActivity extends Activity {
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState != null) {
+
+        }
         MyLog.i("MainActivity", "onRestoreInstanceState");
     }
 
@@ -121,16 +126,17 @@ public class MainActivity extends Activity {
                 .replace(R.id.fragment_container,
                         PasswordItemsListFragment.newInstance(), "FRAG_ITEMS_LIST")
                 .commit();
-        MyLog.i("MainActivity", "showFragments: FRAG_ITEMS_LIST");
+        MyLog.i("MainActivity", "showFragment: FRAG_ITEMS_LIST");
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-
-        outState.putInt(ARG_ACTIVE_ITEM_ID, mActiveItem.getID());
-        outState.putInt(ARG_ACTIVE_USER_ID, mActiveUser.getUserID());
-        outState.putInt(ARG_ACTIVE_FRAGMENT_ID, mActiveFragmentID);
+        if (outState != null) {
+/*            outState.putInt(ARG_ACTIVE_ITEM_ID, mActiveItem.getID());
+            outState.putInt(ARG_ACTIVE_USER_ID, mActiveUser.getUserID());
+            outState.putInt(ARG_ACTIVE_FRAGMENT_ID, mActiveFragmentID);*/
+        }
     }
 
     @Override
@@ -143,10 +149,11 @@ public class MainActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         MyLog.i("MainActivity", "onDestroy");
+        EventBus.getDefault().unregister(this);
     }
 
 
-    private void showFragments() {
+    private void showFragment() {
 
     }
 
@@ -190,7 +197,7 @@ public class MainActivity extends Activity {
             Toast.makeText(this, "TO COME: action_settings", Toast.LENGTH_SHORT).show();
 /*
             MySettings.setActiveFragmentID(MySettings.FRAG_SETTINGS);
-            showFragments()*/
+            showFragment()*/
             ;
             return true;
 

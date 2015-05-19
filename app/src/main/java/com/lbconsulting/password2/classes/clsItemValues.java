@@ -310,35 +310,6 @@ public class clsItemValues {
         cv.put(ItemsTable.COL_WEBSITE_PASSWORD, websitePassword);
     }
 
-    public boolean getIsDirty() {
-        boolean result = true;
-        if (mItemsCursor != null) {
-            result = mItemsCursor.getInt((mItemsCursor.getColumnIndex(ItemsTable.COL_IS_DIRTY))) > 0;
-        }
-        return result;
-    }
-
-    public void putIsDirty(boolean isDirty) {
-        if (cv.containsKey(ItemsTable.COL_IS_DIRTY)) {
-            cv.remove(ItemsTable.COL_IS_DIRTY);
-        }
-        cv.put(ItemsTable.COL_IS_DIRTY, isDirty);
-    }
-
-    public boolean getIsNew() {
-        boolean result = true;
-        if (mItemsCursor != null) {
-            result = mItemsCursor.getInt((mItemsCursor.getColumnIndex(ItemsTable.COL_IS_NEW))) > 0;
-        }
-        return result;
-    }
-
-    public void putIsNew(boolean isNew) {
-        if (cv.containsKey(ItemsTable.COL_IS_NEW)) {
-            cv.remove(ItemsTable.COL_IS_NEW);
-        }
-        cv.put(ItemsTable.COL_IS_NEW, isNew);
-    }
 
     @Override
     public String toString() {
