@@ -12,13 +12,21 @@ import com.lbconsulting.password2.classes.MyLog;
 
 /**
  * SQLite table to hold Password Items data
- * Created by Loren on 5/13/2015.
  */
 public class ItemsTable {
 
-    public static final int NO_CHANGE_MADE = -1;
-    public static final int UPDATE_ERROR_ITEM_NOT_FOUND = -3;
-    public static final int UPDATE_ERROR_ITEM_NAME_EXISTS = -4;
+    public static final int ITEM_NOT_ADDED = -10;
+    public static final int ILLEGAL_ITEM_OR_USER_ID = -11;
+    public static final int PROPOSED_ITEM_IS_NULL = -12;
+    public static final int PROPOSED_ITEM_IS_EMPTY = -13;
+    public static final int ITEM_ID_ALREADY_EXISTS = -14;
+    public static final int ITEM_ALREADY_EXISTS = -15;
+
+    public static final int ITEM_NOT_UPDATED = -16;
+    public static final int ITEM_UPDATE_ERROR_ITEM_NOT_FOUND = -17;
+    public static final int ITEM_UPDATE_ERROR_ITEM_NAME_EXISTS = -18;
+
+    public static final int ITEM_NOT_DELETED = -19;
 
     // Password Items data table
     // Version 1
@@ -40,9 +48,7 @@ public class ItemsTable {
     public static final String COL_WEBSITE_URL = "websiteURL";
     public static final String COL_WEBSITE_USER_ID = "websiteUserID";
     public static final String COL_WEBSITE_PASSWORD = "websitePassword";
-    public static final String COL_IS_DIRTY = "isDirty";
-    public static final String COL_IS_NEW = "isNew";
-
+    public static final String COL_IS_IN_TABLE = "isInTable";
 
 
     public static final String[] PROJECTION_ALL = {COL_ITEM_ID, COL_ITEM_NAME,
@@ -51,7 +57,7 @@ public class ItemsTable {
             COL_CREDIT_CARD_ACCOUNT_NUMBER, COL_CREDIT_CARD_SECURITY_CODE,
             COL_CREDIT_CARD_EXPIRATION_MONTH, COL_CREDIT_CARD_EXPIRATION_YEAR,
             COL_GENERAL_ACCOUNT_NUMBER, COL_PRIMARY_PHONE_NUMBER, COL_ALTERNATE_PHONE_NUMBER,
-            COL_WEBSITE_URL, COL_WEBSITE_USER_ID, COL_WEBSITE_PASSWORD, COL_IS_DIRTY, COL_IS_NEW};
+            COL_WEBSITE_URL, COL_WEBSITE_USER_ID, COL_WEBSITE_PASSWORD, COL_IS_IN_TABLE};
 
     public static final String CONTENT_PATH = TABLE_ITEMS;
 
@@ -62,13 +68,14 @@ public class ItemsTable {
     public static final Uri CONTENT_URI = Uri.parse("content://" + PasswordsContentProvider.AUTHORITY + "/" + CONTENT_PATH);
 
     public static final String SORT_ORDER_ITEM_NAME = COL_ITEM_NAME + " ASC, " + COL_ITEM_ID + " ASC";
+    public static final String SORT_ORDER_ITEM_ID = COL_ITEM_ID + " ASC";
 
 
     // Database creation SQL statements
     private static final String CREATE_DATA_TABLE = "create table "
             + TABLE_ITEMS
             + " ("
-            + COL_ITEM_ID + " integer primary key autoincrement, "
+            + COL_ITEM_ID + " integer primary key, "
             + COL_ITEM_NAME + " text collate nocase, "
             + COL_ITEM_TYPE_ID + " integer DEFAULT 1, "
             + COL_USER_ID + " integer DEFAULT -1, "
@@ -85,8 +92,7 @@ public class ItemsTable {
             + COL_WEBSITE_URL + " text DEFAULT '', "
             + COL_WEBSITE_USER_ID + " text  DEFAULT '', "
             + COL_WEBSITE_PASSWORD + " text   DEFAULT '', "
-            + COL_IS_DIRTY + " integer DEFAULT 0, "
-            + COL_IS_NEW + " integer DEFAULT 1 "
+            + COL_IS_IN_TABLE + " integer DEFAULT 1 "
             + ");";
 
     public static void onCreate(SQLiteDatabase database) {
@@ -104,44 +110,53 @@ public class ItemsTable {
     // Create Methods
     // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public static long CreateNewItem(Context context, long userID, String itemName) {
-        long newUserID = NO_CHANGE_MADE;
+    public static long CreateNewItem(Context context, long itemID, long userID, String itemName) {
+
+        if (itemID < 1 || userID < 1) {
+            return ILLEGAL_ITEM_OR_USER_ID;
+        }
+
+        if (itemName == null) {
+            return PROPOSED_ITEM_IS_NULL;
+        }
+
+        itemName = itemName.trim();
+        if (itemName.isEmpty()) {
+            return PROPOSED_ITEM_IS_EMPTY;
+        }
+
+        // verify that the provided itemID does not exist in  the table
+        Cursor existingItem = getItem(context, itemID);
+        if (existingItem != null && existingItem.getCount() > 0) {
+            // There is already and item with this ID in the table
+            existingItem.close();
+            return ITEM_ID_ALREADY_EXISTS;
+        }
+
         // verify that the User does not already have itemName the table
         Cursor cursor = getItem(context, userID, itemName);
         if (cursor != null && cursor.getCount() > 0) {
-            // the item exists in the table ... so return its id
-            cursor.moveToFirst();
-            newUserID = cursor.getLong(cursor.getColumnIndexOrThrow(COL_ITEM_ID));
+            // the user already has this item in the table
             cursor.close();
-        } else {
-            // the item does not exist in the table ... so add it
-            if (itemName != null) {
-                itemName = itemName.trim();
-                if (!itemName.isEmpty()) {
-                    try {
-                        ContentResolver cr = context.getContentResolver();
-                        Uri uri = CONTENT_URI;
-                        ContentValues values = new ContentValues();
-                        values.put(COL_ITEM_NAME, itemName);
-                        values.put(COL_USER_ID,userID);
-                        Uri newUserUri = cr.insert(uri, values);
-                        if (newUserUri != null) {
-                            newUserID = Long.parseLong(newUserUri.getLastPathSegment());
-                        }
-                    } catch (Exception e) {
-                        MyLog.e("ItemsTable", "CreateNewUser: Exception" + e.getMessage());
-                    }
-
-                } else {
-                    MyLog.e("ItemsTable", "CreateNewUser: Unable to create new user. The proposed user's name is empty!");
-                }
-
-            } else {
-                MyLog.e("ItemsTable", "CreateNewUser: Unable to create new user. The proposed user's name is null!");
-            }
-
+            return ITEM_ALREADY_EXISTS;
         }
 
+        // the item does not exist in the table ... so add it
+        long newUserID = ITEM_NOT_ADDED;
+        try {
+            ContentResolver cr = context.getContentResolver();
+            Uri uri = CONTENT_URI;
+            ContentValues values = new ContentValues();
+            values.put(COL_ITEM_ID, itemID);
+            values.put(COL_USER_ID, userID);
+            values.put(COL_ITEM_NAME, itemName);
+            Uri newUserUri = cr.insert(uri, values);
+            if (newUserUri != null) {
+                newUserID = Long.parseLong(newUserUri.getLastPathSegment());
+            }
+        } catch (Exception e) {
+            MyLog.e("ItemsTable", "CreateNewUser: Exception" + e.getMessage());
+        }
         return newUserID;
     }
 
@@ -215,7 +230,7 @@ public class ItemsTable {
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static int updateItem(Context context, long itemID, ContentValues newFieldValues) {
-        int numberOfUpdatedRecords = NO_CHANGE_MADE;
+        int numberOfUpdatedRecords = ITEM_NOT_UPDATED;
 
         if (itemID > 0) {
 
@@ -226,12 +241,14 @@ public class ItemsTable {
                 // found the item
                 itemCursor.moveToFirst();
                 itemUserID = itemCursor.getLong(itemCursor.getColumnIndexOrThrow(COL_USER_ID));
+                itemCursor.close();
+
             } else {
-                // the item is not in the table ... so return return UPDATE_ERROR_ITEM_NOT_FOUND
-                if(itemCursor!=null) {
+                // the item is not in the table ... so return return ITEM_UPDATE_ERROR_ITEM_NOT_FOUND
+                if (itemCursor != null) {
                     itemCursor.close();
                 }
-                return UPDATE_ERROR_ITEM_NOT_FOUND;
+                return ITEM_UPDATE_ERROR_ITEM_NOT_FOUND;
             }
 
             // if updating the item's name, verify that it does not already exist in the table
@@ -240,12 +257,13 @@ public class ItemsTable {
                 itemNameCursor = getItem(context, itemUserID, itemName);
 
                 if (itemNameCursor != null && itemNameCursor.getCount() > 0) {
-                    // this item's name exists in the table ... so return return UPDATE_ERROR_ITEM_NAME_EXISTS
+                    // this item's name exists in the table ... so return return ITEM_UPDATE_ERROR_ITEM_NAME_EXISTS
                     itemCursor.close();
                     itemNameCursor.close();
-                    return UPDATE_ERROR_ITEM_NAME_EXISTS;
+                    return ITEM_UPDATE_ERROR_ITEM_NAME_EXISTS;
                 }
             }
+
             if (itemNameCursor != null) {
                 itemNameCursor.close();
             }
@@ -269,14 +287,14 @@ public class ItemsTable {
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static int deleteItem(Context context, long itemID) {
-        int numberOfDeletedRecords = NO_CHANGE_MADE;
+        int numberOfDeletedRecords = ITEM_NOT_DELETED;
         if (itemID > 0) {
             ContentResolver cr = context.getContentResolver();
             Uri uri = CONTENT_URI;
             String where = COL_ITEM_ID + " = ?";
             String[] selectionArgs = {String.valueOf(itemID)};
             numberOfDeletedRecords = cr.delete(uri, where, selectionArgs);
-        }else{
+        } else {
             MyLog.e("ItemsTable", "deleteItem: Unable to delete item. itemID is not greater than 0.");
         }
 
@@ -284,14 +302,14 @@ public class ItemsTable {
     }
 
     public static int deleteAllUserItems(Context context, long userID) {
-        int numberOfDeletedRecords = NO_CHANGE_MADE;
+        int numberOfDeletedRecords = ITEM_NOT_DELETED;
         if (userID > 0) {
             ContentResolver cr = context.getContentResolver();
             Uri uri = CONTENT_URI;
             String where = COL_USER_ID + " = ?";
             String[] selectionArgs = {String.valueOf(userID)};
             numberOfDeletedRecords = cr.delete(uri, where, selectionArgs);
-        }else{
+        } else {
             MyLog.e("ItemsTable", "deleteAllUserItems: Unable to delete user items. userID is not greater than 0.");
         }
 
