@@ -113,7 +113,7 @@ public class EditWebsiteFragment extends Fragment implements TextWatcher {
                 txtItemName.setText(mOriginalItemName);
             } else {
                 // check if the name exists
-                if (MainActivity.itemNameExist(itemName, mPasswordItem.getUser_ID())) {
+                if (MainActivity.itemNameExist(itemName, mPasswordItem.getUserID())) {
                     MainActivity.showOkDialog(getActivity(),
                             "Invalid Item Name", "\"" + itemName + "\" already exists!\n\nReverting back to the unedited name.");
                     txtItemName.setText(mOriginalItemName);
@@ -174,9 +174,9 @@ public class EditWebsiteFragment extends Fragment implements TextWatcher {
         if (!mIsDirty) {
             mPasswordItem = MainActivity.getActivePasswordItem();
             if (mPasswordItem != null) {
-                txtItemName.setText(mPasswordItem.getName());
+                txtItemName.setText(mPasswordItem.getItemName());
                 if (mOriginalItemName.isEmpty()) {
-                    mOriginalItemName = mPasswordItem.getName();
+                    mOriginalItemName = mPasswordItem.getItemName();
                 }
                 txtWebsiteURL.setText((mPasswordItem.getWebsiteURL()));
                 txtUserID.setText((mPasswordItem.getWebsiteUserID()));
@@ -236,7 +236,7 @@ public class EditWebsiteFragment extends Fragment implements TextWatcher {
 /*                mIsDirty = false;
                 if (mIsNewPasswordItem) {
                     // delete the newly created password item
-                    MainActivity.deletePasswordItem(mPasswordItem.getID());
+                    MainActivity.deletePasswordItem(mPasswordItem.getItemID());
                 }
                 EventBus.getDefault().post(new clsEvents.PopBackStack());*/
                 return true;

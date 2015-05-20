@@ -144,7 +144,7 @@ public class EditGeneralAccountFragment extends Fragment implements TextWatcher 
             } else {
                 // check if the name exists
                 if (mPasswordItem != null) {
-                    if (MainActivity.itemNameExist(itemName, mPasswordItem.getUser_ID())) {
+                    if (MainActivity.itemNameExist(itemName, mPasswordItem.getUserID())) {
                         MainActivity.showOkDialog(getActivity(),
                                 "Invalid Item Name", "\"" + itemName + "\" already exists!\n\nReverting back to the unedited name.");
                         txtItemName.setText(mOriginalItemName);
@@ -234,7 +234,7 @@ public class EditGeneralAccountFragment extends Fragment implements TextWatcher 
         }
 
         if (mPasswordItem != null) {
-            mPasswordItem.setName(txtItemName.getText().toString().trim());
+            mPasswordItem.setItemName(txtItemName.getText().toString().trim());
             mPasswordItem.setGeneralAccountNumber(txtAccountNumber.getText().toString().trim());
 
             String unformattedPrimaryPhoneNumber = clsFormattingMethods
@@ -278,7 +278,7 @@ public class EditGeneralAccountFragment extends Fragment implements TextWatcher 
                 mIsDirty = false;
                 if (mIsNewPasswordItem) {
                     // delete the newly created password item
-                    //MainActivity.deletePasswordItem(mPasswordItem.getID());
+                    //MainActivity.deletePasswordItem(mPasswordItem.getItemID());
                 }
                 EventBus.getDefault().post(new clsEvents.PopBackStack());
                 return true;

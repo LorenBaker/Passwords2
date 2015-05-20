@@ -72,7 +72,7 @@ public class UsersTable {
     // Create Methods
     // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public static long CreateNewUser(Context context, int userID, String userName) {
+    public static long CreateNewUser(Context context, long userID, String userName) {
 
         if (userID < 1) {
             return ILLEGAL_USER_ID;
@@ -225,6 +225,28 @@ public class UsersTable {
         return userExists;
     }
 
+    private static Cursor getUsersInTable(Context context, boolean isInTable) {
+        Cursor cursor = null;
+        Uri uri = CONTENT_URI;
+        String[] projection = new String[]{COL_USER_ID};
+        String selection = COL_IS_IN_TABLE + " = ? ";
+        String selectionArgs[] = null;
+        if (isInTable) {
+            selectionArgs = new String[]{String.valueOf(1)};
+        } else {
+            selectionArgs = new String[]{String.valueOf(0)};
+        }
+        String sortOrder = ItemsTable.SORT_ORDER_ITEM_ID;
+        ContentResolver cr = context.getContentResolver();
+        try {
+            cursor = cr.query(uri, projection, selection, selectionArgs, sortOrder);
+        } catch (Exception e) {
+            MyLog.i("UsersTable", "getUsersInTable: Exception; " + e.getMessage());
+        }
+
+        return cursor;
+    }
+
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Update Methods
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -283,14 +305,18 @@ public class UsersTable {
         return cr.update(uri, newFieldValues, selection, selectionArgs);
     }
 
-    public static int resetUsersInTable(Context context) {
+    public static int setAllUsersInTable(Context context, boolean isInTable) {
         // Update the user's fields
         ContentResolver cr = context.getContentResolver();
         Uri uri = CONTENT_URI;
         String selection = null;
         String[] selectionArgs = null;
         ContentValues cv = new ContentValues();
-        cv.put(COL_IS_IN_TABLE, 1);
+        if (isInTable) {
+            cv.put(COL_IS_IN_TABLE, 1);
+        } else {
+            cv.put(COL_IS_IN_TABLE, 0);
+        }
         return cr.update(uri, cv, selection, selectionArgs);
     }
 
@@ -299,17 +325,31 @@ public class UsersTable {
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static int deleteUser(Context context, long userID) {
-        int numberOfDeletedRecords = USER_NOT_DELETED;
+        int numberOfDeletedRecords = 0;
         if (userID > 0) {
-            ItemsTable.deleteAllUserItems(context, userID);
+            numberOfDeletedRecords += ItemsTable.deleteAllUserItems(context, userID);
             ContentResolver cr = context.getContentResolver();
             Uri uri = CONTENT_URI;
             String where = COL_USER_ID + " = ?";
             String[] selectionArgs = {String.valueOf(userID)};
-            numberOfDeletedRecords = cr.delete(uri, where, selectionArgs);
+            numberOfDeletedRecords += cr.delete(uri, where, selectionArgs);
         }
         return numberOfDeletedRecords;
     }
 
+    public static int deleteUsersNotInTable(Context context) {
+        int numberOfDeletedRecords = 0;
 
+        // Get all the users NOT in the table then delete each user
+        Cursor cursor = getUsersInTable(context, false);
+        if (cursor != null && cursor.getCount() > 0) {
+            long userID = -1;
+            while (cursor.moveToNext()) {
+                userID = cursor.getLong(cursor.getColumnIndex(COL_USER_ID));
+                numberOfDeletedRecords += deleteUser(context, userID);
+            }
+        }
+
+        return numberOfDeletedRecords;
+    }
 }

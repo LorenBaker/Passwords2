@@ -1,7 +1,7 @@
 package com.lbconsulting.password2.classes;
 
 /**
- * Created by Loren on 3/8/2015.
+ * This class holds password item data
  */
 public class clsItem {
 
@@ -22,8 +22,6 @@ public class clsItem {
     private String WebsiteURL;
     private String WebsiteUserID;
     private String WebsitePassword;
-    private boolean IsDirty;
-    private boolean IsNew;
 
     public clsItem() {
 
@@ -221,22 +219,6 @@ public class clsItem {
 
     public void setWebsitePassword(String websitePassword) {
         WebsitePassword = websitePassword;
-    }
-
-    public boolean getIsDirty() {
-        return IsDirty;
-    }
-
-    public void setIsDirty(boolean isDirty) {
-        this.IsDirty = isDirty;
-    }
-
-    public boolean getIsNew() {
-        return IsNew;
-    }
-
-    public void setIsNew(boolean isNew) {
-        this.IsNew = isNew;
     }
 
     @Override

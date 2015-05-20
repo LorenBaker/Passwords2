@@ -3,6 +3,11 @@ package com.lbconsulting.password2.classes;
 
 public class clsEvents {
 
+    // TODO: remove class test
+    public static class test {
+        public test() {
+        }
+    }
 
     public static class updateUI {
         public updateUI() {

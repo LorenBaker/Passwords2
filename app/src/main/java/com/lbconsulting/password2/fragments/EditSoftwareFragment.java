@@ -194,7 +194,7 @@ public class EditSoftwareFragment extends Fragment {
                 txtItemName.setText(mOriginalItemName);
             } else {
                 // check if the name exists
-                if (MainActivity.itemNameExist(itemName, mPasswordItem.getUser_ID())) {
+                if (MainActivity.itemNameExist(itemName, mPasswordItem.getUserID())) {
                     MainActivity.showOkDialog(getActivity(),
                             "Invalid Item Name", "\"" + itemName + "\" already exists!\n\nReverting back to the unedited name.");
                     txtItemName.setText(mOriginalItemName);
@@ -260,9 +260,9 @@ public class EditSoftwareFragment extends Fragment {
         if (!mIsDirty) {
             mPasswordItem = MainActivity.getActivePasswordItem();
             if (mPasswordItem != null) {
-                txtItemName.setText(mPasswordItem.getName());
+                txtItemName.setText(mPasswordItem.getItemName());
                 if (mOriginalItemName.isEmpty()) {
-                    mOriginalItemName = mPasswordItem.getName();
+                    mOriginalItemName = mPasswordItem.getItemName();
                 }
 
                 mSubgroupLength = mPasswordItem.getSoftwareSubgroupLength();
@@ -323,7 +323,7 @@ public class EditSoftwareFragment extends Fragment {
 /*                mIsDirty = false;
                 if (mIsNewPasswordItem) {
                     // delete the newly created password item
-                    MainActivity.deletePasswordItem(mPasswordItem.getID());
+                    MainActivity.deletePasswordItem(mPasswordItem.getItemID());
                 }
                 EventBus.getDefault().post(new clsEvents.PopBackStack());*/
                 return true;

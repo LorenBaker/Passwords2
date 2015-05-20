@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.lbconsulting.password2.R;
-import com.lbconsulting.password2.classes.clsUser;
+import com.lbconsulting.password2.classes.clsUsers;
 import com.lbconsulting.password2.database.ItemsTable;
 import com.lbconsulting.password2.database.UsersTable;
 
@@ -62,18 +62,18 @@ public class MainActivityFragment extends Fragment {
         long item9ID = ItemsTable.CreateNewItem(getActivity(), user3ID, 109, "Item_9");
 
         Cursor allUsers = UsersTable.getAllUsersCursor(getActivity(), UsersTable.SORT_ORDER_USER_NAME);
-        ArrayList<clsUser> usersList = new ArrayList<>();
+        ArrayList<clsUsers> usersList = new ArrayList<>();
         if (allUsers != null) {
 
-            clsUser user;
-            while (allUsers.moveToNext()) {
-                user = new clsUser(
+            clsUsers user;
+/*            while (allUsers.moveToNext()) {
+                user = new clsUsers(
                         allUsers.getInt(allUsers.getColumnIndex(UsersTable.COL_USER_ID)),
                         allUsers.getString(allUsers.getColumnIndex(UsersTable.COL_USER_NAME)));
                 if (user != null) {
                     usersList.add(user);
                 }
-            }
+            }*/
         }
 
 

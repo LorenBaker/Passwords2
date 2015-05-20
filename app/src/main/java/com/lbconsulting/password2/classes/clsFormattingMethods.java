@@ -457,13 +457,13 @@ public class clsFormattingMethods {
     }
 
 
-    private static boolean compareUsers(ArrayList<clsUser> userList1,
-                                        ArrayList<clsUser> userList2) {
+    private static boolean compareUsers(ArrayList<clsUsers> userList1,
+                                        ArrayList<clsUsers> userList2) {
         boolean result = false;
         int index = 0;
 
-        for (clsUser user1 : userList1) {
-            clsUser user2 = userList2.get(index);
+        for (clsUsers user1 : userList1) {
+            clsUsers user2 = userList2.get(index);
             if (user1.getUserID() != user2.getUserID()) {
                 MyLog.e("clsFormattingMethods", "compareUsers: user IDs are NOT the same!");
                 break;

@@ -18,7 +18,7 @@ import com.lbconsulting.password2.R;
 import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
-import com.lbconsulting.password2.classes.clsUser;
+import com.lbconsulting.password2.classes.clsUsers;
 
 import java.util.ArrayList;
 
@@ -28,8 +28,8 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
 
     // fragment state variables
 
-    private ArrayList<clsUser> mUsers;
-    private clsUser mActiveUser;
+    private ArrayList<clsUsers> mUsers;
+    private clsUsers mActiveUser;
 
     private Button btnSelectUser;
     private Button btnUserSettings;
@@ -206,10 +206,10 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
                  Toast.makeText(getActivity(), "TO COME: btnSelectUser", Toast.LENGTH_SHORT).show();
 /*                if (MainActivity.getPasswordsData() != null) {
                     // Strings to Show In Dialog with Radio Buttons
-                    final ArrayList<clsUser> users = MainActivity.getPasswordsData().getUsers();
+                    final ArrayList<clsUsers> users = MainActivity.getPasswordsData().getUsers();
                     ArrayList<String> userNames = new ArrayList<>();
                     if (users != null) {
-                        for (clsUser user : users) {
+                        for (clsUsers user : users) {
                             if (user.getUserID() > 0) {
                                 userNames.add(user.getUserName());
                             }

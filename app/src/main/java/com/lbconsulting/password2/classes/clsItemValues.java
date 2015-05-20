@@ -24,19 +24,24 @@ public class clsItemValues {
             mItemsCursor = null;
         }
         cv = new ContentValues();
+        cv.put(ItemsTable.COL_IS_IN_TABLE, 1);
     }
 
 
-    public int getItemID() {
-        int result = -1;
+    public boolean hasData() {
+        return mItemsCursor != null;
+    }
+
+    public long getItemID() {
+        long result = -1;
         if (mItemsCursor != null) {
-            result = mItemsCursor.getInt((mItemsCursor.getColumnIndex(ItemsTable.COL_ITEM_ID)));
+            result = mItemsCursor.getLong((mItemsCursor.getColumnIndex(ItemsTable.COL_ITEM_ID)));
         }
         return result;
     }
 
 
-    public String getName() {
+    public String getItemName() {
         String result = "";
         if (mItemsCursor != null) {
             result = mItemsCursor.getString((mItemsCursor.getColumnIndex(ItemsTable.COL_ITEM_NAME)));
@@ -69,15 +74,15 @@ public class clsItemValues {
         cv.put(ItemsTable.COL_ITEM_TYPE_ID, itemTypeID);
     }
 
-    public int getUserID() {
-        int result = -1;
+    public long getUserID() {
+        long result = -1;
         if (mItemsCursor != null) {
-            result = mItemsCursor.getInt((mItemsCursor.getColumnIndex(ItemsTable.COL_USER_ID)));
+            result = mItemsCursor.getLong((mItemsCursor.getColumnIndex(ItemsTable.COL_USER_ID)));
         }
         return result;
     }
 
-    public void putUserID(int userID) {
+    public void putUserID(long userID) {
         if (cv.containsKey(ItemsTable.COL_USER_ID)) {
             cv.remove(ItemsTable.COL_USER_ID);
         }
@@ -310,10 +315,20 @@ public class clsItemValues {
         cv.put(ItemsTable.COL_WEBSITE_PASSWORD, websitePassword);
     }
 
+    public void putIsInTable(boolean isInTable) {
+        if (cv.containsKey(ItemsTable.COL_IS_IN_TABLE)) {
+            cv.remove(ItemsTable.COL_IS_IN_TABLE);
+        }
+        if (isInTable) {
+            cv.put(ItemsTable.COL_IS_IN_TABLE, 1);
+        } else {
+            cv.put(ItemsTable.COL_IS_IN_TABLE, 0);
+        }
+    }
 
     @Override
     public String toString() {
-        return getName();
+        return getItemName();
     }
 
 

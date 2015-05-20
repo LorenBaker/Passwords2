@@ -16,6 +16,7 @@ public class clsUserValues {
     private ContentValues cv;
 
     public clsUserValues(Context context, long userID) {
+        mContext = context;
         mUserCursor = UsersTable.getUser(context, userID);
         if (mUserCursor != null && mUserCursor.getCount() > 0) {
             mUserCursor.moveToFirst();
@@ -23,13 +24,18 @@ public class clsUserValues {
             mUserCursor = null;
         }
         cv = new ContentValues();
+        cv.put(UsersTable.COL_IS_IN_TABLE, 1);
+    }
+
+    public boolean hasData() {
+        return mUserCursor != null;
     }
 
 
-    public int getUserID() {
-        int result = -1;
+    public long getUserID() {
+        long result = -1;
         if (mUserCursor != null) {
-            result = mUserCursor.getInt((mUserCursor.getColumnIndex(UsersTable.COL_USER_ID)));
+            result = mUserCursor.getLong((mUserCursor.getColumnIndex(UsersTable.COL_USER_ID)));
         }
         return result;
     }
@@ -42,6 +48,7 @@ public class clsUserValues {
         }
         return result;
     }
+
     public void putUserName(String userName) {
 
         if (cv.containsKey(UsersTable.COL_USER_NAME)) {
@@ -50,6 +57,16 @@ public class clsUserValues {
         cv.put(UsersTable.COL_USER_NAME, userName);
     }
 
+    public void putIsInTable(boolean isInTable) {
+        if (cv.containsKey(UsersTable.COL_IS_IN_TABLE)) {
+            cv.remove(UsersTable.COL_IS_IN_TABLE);
+        }
+        if (isInTable) {
+            cv.put(UsersTable.COL_IS_IN_TABLE, 1);
+        } else {
+            cv.put(UsersTable.COL_IS_IN_TABLE, 0);
+        }
+    }
 
     @Override
     public String toString() {

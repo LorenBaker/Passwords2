@@ -16,7 +16,7 @@ import com.lbconsulting.password2.R;
 import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
-import com.lbconsulting.password2.classes.clsUser;
+import com.lbconsulting.password2.classes.clsUsers;
 
 import java.util.ArrayList;
 
@@ -26,8 +26,8 @@ public class UserSettingsFragment extends Fragment implements View.OnClickListen
 
     // fragment state variables
 
-    private ArrayList<clsUser> mUsers;
-    private clsUser mActiveUser;
+    private ArrayList<clsUsers> mUsers;
+    private clsUsers mActiveUser;
 
     private Button btnCreateNewUser;
     private Button btnEditUserName;
@@ -171,7 +171,7 @@ public class UserSettingsFragment extends Fragment implements View.OnClickListen
                         String newUserName = input.getText().toString().trim();
                         if (isUnique(newUserName)) {
                             int newUserID = MainActivity.getNextUserID();
-                            mActiveUser = new clsUser();
+                            mActiveUser = new clsUsers();
                             mActiveUser.setUserID(newUserID);
                             mActiveUser.setUserName(newUserName);
                             MySettings.setActiveUserID(newUserID);
@@ -266,7 +266,7 @@ public class UserSettingsFragment extends Fragment implements View.OnClickListen
                                 // set the Active user to the first user
                                 if (MainActivity.getPasswordsData() != null
                                         && MainActivity.getPasswordsData().getUsers() != null) {
-                                    ArrayList<clsUser> users = MainActivity.getPasswordsData().getUsers();
+                                    ArrayList<clsUsers> users = MainActivity.getPasswordsData().getUsers();
                                     if (users.size() > 0) {
                                         MySettings.setActiveUserID(users.get(0).getUserID());
                                         mActiveUser = users.get(0);
@@ -300,8 +300,8 @@ public class UserSettingsFragment extends Fragment implements View.OnClickListen
 /*        ArrayList<Integer> itemIDsForDeletion = new ArrayList<>();
         // Find all items associated with the active user
         for (clsItem item : MainActivity.getPasswordsData().getPasswordItems()) {
-            if (item.getUser_ID() == userID) {
-                itemIDsForDeletion.add(item.getID());
+            if (item.getUserID() == userID) {
+                itemIDsForDeletion.add(item.getItemID());
             }
         }
 
@@ -317,7 +317,7 @@ public class UserSettingsFragment extends Fragment implements View.OnClickListen
 /*        ArrayList<clsItem> passwordItems = MainActivity.getPasswordsData().getPasswordItems();
         if (passwordItems != null) {
             for (int i = passwordItems.size() - 1; i >= 0; i--) {
-                if (passwordItems.get(i).getID() == itemID) {
+                if (passwordItems.get(i).getItemID() == itemID) {
                     passwordItems.remove(i);
                     break;
                 }
@@ -326,7 +326,7 @@ public class UserSettingsFragment extends Fragment implements View.OnClickListen
     }
 
     private void deleteUser(int userID) {
-/*        ArrayList<clsUser> users = MainActivity.getPasswordsData().getUsers();
+/*        ArrayList<clsUsers> users = MainActivity.getPasswordsData().getUsers();
         if (users != null) {
             for (int i = users.size() - 1; i >= 0; i--) {
                 if (users.get(i).getUserID() == userID) {
@@ -340,7 +340,7 @@ public class UserSettingsFragment extends Fragment implements View.OnClickListen
     private boolean isUnique(String newUserName) {
         // TODO: Move to Main Activity ??
         boolean result = true;
-        for (clsUser user : mUsers) {
+        for (clsUsers user : mUsers) {
             if (user.getUserName().equalsIgnoreCase(newUserName)) {
                 result = false;
                 break;

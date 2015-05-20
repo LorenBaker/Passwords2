@@ -25,7 +25,7 @@ import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
 import com.lbconsulting.password2.classes.clsItem;
 import com.lbconsulting.password2.classes.clsItemTypes;
-import com.lbconsulting.password2.classes.clsUser;
+import com.lbconsulting.password2.classes.clsUsers;
 import com.lbconsulting.password2.database.ItemsTable;
 import com.lbconsulting.password2.database.UsersTable;
 
@@ -40,7 +40,6 @@ import de.greenrobot.event.EventBus;
 public class PasswordItemsListFragment extends Fragment
         implements View.OnClickListener, AdapterView.OnItemClickListener {
 
-    private Button btnTest;
 
     //<editor-fold desc="Fragment Views">
     private EditText txtSearch;
@@ -117,8 +116,6 @@ public class PasswordItemsListFragment extends Fragment
         MyLog.i("PasswordItemsListFragment", "onCreateView()");
         View rootView = inflater.inflate(R.layout.frag_password_items_list, container, false);
 
-        btnTest = (Button) rootView.findViewById(R.id.btnTest);
-        btnTest.setOnClickListener(this);
 
         txtSearch = (EditText) rootView.findViewById(R.id.txtSearch);
         txtSearch.addTextChangedListener(new TextWatcher() {
@@ -204,8 +201,8 @@ public class PasswordItemsListFragment extends Fragment
 
         //int lastPasswordItemID = -1;
         for (clsItem item : mAllItems) {
-/*            if (item.getID() > lastPasswordItemID) {
-                lastPasswordItemID = item.getID();
+/*            if (item.getItemID() > lastPasswordItemID) {
+                lastPasswordItemID = item.getItemID();
             }*/
             if (item.getUser_ID() == MySettings.getActiveUserID()) {
                 mAllUserItems.add(item);
@@ -276,23 +273,23 @@ public class PasswordItemsListFragment extends Fragment
              /*   final clsItem newPasswordItem = MainActivity.createNewPasswordItem();
 
                 if (lvCreditCards.getVisibility() == View.VISIBLE) {
-                    newPasswordItem.setItemType_ID(clsItemTypes.CREDIT_CARDS);
-                    EventBus.getDefault().post(new clsEvents.replaceFragment(newPasswordItem.getID(),
+                    newPasswordItem.setItemTypeID(clsItemTypes.CREDIT_CARDS);
+                    EventBus.getDefault().post(new clsEvents.replaceFragment(newPasswordItem.getItemID(),
                             MySettings.FRAG_EDIT_CREDIT_CARD, true));
 
                 } else if (lvGeneralAccounts.getVisibility() == View.VISIBLE) {
-                    newPasswordItem.setItemType_ID(clsItemTypes.GENERAL_ACCOUNTS);
-                    EventBus.getDefault().post(new clsEvents.replaceFragment(newPasswordItem.getID(),
+                    newPasswordItem.setItemTypeID(clsItemTypes.GENERAL_ACCOUNTS);
+                    EventBus.getDefault().post(new clsEvents.replaceFragment(newPasswordItem.getItemID(),
                             MySettings.FRAG_EDIT_GENERAL_ACCOUNT, true));
 
                 } else if (lvSoftware.getVisibility() == View.VISIBLE) {
-                    newPasswordItem.setItemType_ID(clsItemTypes.SOFTWARE);
-                    EventBus.getDefault().post(new clsEvents.replaceFragment(newPasswordItem.getID(),
+                    newPasswordItem.setItemTypeID(clsItemTypes.SOFTWARE);
+                    EventBus.getDefault().post(new clsEvents.replaceFragment(newPasswordItem.getItemID(),
                             MySettings.FRAG_EDIT_SOFTWARE, true));
 
                 } else if (lvWebsites.getVisibility() == View.VISIBLE) {
-                    newPasswordItem.setItemType_ID(clsItemTypes.WEBSITES);
-                    EventBus.getDefault().post(new clsEvents.replaceFragment(newPasswordItem.getID(),
+                    newPasswordItem.setItemTypeID(clsItemTypes.WEBSITES);
+                    EventBus.getDefault().post(new clsEvents.replaceFragment(newPasswordItem.getItemID(),
                             MySettings.FRAG_EDIT_WEBSITE, true));
 
                 } else if (lvAllUserItems.getVisibility() == View.VISIBLE) {
@@ -308,23 +305,23 @@ public class PasswordItemsListFragment extends Fragment
                             int itemType = item+1;
                             switch (itemType){
                                 case clsItemTypes.CREDIT_CARDS:
-                                    newPasswordItem.setItemType_ID(clsItemTypes.CREDIT_CARDS);
-                                    EventBus.getDefault().post(new clsEvents.replaceFragment(newPasswordItem.getID(),
+                                    newPasswordItem.setItemTypeID(clsItemTypes.CREDIT_CARDS);
+                                    EventBus.getDefault().post(new clsEvents.replaceFragment(newPasswordItem.getItemID(),
                                             MySettings.FRAG_EDIT_CREDIT_CARD, true));
                                     break;
                                 case clsItemTypes.GENERAL_ACCOUNTS:
-                                    newPasswordItem.setItemType_ID(clsItemTypes.GENERAL_ACCOUNTS);
-                                    EventBus.getDefault().post(new clsEvents.replaceFragment(newPasswordItem.getID(),
+                                    newPasswordItem.setItemTypeID(clsItemTypes.GENERAL_ACCOUNTS);
+                                    EventBus.getDefault().post(new clsEvents.replaceFragment(newPasswordItem.getItemID(),
                                             MySettings.FRAG_EDIT_GENERAL_ACCOUNT, true));
                                     break;
                                 case clsItemTypes.SOFTWARE:
-                                    newPasswordItem.setItemType_ID(clsItemTypes.SOFTWARE);
-                                    EventBus.getDefault().post(new clsEvents.replaceFragment(newPasswordItem.getID(),
+                                    newPasswordItem.setItemTypeID(clsItemTypes.SOFTWARE);
+                                    EventBus.getDefault().post(new clsEvents.replaceFragment(newPasswordItem.getItemID(),
                                             MySettings.FRAG_EDIT_SOFTWARE, true));
                                     break;
                                 case clsItemTypes.WEBSITES:
-                                    newPasswordItem.setItemType_ID(clsItemTypes.WEBSITES);
-                                    EventBus.getDefault().post(new clsEvents.replaceFragment(newPasswordItem.getID(),
+                                    newPasswordItem.setItemTypeID(clsItemTypes.WEBSITES);
+                                    EventBus.getDefault().post(new clsEvents.replaceFragment(newPasswordItem.getItemID(),
                                             MySettings.FRAG_EDIT_WEBSITE, true));
                                     break;
                             }
@@ -364,7 +361,7 @@ public class PasswordItemsListFragment extends Fragment
 
 /*        mActiveListView = MySettings.getActiveListViewID();
         MySettings.setActiveFragmentID(MySettings.FRAG_ITEMS_LIST);
-        MySettings.setActivePasswordItemID(-1);
+        MySettings.setActiveItemID(-1);
         setupDisplay(mActiveListView);
         //MainActivity.sortPasswordsData();
         if (mActiveListView == clsItemTypes.ALL_ITEMS) {
@@ -394,9 +391,6 @@ public class PasswordItemsListFragment extends Fragment
     public void onClick(View v) {
 
         switch (v.getId()) {
-            case R.id.btnTest:
-                test();
-                break;
 
             case R.id.btnCreditCards:
                 setupDisplay(clsItemTypes.CREDIT_CARDS);
@@ -415,53 +409,6 @@ public class PasswordItemsListFragment extends Fragment
                 break;
 
         }
-    }
-
-    private void test() {
-
-        long user1ID = UsersTable.CreateNewUser(getActivity(), -1, "User_1");
-        if (user1ID < 0) showItemError(user1ID);
-        long user2ID = UsersTable.CreateNewUser(getActivity(), 20, "User_2");
-        if (user2ID < 0) showItemError(user2ID);
-        long user3ID = UsersTable.CreateNewUser(getActivity(), 50, "User_3");
-        if (user3ID < 0) showItemError(user3ID);
-
-        long item1ID = ItemsTable.CreateNewItem(getActivity(), 201, 10, "Item_1");
-        if (item1ID < 0) showItemError(item1ID);
-        long item2ID = ItemsTable.CreateNewItem(getActivity(), 102, 20, "Item_2");
-        if (item2ID < 0) showItemError(item2ID);
-        long item3ID = ItemsTable.CreateNewItem(getActivity(), 103, 30, "Item_3");
-        if (item3ID < 0) showItemError(item3ID);
-        long item4ID = ItemsTable.CreateNewItem(getActivity(), 104, 10, "ITEM_4");
-        if (item4ID < 0) showItemError(item4ID);
-        long item5ID = ItemsTable.CreateNewItem(getActivity(), 105, 20, "Item_5");
-        if (item5ID < 0) showItemError(item5ID);
-        long item6ID = ItemsTable.CreateNewItem(getActivity(), 106, 30, "Item_6");
-        if (item6ID < 0) showItemError(item6ID);
-        long item7ID = ItemsTable.CreateNewItem(getActivity(), 107, 10, "Item_7");
-        if (item7ID < 0) showItemError(item7ID);
-        long item8ID = ItemsTable.CreateNewItem(getActivity(), 108, 40, "Item_8");
-        if (item8ID < 0) showItemError(item8ID);
-        long item9ID = ItemsTable.CreateNewItem(getActivity(), 209, 30, "Item_9");
-        if (item9ID < 0) showItemError(item9ID);
-
-        Cursor allUsers = UsersTable.getAllUsersCursor(getActivity(), UsersTable.SORT_ORDER_USER_NAME);
-        ArrayList<clsUser> usersList = new ArrayList<>();
-        if (allUsers != null) {
-
-            clsUser user;
-            while (allUsers.moveToNext()) {
-                user = new clsUser(
-                        allUsers.getInt(allUsers.getColumnIndex(UsersTable.COL_USER_ID)),
-                        allUsers.getString(allUsers.getColumnIndex(UsersTable.COL_USER_NAME)));
-                if (user != null) {
-                    usersList.add(user);
-                }
-            }
-        }
-
-
-        String temp = "";
     }
 
 
@@ -655,7 +602,7 @@ public class PasswordItemsListFragment extends Fragment
             clsItem item = (clsItem) tvItemName.getTag();
             if (item != null) {
                 int itemID = item.getID();
-                MySettings.setActivePasswordItemID(itemID);
+                MySettings.setActiveItemID(itemID);
                 //MainActivity.setActivePosition(position);
                 EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_ITEM_DETAIL, false));
             }

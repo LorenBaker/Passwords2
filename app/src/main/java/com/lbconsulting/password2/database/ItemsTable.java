@@ -212,6 +212,7 @@ public class ItemsTable {
     }
 
 
+
     public static CursorLoader getAllUserItems(Context context, long userID, String sortOrder) {
         CursorLoader cursorLoader = null;
         if (userID > 0) {
@@ -296,14 +297,18 @@ public class ItemsTable {
         return numberOfUpdatedRecords;
     }
 
-    public static int resetItemsInTable(Context context) {
+    public static int setAllItemsInTable(Context context, boolean isInTable) {
         // Update the user's fields
         ContentResolver cr = context.getContentResolver();
         Uri uri = CONTENT_URI;
         String selection = null;
         String[] selectionArgs = null;
         ContentValues cv = new ContentValues();
-        cv.put(COL_IS_IN_TABLE, 1);
+        if (isInTable) {
+            cv.put(COL_IS_IN_TABLE, 1);
+        } else {
+            cv.put(COL_IS_IN_TABLE, 0);
+        }
         return cr.update(uri, cv, selection, selectionArgs);
     }
 
@@ -339,5 +344,17 @@ public class ItemsTable {
         }
 
         return numberOfDeletedRecords;
+    }
+
+    public static int deleteItemsNotInTable(Context context) {
+        int numberOfDeletedRecords = ITEM_NOT_DELETED;
+
+        ContentResolver cr = context.getContentResolver();
+        Uri uri = CONTENT_URI;
+        String where = COL_IS_IN_TABLE + " = ?";
+        String[] selectionArgs = {String.valueOf(0)};
+        numberOfDeletedRecords = cr.delete(uri, where, selectionArgs);
+
+        return  numberOfDeletedRecords;
     }
 }

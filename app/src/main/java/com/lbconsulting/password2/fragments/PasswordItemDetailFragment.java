@@ -130,7 +130,7 @@ public class PasswordItemDetailFragment extends Fragment implements View.OnClick
      /*   if (!mIsDirty) {
             mPasswordItem = MainActivity.getActivePasswordItem();
             // fill the UI views
-            tvPasswordItemName.setText(mPasswordItem.getName());
+            tvPasswordItemName.setText(mPasswordItem.getItemName());
             tvItemDetail.setText(mPasswordItem.getItemDetail());
             tvWebsiteDetail.setText(mPasswordItem.getWebsiteDetail());
             // don't change comments if the user has made edits
@@ -159,7 +159,7 @@ public class PasswordItemDetailFragment extends Fragment implements View.OnClick
             }
 
             btnCopyAccountNumber.setEnabled(true);
-            switch (mPasswordItem.getItemType_ID()) {
+            switch (mPasswordItem.getItemTypeID()) {
                 case clsItemTypes.CREDIT_CARDS:
                     if (mPasswordItem.getCreditCardAccountNumber() == null) {
                         btnCopyAccountNumber.setEnabled(false);
@@ -179,7 +179,7 @@ public class PasswordItemDetailFragment extends Fragment implements View.OnClick
                     break;
             }
 
-            if (mPasswordItem.getItemType_ID() == clsItemTypes.WEBSITES) {
+            if (mPasswordItem.getItemTypeID() == clsItemTypes.WEBSITES) {
                 tvItemDetail.setVisibility(View.GONE);
                 btnEditItem.setVisibility(View.GONE);
                 btnCopyAccountNumber.setVisibility(View.GONE);
@@ -271,35 +271,35 @@ public class PasswordItemDetailFragment extends Fragment implements View.OnClick
             // Do Fragment menu item stuff here
             case R.id.action_discard:
                 Toast.makeText(getActivity(), "TO COME: action_discard", Toast.LENGTH_SHORT).show();
-/*                MainActivity.deletePasswordItem(MySettings.getActivePasswordItemID());
+/*                MainActivity.deletePasswordItem(MySettings.getActiveItemID());
                 EventBus.getDefault().post(new clsEvents.PopBackStack());*/
                 return true;
 
             case R.id.action_new:
                 Toast.makeText(getActivity(), "TO COME: action_new", Toast.LENGTH_SHORT).show();
 /*                clsItem newPasswordItem = MainActivity.createNewPasswordItem();
-                switch (mPasswordItem.getItemType_ID()) {
+                switch (mPasswordItem.getItemTypeID()) {
                     case clsItemTypes.CREDIT_CARDS:
-                        newPasswordItem.setItemType_ID(clsItemTypes.CREDIT_CARDS);
-                        EventBus.getDefault().post(new clsEvents.replaceFragment(newPasswordItem.getID(),
+                        newPasswordItem.setItemTypeID(clsItemTypes.CREDIT_CARDS);
+                        EventBus.getDefault().post(new clsEvents.replaceFragment(newPasswordItem.getItemID(),
                                 MySettings.FRAG_EDIT_CREDIT_CARD, true));
                         break;
 
                     case clsItemTypes.GENERAL_ACCOUNTS:
-                        newPasswordItem.setItemType_ID(clsItemTypes.GENERAL_ACCOUNTS);
-                        EventBus.getDefault().post(new clsEvents.replaceFragment(newPasswordItem.getID(),
+                        newPasswordItem.setItemTypeID(clsItemTypes.GENERAL_ACCOUNTS);
+                        EventBus.getDefault().post(new clsEvents.replaceFragment(newPasswordItem.getItemID(),
                                 MySettings.FRAG_EDIT_GENERAL_ACCOUNT, true));
                         break;
 
                     case clsItemTypes.SOFTWARE:
-                        newPasswordItem.setItemType_ID(clsItemTypes.SOFTWARE);
-                        EventBus.getDefault().post(new clsEvents.replaceFragment(newPasswordItem.getID(),
+                        newPasswordItem.setItemTypeID(clsItemTypes.SOFTWARE);
+                        EventBus.getDefault().post(new clsEvents.replaceFragment(newPasswordItem.getItemID(),
                                 MySettings.FRAG_EDIT_SOFTWARE, true));
                         break;
 
                     case clsItemTypes.WEBSITES:
-                        newPasswordItem.setItemType_ID(clsItemTypes.WEBSITES);
-                        EventBus.getDefault().post(new clsEvents.replaceFragment(newPasswordItem.getID(),
+                        newPasswordItem.setItemTypeID(clsItemTypes.WEBSITES);
+                        EventBus.getDefault().post(new clsEvents.replaceFragment(newPasswordItem.getItemID(),
                                 MySettings.FRAG_EDIT_WEBSITE, true));
                         break;
                 }*/
