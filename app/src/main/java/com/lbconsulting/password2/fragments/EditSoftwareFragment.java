@@ -2,6 +2,7 @@ package com.lbconsulting.password2.fragments;
 
 
 import android.app.Fragment;
+import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -11,18 +12,19 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.lbconsulting.password2.R;
 import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
 import com.lbconsulting.password2.classes.clsFormattingMethods;
-import com.lbconsulting.password2.classes.clsItem;
+import com.lbconsulting.password2.classes.clsItemValues;
+import com.lbconsulting.password2.database.ItemsTable;
 
 import de.greenrobot.event.EventBus;
 
@@ -45,7 +47,9 @@ public class EditSoftwareFragment extends Fragment {
     private String mAccountNumber = "";
 
     private boolean mIsNewPasswordItem = false;
-    private clsItem mPasswordItem;
+
+    private long mActiveItemID;
+    private clsItemValues mActiveItem;
 
     private EditText txtItemName;
     private EditText txtKeyCode;
@@ -75,7 +79,6 @@ public class EditSoftwareFragment extends Fragment {
             if (mIsNewPasswordItem) {
                 mIsDirty = true;
             }
-            //mPasswordItem = MainActivity.getActivePasswordItem();
         }
         setHasOptionsMenu(true);
         EventBus.getDefault().register(this);
@@ -186,25 +189,26 @@ public class EditSoftwareFragment extends Fragment {
     }
 
     private void validateItemName() {
-/*        String itemName = txtItemName.getText().toString().trim();
+        String itemName = txtItemName.getText().toString().trim();
         if (!itemName.equalsIgnoreCase(mOriginalItemName)) {
+            String title = "Invalid Item Name";
             if (itemName.isEmpty()) {
-                MainActivity.showOkDialog(getActivity(),
-                        "Invalid Item Name", "The item’s name cannot be empty!\n\nReverting back to the unedited name.");
+                String msg = "The item’s name cannot be empty!\n\nReverting back to the unedited name.";
+                EventBus.getDefault().post(new clsEvents.showOkDialog(title, msg));
                 txtItemName.setText(mOriginalItemName);
+
             } else {
                 // check if the name exists
-                if (MainActivity.itemNameExist(itemName, mPasswordItem.getUserID())) {
-                    MainActivity.showOkDialog(getActivity(),
-                            "Invalid Item Name", "\"" + itemName + "\" already exists!\n\nReverting back to the unedited name.");
+                if (ItemsTable.itemNameExists(getActivity(), mActiveItem.getUserID(), itemName)) {
+                    String msg = "\"" + itemName + "\" already exists!\n\nReverting back to the unedited name.";
+                    EventBus.getDefault().post(new clsEvents.showOkDialog(title, msg));
                     txtItemName.setText(mOriginalItemName);
                 } else {
                     // the item name does not exist
                     mIsDirty = true;
-                    //MainActivity.sortPasswordsData();
                 }
             }
-        }*/
+        }
     }
 
     @Override
@@ -212,6 +216,9 @@ public class EditSoftwareFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         MyLog.i("EditSoftwareFragment", "onActivityCreated()");
         mTextChangedListenersEnabled = false;
+
+        mActiveItemID = MySettings.getActiveItemID();
+        mActiveItem = new clsItemValues(getActivity(), mActiveItemID);
 
         // Restore saved state
         if (savedInstanceState != null) {
@@ -243,6 +250,7 @@ public class EditSoftwareFragment extends Fragment {
         MyLog.i("EditSoftwareFragment", "onResume()");
         MySettings.setActiveFragmentID(MySettings.FRAG_EDIT_GENERAL_ACCOUNT);
         updateUI();
+        showKeyBoard(txtItemName);
     }
 
     public void onEvent(clsEvents.updateUI event) {
@@ -256,40 +264,41 @@ public class EditSoftwareFragment extends Fragment {
         // inhibit text change event when loading updating the UI.
         mTextChangedListenersEnabled = false;
 
-/*        // don't update if the user has made edits
+        // don't update if the user has made edits
         if (!mIsDirty) {
-            mPasswordItem = MainActivity.getActivePasswordItem();
-            if (mPasswordItem != null) {
-                txtItemName.setText(mPasswordItem.getItemName());
-                if (mOriginalItemName.isEmpty()) {
-                    mOriginalItemName = mPasswordItem.getItemName();
-                }
+            mActiveItem = new clsItemValues(getActivity(), mActiveItemID);
 
-                mSubgroupLength = mPasswordItem.getSoftwareSubgroupLength();
-                int position = mSubgroupLength - mFirstSubgroupLength;
-                if (position < 0) {
-                    position = 0;
-                }
-
-                String formattedKeyCode = clsFormattingMethods.formatTypicalAccountNumber(mPasswordItem.getSoftwareKeyCode(), mSubgroupLength);
-                txtKeyCode.setText(formattedKeyCode);
-                spnSpacing.setSelection(position);
-                mIsDirty = false;
+            txtItemName.setText(mActiveItem.getItemName());
+            if (mOriginalItemName.isEmpty()) {
+                mOriginalItemName = mActiveItem.getItemName();
             }
-        }*/
+
+            mSubgroupLength = mActiveItem.getSoftwareSubgroupLength();
+            int position = mSubgroupLength - mFirstSubgroupLength;
+            if (position < 0) {
+                position = 0;
+            }
+
+            String formattedKeyCode = clsFormattingMethods.formatTypicalAccountNumber(mActiveItem.getSoftwareKeyCode(), mSubgroupLength);
+            txtKeyCode.setText(formattedKeyCode);
+            spnSpacing.setSelection(position);
+            mIsDirty = false;
+        }
+
         mTextChangedListenersEnabled = true;
     }
 
     private void updatePasswordItem() {
 
-        mPasswordItem.setName(txtItemName.getText().toString().trim());
+        mActiveItem.putName(txtItemName.getText().toString().trim());
         String unformattedKeyCode = clsFormattingMethods.unformatKeyCode(txtKeyCode.getText().toString().trim());
-        mPasswordItem.setSoftwareKeyCode(unformattedKeyCode);
-        mPasswordItem.setSoftwareSubgroupLength(mSubgroupLength);
-        mIsDirty = false;
+        mActiveItem.putSoftwareKeyCode(unformattedKeyCode);
+        mActiveItem.putSoftwareSubgroupLength(mSubgroupLength);
+        mActiveItem.update();
 
-        // save changes
+        // save changes to Dropbox
         EventBus.getDefault().post(new clsEvents.saveChangesToDropbox());
+        mIsDirty = false;
     }
 
     @Override
@@ -304,34 +313,28 @@ public class EditSoftwareFragment extends Fragment {
 
             // Do Fragment menu item stuff here
             case R.id.action_save:
-                Toast.makeText(getActivity(), "TO COME: action_save", Toast.LENGTH_SHORT).show();
-/*                if (txtItemName.hasFocus()) {
+               // Toast.makeText(getActivity(), "TO COME: action_save", Toast.LENGTH_SHORT).show();
+                if (txtItemName.hasFocus()) {
                     validateItemName();
                     mNameValidated = true;
                 }
-                InputMethodManager imm = (InputMethodManager) getActivity()
-                        .getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(txtItemName.getWindowToken(), 0);
-
-                EventBus.getDefault().post(new clsEvents.PopBackStack());*/
+                EventBus.getDefault().post(new clsEvents.PopBackStack());
                 return true;
 
             case R.id.action_cancel:
-                Toast.makeText(getActivity(), "TO COME: action_cancel", Toast.LENGTH_SHORT).show();
-
-                //Toast.makeText(getActivity(), "TO COME: action_cancel", Toast.LENGTH_SHORT).show();
-/*                mIsDirty = false;
+               // Toast.makeText(getActivity(), "TO COME: action_cancel", Toast.LENGTH_SHORT).show();
+                mIsDirty = false;
                 if (mIsNewPasswordItem) {
                     // delete the newly created password item
-                    MainActivity.deletePasswordItem(mPasswordItem.getItemID());
+                    ItemsTable.deleteItem(getActivity(), mActiveItem.getItemID());
                 }
-                EventBus.getDefault().post(new clsEvents.PopBackStack());*/
+                EventBus.getDefault().post(new clsEvents.PopBackStack());
                 return true;
 
             case R.id.action_clear:
-                Toast.makeText(getActivity(), "TO COME: action_clear", Toast.LENGTH_SHORT).show();
-/*                txtKeyCode.setText("");
-                mIsDirty = true;*/
+                //Toast.makeText(getActivity(), "TO COME: action_clear", Toast.LENGTH_SHORT).show();
+                txtKeyCode.setText("");
+                mIsDirty = true;
                 return true;
 
 
@@ -345,6 +348,23 @@ public class EditSoftwareFragment extends Fragment {
         }
     }
 
+    private void showKeyBoard(final EditText txt) {
+        final InputMethodManager imm = (InputMethodManager) getActivity()
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
+        txt.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                txt.requestFocus();
+                imm.showSoftInput(txt, 0);
+            }
+        }, 100);
+    }
+
+    private void hideKeyBoard(EditText txt) {
+        InputMethodManager imm = (InputMethodManager) getActivity()
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(txt.getWindowToken(), 0);
+    }
 
     @Override
     public void onPause() {
@@ -358,6 +378,7 @@ public class EditSoftwareFragment extends Fragment {
         if (getActivity().getActionBar() != null) {
             getActivity().getActionBar().setDisplayHomeAsUpEnabled(false);
         }
+        hideKeyBoard(txtItemName);
     }
 
 

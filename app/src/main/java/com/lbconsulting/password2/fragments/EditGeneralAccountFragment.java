@@ -20,7 +20,8 @@ import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
 import com.lbconsulting.password2.classes.clsFormattingMethods;
-import com.lbconsulting.password2.classes.clsItem;
+import com.lbconsulting.password2.classes.clsItemValues;
+import com.lbconsulting.password2.database.ItemsTable;
 
 import de.greenrobot.event.EventBus;
 
@@ -35,14 +36,15 @@ public class EditGeneralAccountFragment extends Fragment implements TextWatcher 
     // fragment state variables
     private boolean mIsDirty = false;
     private boolean mTextChangedListenersEnabled = false;
-    
+
     private boolean mNameValidated = false;
     private String mOriginalItemName = "";
     private boolean mIsItemNameDirty = false;
     private String mAccountNumber = "";
     private boolean mIsNewPasswordItem = false;
 
-    private clsItem mPasswordItem;
+    private long mActiveItemID;
+    private clsItemValues mActiveItem;
 
     private EditText txtItemName;
     private EditText txtAccountNumber;
@@ -71,7 +73,6 @@ public class EditGeneralAccountFragment extends Fragment implements TextWatcher 
             if (mIsNewPasswordItem) {
                 mIsDirty = true;
             }
-            //mPasswordItem = MainActivity.getActivePasswordItem();
         }
         setHasOptionsMenu(true);
         EventBus.getDefault().register(this);
@@ -122,7 +123,7 @@ public class EditGeneralAccountFragment extends Fragment implements TextWatcher 
                 if (!hasFocus) {
                     String formattedAlternatePhoneNumber = clsFormattingMethods
                             .formatPhoneNumber(txtAlternatePhoneNumber.getText().toString().trim());
-                    txtPrimaryPhoneNumber.setText(formattedAlternatePhoneNumber);
+                    txtAlternatePhoneNumber.setText(formattedAlternatePhoneNumber);
                 }
             }
         });
@@ -132,46 +133,44 @@ public class EditGeneralAccountFragment extends Fragment implements TextWatcher 
     }
 
     private void validateItemName() {
-/*        String itemName = txtItemName.getText().toString().trim();
-        if (mPasswordItem == null) {
-            mPasswordItem = MainActivity.getActivePasswordItem();
-        }
+        String itemName = txtItemName.getText().toString().trim();
         if (!itemName.equalsIgnoreCase(mOriginalItemName)) {
+            String title = "Invalid Item Name";
             if (itemName.isEmpty()) {
-                MainActivity.showOkDialog(getActivity(),
-                        "Invalid Item Name", "The item’s name cannot be empty!\n\nReverting back to the unedited name.");
+                String msg = "The item’s name cannot be empty!\n\nReverting back to the unedited name.";
+                EventBus.getDefault().post(new clsEvents.showOkDialog(title, msg));
                 txtItemName.setText(mOriginalItemName);
+
             } else {
                 // check if the name exists
-                if (mPasswordItem != null) {
-                    if (MainActivity.itemNameExist(itemName, mPasswordItem.getUserID())) {
-                        MainActivity.showOkDialog(getActivity(),
-                                "Invalid Item Name", "\"" + itemName + "\" already exists!\n\nReverting back to the unedited name.");
-                        txtItemName.setText(mOriginalItemName);
-                    } else {
-                        // the item name does not exist
-                        mIsDirty = true;
-                        //MainActivity.sortPasswordsData();
-                    }
+                if (ItemsTable.itemNameExists(getActivity(), mActiveItem.getUserID(), itemName)) {
+                    String msg = "\"" + itemName + "\" already exists!\n\nReverting back to the unedited name.";
+                    EventBus.getDefault().post(new clsEvents.showOkDialog(title, msg));
+                    txtItemName.setText(mOriginalItemName);
+                } else {
+                    // the item name does not exist
+                    mIsDirty = true;
                 }
             }
-        }*/
+        }
     }
 
     @Override
-    public void onActivityCreated( Bundle savedInstanceState) {
+    public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         MyLog.i("EditGeneralAccountFragment", "onActivityCreated()");
         mTextChangedListenersEnabled = false;
+
+        mActiveItemID = MySettings.getActiveItemID();
+        mActiveItem = new clsItemValues(getActivity(), mActiveItemID);
 
         // Restore saved state
         if (savedInstanceState != null) {
             MyLog.i("EditGeneralAccountFragment", "onActivityCreated(): savedInstanceState");
             mIsDirty = savedInstanceState.getBoolean(MySettings.ARG_IS_DIRTY);
             mAccountNumber = savedInstanceState.getString(ARG_ACCOUNT_NUMBER);
-           // mPasswordItem = MainActivity.getActivePasswordItem();
         }
-        if(getActivity().getActionBar()!=null) {
+        if (getActivity().getActionBar() != null) {
             getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
         }
         MySettings.setOnSaveInstanceState(false);
@@ -194,6 +193,7 @@ public class EditGeneralAccountFragment extends Fragment implements TextWatcher 
         MyLog.i("EditGeneralAccountFragment", "onResume()");
         MySettings.setActiveFragmentID(MySettings.FRAG_EDIT_GENERAL_ACCOUNT);
         updateUI();
+        showKeyBoard(txtItemName);
     }
 
     public void onEvent(clsEvents.updateUI event) {
@@ -208,46 +208,40 @@ public class EditGeneralAccountFragment extends Fragment implements TextWatcher 
 
         // don't update if the user has made edits
         if (!mIsDirty) {
-            if (mPasswordItem == null) {
-               // mPasswordItem = MainActivity.getActivePasswordItem();
-            }
-            if (mPasswordItem != null) {
-                txtItemName.setText(mPasswordItem.getName());
-                if (mOriginalItemName.isEmpty()) {
-                    mOriginalItemName = mPasswordItem.getName();
-                }
+            mActiveItem = new clsItemValues(getActivity(), mActiveItemID);
 
-                txtAccountNumber.setText((mPasswordItem.getGeneralAccountNumber()));
-
-                String formattedPrimaryPhoneNumber = clsFormattingMethods.formatPhoneNumber(mPasswordItem.getPrimaryPhoneNumber());
-                String formattedAlternatePhoneNumber = clsFormattingMethods.formatPhoneNumber(mPasswordItem.getAlternatePhoneNumber());
-                txtPrimaryPhoneNumber.setText(formattedPrimaryPhoneNumber);
-                txtAlternatePhoneNumber.setText(formattedAlternatePhoneNumber);
+            txtItemName.setText(mActiveItem.getItemName());
+            if (mOriginalItemName.isEmpty()) {
+                mOriginalItemName = mActiveItem.getItemName();
             }
+
+            txtAccountNumber.setText((mActiveItem.getGeneralAccountNumber()));
+
+            String formattedPrimaryPhoneNumber = clsFormattingMethods.formatPhoneNumber(mActiveItem.getPrimaryPhoneNumber());
+            String formattedAlternatePhoneNumber = clsFormattingMethods.formatPhoneNumber(mActiveItem.getAlternatePhoneNumber());
+            txtPrimaryPhoneNumber.setText(formattedPrimaryPhoneNumber);
+            txtAlternatePhoneNumber.setText(formattedAlternatePhoneNumber);
         }
+
         mTextChangedListenersEnabled = true;
     }
 
     private void updatePasswordItem() {
-/*        if (mPasswordItem == null) {
-            mPasswordItem = MainActivity.getActivePasswordItem();
-        }
 
-        if (mPasswordItem != null) {
-            mPasswordItem.setItemName(txtItemName.getText().toString().trim());
-            mPasswordItem.setGeneralAccountNumber(txtAccountNumber.getText().toString().trim());
+        mActiveItem.putName(txtItemName.getText().toString().trim());
+        mActiveItem.putGeneralAccountNumber(txtAccountNumber.getText().toString().trim());
 
-            String unformattedPrimaryPhoneNumber = clsFormattingMethods
-                    .unFormatPhoneNumber(txtPrimaryPhoneNumber.getText().toString());
-            String unformattedAlternatePhoneNumber = clsFormattingMethods
-                    .unFormatPhoneNumber(txtAlternatePhoneNumber.getText().toString());
-            mPasswordItem.setPrimaryPhoneNumber(unformattedPrimaryPhoneNumber);
-            mPasswordItem.setAlternatePhoneNumber(unformattedAlternatePhoneNumber);
-            mIsDirty = false;
+        String unformattedPrimaryPhoneNumber = clsFormattingMethods
+                .unFormatPhoneNumber(txtPrimaryPhoneNumber.getText().toString());
+        String unformattedAlternatePhoneNumber = clsFormattingMethods
+                .unFormatPhoneNumber(txtAlternatePhoneNumber.getText().toString());
+        mActiveItem.putPrimaryPhoneNumber(unformattedPrimaryPhoneNumber);
+        mActiveItem.putAlternatePhoneNumber(unformattedAlternatePhoneNumber);
+        mActiveItem.update();
 
-            // save the changes
-            EventBus.getDefault().post(new clsEvents.saveChangesToDropbox());
-        }*/
+        // save the changes
+        EventBus.getDefault().post(new clsEvents.saveChangesToDropbox());
+        mIsDirty = false;
     }
 
     @Override
@@ -266,10 +260,6 @@ public class EditGeneralAccountFragment extends Fragment implements TextWatcher 
                     validateItemName();
                     mNameValidated = true;
                 }
-                InputMethodManager imm = (InputMethodManager) getActivity()
-                        .getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(txtItemName.getWindowToken(), 0);
-
                 EventBus.getDefault().post(new clsEvents.PopBackStack());
                 return true;
 
@@ -278,7 +268,7 @@ public class EditGeneralAccountFragment extends Fragment implements TextWatcher 
                 mIsDirty = false;
                 if (mIsNewPasswordItem) {
                     // delete the newly created password item
-                    //MainActivity.deletePasswordItem(mPasswordItem.getItemID());
+                    ItemsTable.deleteItem(getActivity(), mActiveItem.getItemID());
                 }
                 EventBus.getDefault().post(new clsEvents.PopBackStack());
                 return true;
@@ -302,6 +292,23 @@ public class EditGeneralAccountFragment extends Fragment implements TextWatcher 
         }
     }
 
+    private void showKeyBoard(final EditText txt) {
+        final InputMethodManager imm = (InputMethodManager) getActivity()
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
+        txt.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                txt.requestFocus();
+                imm.showSoftInput(txt, 0);
+            }
+        }, 100);
+    }
+
+    private void hideKeyBoard(EditText txt) {
+        InputMethodManager imm = (InputMethodManager) getActivity()
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(txt.getWindowToken(), 0);
+    }
 
     @Override
     public void onPause() {
@@ -312,9 +319,10 @@ public class EditGeneralAccountFragment extends Fragment implements TextWatcher 
         if (mIsDirty) {
             updatePasswordItem();
         }
-        if(getActivity().getActionBar()!=null) {
+        if (getActivity().getActionBar() != null) {
             getActivity().getActionBar().setDisplayHomeAsUpEnabled(false);
         }
+        hideKeyBoard(txtItemName);
     }
 
 
@@ -336,25 +344,25 @@ public class EditGeneralAccountFragment extends Fragment implements TextWatcher 
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
         if (mTextChangedListenersEnabled) {
-            String editTextName = "";
+            //String editTextName = "";
             if (txtItemName.getText().hashCode() == s.hashCode()) {
-                editTextName = "txtItemName";
+                //editTextName = "txtItemName";
                 mIsItemNameDirty = true;
-            } else if (txtAccountNumber.getText().hashCode() == s.hashCode()) {
+/*            } else if (txtAccountNumber.getText().hashCode() == s.hashCode()) {
                 editTextName = "txtAccountNumber";
             } else if (txtPrimaryPhoneNumber.getText().hashCode() == s.hashCode()) {
                 editTextName = "txtPrimaryPhoneNumber";
             } else if (txtAlternatePhoneNumber.getText().hashCode() == s.hashCode()) {
-                editTextName = "txtAlternatePhoneNumber";
+                editTextName = "txtAlternatePhoneNumber";*/
             }
 
-            MyLog.d("EditGeneralAccountFragment", "onTextChanged: EditText = " + editTextName);
+            //MyLog.d("EditGeneralAccountFragment", "onTextChanged: EditText = " + editTextName);
             mIsDirty = true;
         }
     }
 
     @Override
     public void afterTextChanged(Editable s) {
-        
+
     }
 }

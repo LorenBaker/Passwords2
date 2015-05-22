@@ -249,6 +249,20 @@ public class ItemsTable {
         return cursorLoader;
     }
 
+    public static boolean itemNameExists(Context context, long userID, String itemName) {
+        boolean result = false;
+        if (!itemName.isEmpty()) {
+            Cursor cursor = getItem(context, userID, itemName);
+            if (cursor != null && cursor.getCount() > 0) {
+                result = true;
+            }
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        return result;
+    }
+
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Update Methods
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////

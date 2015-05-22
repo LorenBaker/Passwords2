@@ -2,6 +2,7 @@ package com.lbconsulting.password2.fragments;
 
 
 import android.app.Fragment;
+import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -11,6 +12,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -18,7 +20,8 @@ import com.lbconsulting.password2.R;
 import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
-import com.lbconsulting.password2.classes.clsItem;
+import com.lbconsulting.password2.classes.clsItemValues;
+import com.lbconsulting.password2.database.ItemsTable;
 
 import de.greenrobot.event.EventBus;
 
@@ -38,7 +41,8 @@ public class EditWebsiteFragment extends Fragment implements TextWatcher {
     private String mOriginalItemName = "";
     private boolean mIsNewPasswordItem = false;
 
-    private clsItem mPasswordItem;
+    private long mActiveItemID;
+    private clsItemValues mActiveItem;
 
     private EditText txtItemName;
     private EditText txtWebsiteURL;
@@ -67,7 +71,6 @@ public class EditWebsiteFragment extends Fragment implements TextWatcher {
             if (mIsNewPasswordItem) {
                 mIsDirty = true;
             }
-            //mPasswordItem = MainActivity.getActivePasswordItem();
         }
         setHasOptionsMenu(true);
         EventBus.getDefault().register(this);
@@ -105,37 +108,41 @@ public class EditWebsiteFragment extends Fragment implements TextWatcher {
     }
 
     private void validateItemName() {
-/*        String itemName = txtItemName.getText().toString().trim();
+        String itemName = txtItemName.getText().toString().trim();
         if (!itemName.equalsIgnoreCase(mOriginalItemName)) {
+            String title = "Invalid Item Name";
             if (itemName.isEmpty()) {
-                MainActivity.showOkDialog(getActivity(),
-                        "Invalid Item Name", "The item’s name cannot be empty!\n\nReverting back to the unedited name.");
+                String msg = "The item’s name cannot be empty!\n\nReverting back to the unedited name.";
+                EventBus.getDefault().post(new clsEvents.showOkDialog(title, msg));
                 txtItemName.setText(mOriginalItemName);
+
             } else {
                 // check if the name exists
-                if (MainActivity.itemNameExist(itemName, mPasswordItem.getUserID())) {
-                    MainActivity.showOkDialog(getActivity(),
-                            "Invalid Item Name", "\"" + itemName + "\" already exists!\n\nReverting back to the unedited name.");
+                if (ItemsTable.itemNameExists(getActivity(), mActiveItem.getUserID(), itemName)) {
+                    String msg = "\"" + itemName + "\" already exists!\n\nReverting back to the unedited name.";
+                    EventBus.getDefault().post(new clsEvents.showOkDialog(title, msg));
                     txtItemName.setText(mOriginalItemName);
                 } else {
                     // the item name does not exist
                     mIsDirty = true;
                 }
             }
-        }*/
+        }
     }
 
     @Override
-    public void onActivityCreated( Bundle savedInstanceState) {
+    public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         MyLog.i("EditWebsiteFragment", "onActivityCreated()");
         mTextChangedListenersEnabled = false;
+
+        mActiveItemID = MySettings.getActiveItemID();
+        mActiveItem = new clsItemValues(getActivity(), mActiveItemID);
 
         // Restore saved state
         if (savedInstanceState != null) {
             MyLog.i("EditWebsiteFragment", "onActivityCreated(): savedInstanceState");
             mIsDirty = savedInstanceState.getBoolean(MySettings.ARG_IS_DIRTY);
-            //mPasswordItem = MainActivity.getActivePasswordItem();
         }
         if (getActivity().getActionBar() != null) {
             getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -158,6 +165,7 @@ public class EditWebsiteFragment extends Fragment implements TextWatcher {
         MyLog.i("EditWebsiteFragment", "onResume()");
         MySettings.setActiveFragmentID(MySettings.FRAG_EDIT_GENERAL_ACCOUNT);
         updateUI();
+        showKeyBoard(txtItemName);
     }
 
     public void onEvent(clsEvents.updateUI event) {
@@ -170,40 +178,38 @@ public class EditWebsiteFragment extends Fragment implements TextWatcher {
         // inhibit text change event when loading updating the UI.
         mTextChangedListenersEnabled = false;
 
-/*        // don't update if the user has made edits
+        // don't update if the user has made edits
         if (!mIsDirty) {
-            mPasswordItem = MainActivity.getActivePasswordItem();
-            if (mPasswordItem != null) {
-                txtItemName.setText(mPasswordItem.getItemName());
-                if (mOriginalItemName.isEmpty()) {
-                    mOriginalItemName = mPasswordItem.getItemName();
-                }
-                txtWebsiteURL.setText((mPasswordItem.getWebsiteURL()));
-                txtUserID.setText((mPasswordItem.getWebsiteUserID()));
-                txtPassword.setText((mPasswordItem.getWebsitePassword()));
+            mActiveItem = new clsItemValues(getActivity(), mActiveItemID);
+
+            txtItemName.setText(mActiveItem.getItemName());
+            if (mOriginalItemName.isEmpty()) {
+                mOriginalItemName = mActiveItem.getItemName();
             }
-        }*/
+            txtWebsiteURL.setText((mActiveItem.getWebsiteURL()));
+            txtUserID.setText((mActiveItem.getWebsiteUserID()));
+            txtPassword.setText((mActiveItem.getWebsitePassword()));
+        }
         mTextChangedListenersEnabled = true;
     }
 
     private void updatePasswordItem() {
 
-        mPasswordItem.setName(txtItemName.getText().toString().trim());
+        mActiveItem.putName(txtItemName.getText().toString().trim());
 
         String websiteURL = txtWebsiteURL.getText().toString().trim();
         if (!websiteURL.startsWith("http://") && !websiteURL.startsWith("https://")) {
             websiteURL = "http://" + websiteURL;
         }
-        mPasswordItem.setWebsiteURL(websiteURL);
+        mActiveItem.putWebsiteURL(websiteURL);
 
-        mPasswordItem.setWebsiteUserID(txtUserID.getText().toString().trim());
-        mPasswordItem.setWebsitePassword(txtPassword.getText().toString().trim());
+        mActiveItem.putWebsiteUserID(txtUserID.getText().toString().trim());
+        mActiveItem.putWebsitePassword(txtPassword.getText().toString().trim());
+        mActiveItem.update();
 
-        // save changes
+        // save changes to Dropbox
         EventBus.getDefault().post(new clsEvents.saveChangesToDropbox());
-
         mIsDirty = false;
-
     }
 
     @Override
@@ -218,37 +224,31 @@ public class EditWebsiteFragment extends Fragment implements TextWatcher {
 
             // Do Fragment menu item stuff here
             case R.id.action_save:
-                Toast.makeText(getActivity(), "TO COME: action_save", Toast.LENGTH_SHORT).show();
-
-/*                if (txtItemName.hasFocus()) {
+               // Toast.makeText(getActivity(), "TO COME: action_save", Toast.LENGTH_SHORT).show();
+                if (txtItemName.hasFocus()) {
                     validateItemName();
                     mNameValidated = true;
                 }
-                InputMethodManager imm = (InputMethodManager) getActivity()
-                        .getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(txtItemName.getWindowToken(), 0);
-
-                EventBus.getDefault().post(new clsEvents.PopBackStack());*/
+                EventBus.getDefault().post(new clsEvents.PopBackStack());
                 return true;
 
             case R.id.action_cancel:
-                Toast.makeText(getActivity(), "TO COME: action_cancel", Toast.LENGTH_SHORT).show();
-/*                mIsDirty = false;
+                //Toast.makeText(getActivity(), "TO COME: action_cancel", Toast.LENGTH_SHORT).show();
+                mIsDirty = false;
                 if (mIsNewPasswordItem) {
                     // delete the newly created password item
-                    MainActivity.deletePasswordItem(mPasswordItem.getItemID());
+                    ItemsTable.deleteItem(getActivity(), mActiveItem.getItemID());
                 }
-                EventBus.getDefault().post(new clsEvents.PopBackStack());*/
+                EventBus.getDefault().post(new clsEvents.PopBackStack());
                 return true;
 
             case R.id.action_clear:
                 Toast.makeText(getActivity(), "TO COME: action_clear", Toast.LENGTH_SHORT).show();
-/*                txtWebsiteURL.setText("");
+                txtWebsiteURL.setText("");
                 txtUserID.setText("");
                 txtPassword.setText("");
-                mIsDirty = true;*/
+                mIsDirty = true;
                 return true;
-
 
             case android.R.id.home:
                 EventBus.getDefault().post(new clsEvents.PopBackStack());
@@ -260,6 +260,23 @@ public class EditWebsiteFragment extends Fragment implements TextWatcher {
         }
     }
 
+    private void showKeyBoard(final EditText txt) {
+        final InputMethodManager imm = (InputMethodManager) getActivity()
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
+        txt.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                txt.requestFocus();
+                imm.showSoftInput(txt, 0);
+            }
+        }, 100);
+    }
+
+    private void hideKeyBoard(EditText txt) {
+        InputMethodManager imm = (InputMethodManager) getActivity()
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(txt.getWindowToken(), 0);
+    }
 
     @Override
     public void onPause() {
@@ -269,9 +286,10 @@ public class EditWebsiteFragment extends Fragment implements TextWatcher {
         if (mIsDirty) {
             updatePasswordItem();
         }
-        if(getActivity().getActionBar()!=null) {
+        if (getActivity().getActionBar() != null) {
             getActivity().getActionBar().setDisplayHomeAsUpEnabled(false);
         }
+        hideKeyBoard(txtItemName);
     }
 
 
@@ -290,21 +308,21 @@ public class EditWebsiteFragment extends Fragment implements TextWatcher {
 
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
+        mIsDirty = true;
         if (mTextChangedListenersEnabled) {
-            String editTextName = "";
+            //String editTextName = "";
             if (txtItemName.getText().hashCode() == s.hashCode()) {
-                editTextName = "txtItemName";
+                //editTextName = "txtItemName";
                 mIsItemNameDirty = true;
-            } else if (txtWebsiteURL.getText().hashCode() == s.hashCode()) {
+/*            } else if (txtWebsiteURL.getText().hashCode() == s.hashCode()) {
                 editTextName = "txtWebsiteURL";
             } else if (txtUserID.getText().hashCode() == s.hashCode()) {
                 editTextName = "txtUserID";
             } else if (txtPassword.getText().hashCode() == s.hashCode()) {
-                editTextName = "txtPassword";
+                editTextName = "txtPassword";*/
             }
 
-            MyLog.d("EditWebsiteFragment", "onTextChanged: EditText = " + editTextName);
-            mIsDirty = true;
+            //MyLog.d("EditWebsiteFragment", "onTextChanged: EditText = " + editTextName);
         }
     }
 

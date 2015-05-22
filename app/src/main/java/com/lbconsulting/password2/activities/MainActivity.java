@@ -23,7 +23,7 @@ import com.lbconsulting.password2.classes.clsEvents;
 import com.lbconsulting.password2.classes.clsItemValues;
 import com.lbconsulting.password2.classes.clsLabPasswords;
 import com.lbconsulting.password2.classes.clsUserValues;
-import com.lbconsulting.password2.classes_async.DownloadTextFile;
+import com.lbconsulting.password2.classes_async.DownloadDecryptDataFile;
 import com.lbconsulting.password2.fragments.AppPasswordFragment;
 import com.lbconsulting.password2.fragments.EditCreditCardFragment;
 import com.lbconsulting.password2.fragments.EditGeneralAccountFragment;
@@ -37,7 +37,7 @@ import com.lbconsulting.password2.fragments.UserSettingsFragment;
 import de.greenrobot.event.EventBus;
 
 
-public class MainActivity extends Activity implements DownloadTextFile.DownloadFinishedListener {
+public class MainActivity extends Activity implements DownloadDecryptDataFile.DownloadFinishedListener {
 
     private static final String APP_KEY = "kz0qsqlw52f41cy";
     private static final String APP_SECRET = "owdln6x88inn9vo";
@@ -353,13 +353,10 @@ public class MainActivity extends Activity implements DownloadTextFile.DownloadF
     }
 
     private void updatePasswordsData() {
-        // This method starts the first of a series of async tasks
-        // that reads and decrypts the Dropbox data file, and
-        // updates the SQLite database
-
+        // This method asynchronously reads and decrypts the Dropbox data file, and
+        // then updates the SQLite database
         String dropboxFullFilename = MySettings.getDropboxFilename();
-        new DownloadTextFile(this, mDBApi, dropboxFullFilename, true).execute();
-
+        new DownloadDecryptDataFile(this, mDBApi, dropboxFullFilename, true).execute();
     }
 
     @Override
@@ -383,16 +380,9 @@ public class MainActivity extends Activity implements DownloadTextFile.DownloadF
 
         } else if (id == R.id.action_refresh_from_dropbox) {
             updatePasswordsData();
+            // TODO: Show progress bar
             // Toast.makeText(this, "TO COME: action_refresh_from_dropbox", Toast.LENGTH_SHORT).show();
 
-/*            try {
-                mPasswordsDropboxDataFile.update();
-                MyLog.i("MainActivity", "action_refresh_from_dropbox");
-                new readLabPasswordData().execute();
-            } catch (DbxException e) {
-                MyLog.e("MainActivity", "onOptionsItemSelected: action_refresh_from_dropbox: DbxException " + e.getMessage());
-                e.printStackTrace();
-            }*/
             return true;
 
         } else if (id == R.id.action_settings) {
@@ -451,9 +441,10 @@ public class MainActivity extends Activity implements DownloadTextFile.DownloadF
     }
 
     @Override
-    public void fileDownloadFinished(Boolean result) {
+    public void onFileDownloadFinished(Boolean result) {
         // TODO: validateActiveUser();
         //validateActiveUser();
-        //MyLog.i("MainActivity", "fileDownloadFinished: encrypted file length = " + encryptedFileContent.length() + " bytes.");
+        EventBus.getDefault().post(new clsEvents.updateUI());
+        //MyLog.i("MainActivity", "onFileDownloadFinished: encrypted file length = " + encryptedFileContent.length() + " bytes.");
     }
 }

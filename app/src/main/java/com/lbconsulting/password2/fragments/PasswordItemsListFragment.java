@@ -2,6 +2,7 @@ package com.lbconsulting.password2.fragments;
 
 import android.app.Fragment;
 import android.app.LoaderManager;
+import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
@@ -218,7 +219,7 @@ public class PasswordItemsListFragment extends Fragment
 
     private void showKeyBoard(final EditText txt) {
         final InputMethodManager imm = (InputMethodManager) getActivity()
-                .getSystemService(getActivity().INPUT_METHOD_SERVICE);
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
         txt.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -230,7 +231,7 @@ public class PasswordItemsListFragment extends Fragment
 
     private void hideKeyBoard(EditText txt) {
         InputMethodManager imm = (InputMethodManager) getActivity()
-                .getSystemService(getActivity().INPUT_METHOD_SERVICE);
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(txt.getWindowToken(), 0);
     }
 

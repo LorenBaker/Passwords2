@@ -2,6 +2,7 @@ package com.lbconsulting.password2.fragments;
 
 
 import android.app.Fragment;
+import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputFilter;
@@ -12,13 +13,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.lbconsulting.password2.R;
 import com.lbconsulting.password2.classes.MyLog;
@@ -26,6 +27,7 @@ import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
 import com.lbconsulting.password2.classes.clsFormattingMethods;
 import com.lbconsulting.password2.classes.clsItemValues;
+import com.lbconsulting.password2.database.ItemsTable;
 
 import de.greenrobot.event.EventBus;
 
@@ -68,8 +70,6 @@ public class EditCreditCardFragment extends Fragment implements TextWatcher {
     private EditText txtSecurityCode;
     private EditText txtPrimaryPhoneNumber;
     private EditText txtAlternatePhoneNumber;
-
-
 
 
     private class CreditCardParts {
@@ -169,7 +169,7 @@ public class EditCreditCardFragment extends Fragment implements TextWatcher {
             if (mIsNewPasswordItem) {
                 mIsDirty = true;
             }
-           // mActiveItem = MainActivity.getActivePasswordItem();
+
             if (mActiveItem != null) {
                 mSelectedCreditCardTypePosition = findSpinnerPosition(mActiveItem.getCreditCardAccountNumber());
             }
@@ -319,7 +319,7 @@ public class EditCreditCardFragment extends Fragment implements TextWatcher {
                 if (!hasFocus) {
                     String formattedAlternatePhoneNumber = clsFormattingMethods
                             .formatPhoneNumber(txtAlternatePhoneNumber.getText().toString().trim());
-                    txtPrimaryPhoneNumber.setText(formattedAlternatePhoneNumber);
+                    txtAlternatePhoneNumber.setText(formattedAlternatePhoneNumber);
                 }
             }
         });
@@ -330,24 +330,25 @@ public class EditCreditCardFragment extends Fragment implements TextWatcher {
 
     private void validateItemName() {
         String itemName = txtItemName.getText().toString().trim();
-/*        if (!itemName.equalsIgnoreCase(mOriginalItemName)) {
+        if (!itemName.equalsIgnoreCase(mOriginalItemName)) {
+            String title = "Invalid Item Name";
             if (itemName.isEmpty()) {
-                MainActivity.showOkDialog(getActivity(),
-                        "Invalid Item Name", "The item’s name cannot be empty!\n\nReverting back to the unedited name.");
+                String msg = "The item’s name cannot be empty!\n\nReverting back to the unedited name.";
+                EventBus.getDefault().post(new clsEvents.showOkDialog(title, msg));
                 txtItemName.setText(mOriginalItemName);
+
             } else {
                 // check if the name exists
-                if (MainActivity.itemNameExist(itemName, mActiveItem.getUserID())) {
-                    MainActivity.showOkDialog(getActivity(),
-                            "Invalid Item Name", "\"" + itemName + "\" already exists!\n\nReverting back to the unedited name.");
+                if (ItemsTable.itemNameExists(getActivity(), mActiveItem.getUserID(), itemName)) {
+                    String msg = "\"" + itemName + "\" already exists!\n\nReverting back to the unedited name.";
+                    EventBus.getDefault().post(new clsEvents.showOkDialog(title, msg));
                     txtItemName.setText(mOriginalItemName);
                 } else {
                     // the item name does not exist
                     mIsDirty = true;
-                    //MainActivity.sortPasswordsData();
                 }
             }
-        }*/
+        }
     }
 
     private void validateCreditCard() {
@@ -367,10 +368,13 @@ public class EditCreditCardFragment extends Fragment implements TextWatcher {
     }
 
     @Override
-    public void onActivityCreated( Bundle savedInstanceState) {
+    public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         MyLog.i("EditCreditCardFragment", "onActivityCreated()");
         mTextChangedListenersEnabled = false;
+
+        mActiveItemID = MySettings.getActiveItemID();
+        mActiveItem = new clsItemValues(getActivity(), mActiveItemID);
 
         if (savedInstanceState != null) {
             // Restore saved state
@@ -378,13 +382,11 @@ public class EditCreditCardFragment extends Fragment implements TextWatcher {
             mIsDirty = savedInstanceState.getBoolean(MySettings.ARG_IS_DIRTY);
             mActiveCardType = savedInstanceState.getInt(ARG_ACTIVE_CARD_TYPE);
             mCreditCardNumber = savedInstanceState.getString(ARG_CREDIT_CARD_NUMBER);
-
-            mSelectedCreditCardTypePosition = findSpinnerPosition(mActiveItem.getCreditCardAccountNumber());
         }
-        mActiveItemID = MySettings.getActiveItemID();
 
+        mSelectedCreditCardTypePosition = findSpinnerPosition(mActiveItem.getCreditCardAccountNumber());
         spnCreditCardType.setSelection(mSelectedCreditCardTypePosition);
-        if(getActivity().getActionBar()!=null) {
+        if (getActivity().getActionBar() != null) {
             getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
         }
         MySettings.setOnSaveInstanceState(false);
@@ -408,6 +410,7 @@ public class EditCreditCardFragment extends Fragment implements TextWatcher {
         MyLog.i("EditCreditCardFragment", "onResume()");
         MySettings.setActiveFragmentID(MySettings.FRAG_EDIT_CREDIT_CARD);
         updateUI();
+        showKeyBoard(txtItemName);
     }
 
     public void onEvent(clsEvents.updateUI event) {
@@ -423,23 +426,22 @@ public class EditCreditCardFragment extends Fragment implements TextWatcher {
         if (!mIsDirty) {
             mActiveItem = new clsItemValues(getActivity(), mActiveItemID);
 
-            if (mActiveItem != null) {
-                txtItemName.setText(mActiveItem.getItemName());
-                if (mOriginalItemName.isEmpty()) {
-                    mOriginalItemName = mActiveItem.getItemName();
-                }
-
-                updateCreditCardUI();
-
-                txtExpirationMonth.setText(mActiveItem.getCreditCardExpirationMonth());
-                txtExpirationYear.setText(mActiveItem.getCreditCardExpirationYear());
-                txtSecurityCode.setText(mActiveItem.getCardCreditSecurityCode());
-
-                String formattedPrimaryPhoneNumber = clsFormattingMethods.formatPhoneNumber(mActiveItem.getPrimaryPhoneNumber());
-                String formattedAlternatePhoneNumber = clsFormattingMethods.formatPhoneNumber(mActiveItem.getAlternatePhoneNumber());
-                txtPrimaryPhoneNumber.setText(formattedPrimaryPhoneNumber);
-                txtAlternatePhoneNumber.setText(formattedAlternatePhoneNumber);
+            txtItemName.setText(mActiveItem.getItemName());
+            if (mOriginalItemName.isEmpty()) {
+                mOriginalItemName = mActiveItem.getItemName();
             }
+
+            updateCreditCardUI();
+
+            txtExpirationMonth.setText(mActiveItem.getCreditCardExpirationMonth());
+            txtExpirationYear.setText(mActiveItem.getCreditCardExpirationYear());
+            txtSecurityCode.setText(mActiveItem.getCardCreditSecurityCode());
+
+            String formattedPrimaryPhoneNumber = clsFormattingMethods.formatPhoneNumber(mActiveItem.getPrimaryPhoneNumber());
+            String formattedAlternatePhoneNumber = clsFormattingMethods.formatPhoneNumber(mActiveItem.getAlternatePhoneNumber());
+            txtPrimaryPhoneNumber.setText(formattedPrimaryPhoneNumber);
+            txtAlternatePhoneNumber.setText(formattedAlternatePhoneNumber);
+
         }
         mTextChangedListenersEnabled = true;
     }
@@ -505,35 +507,27 @@ public class EditCreditCardFragment extends Fragment implements TextWatcher {
 
             // Do Fragment menu item stuff here
             case R.id.action_save:
-                // TODO: Implement action_save
-                Toast.makeText(getActivity(), "TO COME: action_save Click", Toast.LENGTH_SHORT).show();
-/*                if (txtItemName.hasFocus()) {
+                //Toast.makeText(getActivity(), "TO COME: action_save Click", Toast.LENGTH_SHORT).show();
+                if (txtItemName.hasFocus()) {
                     validateItemName();
                     mNameValidated = true;
                 }
-                InputMethodManager imm = (InputMethodManager) getActivity()
-                        .getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(txtItemName.getWindowToken(), 0);
-
-                EventBus.getDefault().post(new clsEvents.PopBackStack());*/
-
+                EventBus.getDefault().post(new clsEvents.PopBackStack());
                 return true;
 
             case R.id.action_cancel:
-                // TODO: Implement action_cancel
-                Toast.makeText(getActivity(), "TO COME: action_cancel Click", Toast.LENGTH_SHORT).show();
-/*                mIsDirty = false;
+                // Toast.makeText(getActivity(), "TO COME: action_cancel Click", Toast.LENGTH_SHORT).show();
+                mIsDirty = false;
                 if (mIsNewPasswordItem) {
                     // delete the newly created password item
-                    MainActivity.deletePasswordItem(mActiveItem.getItemID());
+                    ItemsTable.deleteItem(getActivity(), mActiveItem.getItemID());
                 }
-                EventBus.getDefault().post(new clsEvents.PopBackStack());*/
+                EventBus.getDefault().post(new clsEvents.PopBackStack());
                 return true;
 
             case R.id.action_clear:
-                // TODO: Implement action_clear
-                Toast.makeText(getActivity(), "TO COME: action_clear", Toast.LENGTH_SHORT).show();
-/*                txtCreditCardPart1.setText("");
+                // Toast.makeText(getActivity(), "TO COME: action_clear", Toast.LENGTH_SHORT).show();
+                txtCreditCardPart1.setText("");
                 txtCreditCardPart2.setText("");
                 txtCreditCardPart3.setText("");
                 txtCreditCardPart4.setText("");
@@ -545,7 +539,7 @@ public class EditCreditCardFragment extends Fragment implements TextWatcher {
                 txtPrimaryPhoneNumber.setText("");
                 txtAlternatePhoneNumber.setText("");
 
-                mIsDirty = true;*/
+                mIsDirty = true;
                 return true;
 
 
@@ -559,6 +553,23 @@ public class EditCreditCardFragment extends Fragment implements TextWatcher {
         }
     }
 
+    private void showKeyBoard(final EditText txt) {
+        final InputMethodManager imm = (InputMethodManager) getActivity()
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
+        txt.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                txt.requestFocus();
+                imm.showSoftInput(txt, 0);
+            }
+        }, 100);
+    }
+
+    private void hideKeyBoard(EditText txt) {
+        InputMethodManager imm = (InputMethodManager) getActivity()
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(txt.getWindowToken(), 0);
+    }
 
     @Override
     public void onPause() {
@@ -568,9 +579,10 @@ public class EditCreditCardFragment extends Fragment implements TextWatcher {
         if (mIsDirty) {
             updatePasswordItem();
         }
-        if(getActivity().getActionBar()!=null) {
+        if (getActivity().getActionBar() != null) {
             getActivity().getActionBar().setDisplayHomeAsUpEnabled(false);
         }
+        hideKeyBoard(txtItemName);
     }
 
 
@@ -590,36 +602,36 @@ public class EditCreditCardFragment extends Fragment implements TextWatcher {
     public void onTextChanged(CharSequence s, int start, int before, int count) {
 
         if (mTextChangedListenersEnabled) {
-            String editTextName = "";
+            mIsDirty = true;
+           // String editTextName = "";
             if (txtItemName.getText().hashCode() == s.hashCode()) {
-                editTextName = "txtItemName";
+               // editTextName = "txtItemName";
                 mIsItemNameDirty = true;
             } else if (txtCreditCardPart1.getText().hashCode() == s.hashCode()) {
-                editTextName = "txtCreditCardPart1";
+               // editTextName = "txtCreditCardPart1";
                 validateCreditCard();
             } else if (txtCreditCardPart2.getText().hashCode() == s.hashCode()) {
-                editTextName = "txtCreditCardPart2";
+                //editTextName = "txtCreditCardPart2";
                 validateCreditCard();
             } else if (txtCreditCardPart3.getText().hashCode() == s.hashCode()) {
-                editTextName = "txtCreditCardPart3";
+               // editTextName = "txtCreditCardPart3";
                 validateCreditCard();
             } else if (txtCreditCardPart4.getText().hashCode() == s.hashCode()) {
-                editTextName = "txtCreditCardPart4";
+                //editTextName = "txtCreditCardPart4";
                 validateCreditCard();
-            } else if (txtExpirationMonth.getText().hashCode() == s.hashCode()) {
-                editTextName = "txtExpirationMonth";
+/*            } else if (txtExpirationMonth.getText().hashCode() == s.hashCode()) {
+               // editTextName = "txtExpirationMonth";
             } else if (txtExpirationYear.getText().hashCode() == s.hashCode()) {
-                editTextName = "txtExpirationYear";
+               // editTextName = "txtExpirationYear";
             } else if (txtSecurityCode.getText().hashCode() == s.hashCode()) {
-                editTextName = "txtSecurityCode";
+                //editTextName = "txtSecurityCode";
             } else if (txtPrimaryPhoneNumber.getText().hashCode() == s.hashCode()) {
-                editTextName = "txtPrimaryPhoneNumber";
+               // editTextName = "txtPrimaryPhoneNumber";
             } else if (txtAlternatePhoneNumber.getText().hashCode() == s.hashCode()) {
-                editTextName = "txtAlternatePhoneNumber";
+               // editTextName = "txtAlternatePhoneNumber";*/
             }
 
-            MyLog.d("EditCreditCardFragment", "onTextChanged: EditText = " + editTextName);
-            mIsDirty = true;
+           // MyLog.d("EditCreditCardFragment", "onTextChanged: EditText = " + editTextName);
         }
     }
 
