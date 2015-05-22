@@ -113,6 +113,7 @@ public class PasswordsContentProvider extends ContentProvider {
                 cursor = queryBuilder.query(db, projection, selection, selectionArgs, groupBy, having, sortOrder);
             } catch (Exception e) {
                 MyLog.e("PasswordsContentProvider", "query: " + e.toString());
+                e.printStackTrace();
             }
 
             if (cursor != null) {

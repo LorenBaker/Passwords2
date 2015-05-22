@@ -25,7 +25,7 @@ import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
 import com.lbconsulting.password2.classes.clsFormattingMethods;
-import com.lbconsulting.password2.classes.clsItem;
+import com.lbconsulting.password2.classes.clsItemValues;
 
 import de.greenrobot.event.EventBus;
 
@@ -52,7 +52,8 @@ public class EditCreditCardFragment extends Fragment implements TextWatcher {
     private boolean mIsNewPasswordItem = false;
     private int mSelectedCreditCardTypePosition = Spinner.INVALID_POSITION;
 
-    private clsItem mPasswordItem;
+    private long mActiveItemID;
+    private clsItemValues mActiveItem;
 
     private EditText txtItemName;
     private Spinner spnCreditCardType;
@@ -168,9 +169,9 @@ public class EditCreditCardFragment extends Fragment implements TextWatcher {
             if (mIsNewPasswordItem) {
                 mIsDirty = true;
             }
-           // mPasswordItem = MainActivity.getActivePasswordItem();
-            if (mPasswordItem != null) {
-                mSelectedCreditCardTypePosition = findSpinnerPosition(mPasswordItem.getCreditCardAccountNumber());
+           // mActiveItem = MainActivity.getActivePasswordItem();
+            if (mActiveItem != null) {
+                mSelectedCreditCardTypePosition = findSpinnerPosition(mActiveItem.getCreditCardAccountNumber());
             }
         }
         setHasOptionsMenu(true);
@@ -336,7 +337,7 @@ public class EditCreditCardFragment extends Fragment implements TextWatcher {
                 txtItemName.setText(mOriginalItemName);
             } else {
                 // check if the name exists
-                if (MainActivity.itemNameExist(itemName, mPasswordItem.getUserID())) {
+                if (MainActivity.itemNameExist(itemName, mActiveItem.getUserID())) {
                     MainActivity.showOkDialog(getActivity(),
                             "Invalid Item Name", "\"" + itemName + "\" already exists!\n\nReverting back to the unedited name.");
                     txtItemName.setText(mOriginalItemName);
@@ -377,9 +378,11 @@ public class EditCreditCardFragment extends Fragment implements TextWatcher {
             mIsDirty = savedInstanceState.getBoolean(MySettings.ARG_IS_DIRTY);
             mActiveCardType = savedInstanceState.getInt(ARG_ACTIVE_CARD_TYPE);
             mCreditCardNumber = savedInstanceState.getString(ARG_CREDIT_CARD_NUMBER);
-           // mPasswordItem = MainActivity.getActivePasswordItem();
-            mSelectedCreditCardTypePosition = findSpinnerPosition(mPasswordItem.getCreditCardAccountNumber());
+
+            mSelectedCreditCardTypePosition = findSpinnerPosition(mActiveItem.getCreditCardAccountNumber());
         }
+        mActiveItemID = MySettings.getActiveItemID();
+
         spnCreditCardType.setSelection(mSelectedCreditCardTypePosition);
         if(getActivity().getActionBar()!=null) {
             getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -416,35 +419,35 @@ public class EditCreditCardFragment extends Fragment implements TextWatcher {
     private void updateUI() {
         // inhibit text change event when loading updating the UI.
         mTextChangedListenersEnabled = false;
-/*
         // don't update if the user has made edits
         if (!mIsDirty) {
-            mPasswordItem = MainActivity.getActivePasswordItem();
-            if (mPasswordItem != null) {
-                txtItemName.setText(mPasswordItem.getItemName());
+            mActiveItem = new clsItemValues(getActivity(), mActiveItemID);
+
+            if (mActiveItem != null) {
+                txtItemName.setText(mActiveItem.getItemName());
                 if (mOriginalItemName.isEmpty()) {
-                    mOriginalItemName = mPasswordItem.getItemName();
+                    mOriginalItemName = mActiveItem.getItemName();
                 }
 
                 updateCreditCardUI();
 
-                txtExpirationMonth.setText(mPasswordItem.getCreditCardExpirationMonth());
-                txtExpirationYear.setText(mPasswordItem.getCreditCardExpirationYear());
-                txtSecurityCode.setText(mPasswordItem.getCreditCardSecurityCode());
+                txtExpirationMonth.setText(mActiveItem.getCreditCardExpirationMonth());
+                txtExpirationYear.setText(mActiveItem.getCreditCardExpirationYear());
+                txtSecurityCode.setText(mActiveItem.getCardCreditSecurityCode());
 
-                String formattedPrimaryPhoneNumber = clsFormattingMethods.formatPhoneNumber(mPasswordItem.getPrimaryPhoneNumber());
-                String formattedAlternatePhoneNumber = clsFormattingMethods.formatPhoneNumber(mPasswordItem.getAlternatePhoneNumber());
+                String formattedPrimaryPhoneNumber = clsFormattingMethods.formatPhoneNumber(mActiveItem.getPrimaryPhoneNumber());
+                String formattedAlternatePhoneNumber = clsFormattingMethods.formatPhoneNumber(mActiveItem.getAlternatePhoneNumber());
                 txtPrimaryPhoneNumber.setText(formattedPrimaryPhoneNumber);
                 txtAlternatePhoneNumber.setText(formattedAlternatePhoneNumber);
             }
-        }*/
+        }
         mTextChangedListenersEnabled = true;
     }
 
     private void updateCreditCardUI() {
-        if (mPasswordItem != null) {
+        if (mActiveItem != null) {
 
-            CreditCardParts creditCardParts = new CreditCardParts(mPasswordItem.getCreditCardAccountNumber(), mSelectedCreditCardTypePosition);
+            CreditCardParts creditCardParts = new CreditCardParts(mActiveItem.getCreditCardAccountNumber(), mSelectedCreditCardTypePosition);
             txtCreditCardPart1.setText(creditCardParts.getPart1());
             txtCreditCardPart2.setText(creditCardParts.getPart2());
             txtCreditCardPart3.setText(creditCardParts.getPart3());
@@ -456,18 +459,19 @@ public class EditCreditCardFragment extends Fragment implements TextWatcher {
 
     private void updatePasswordItem() {
 
-        mPasswordItem.setName(txtItemName.getText().toString().trim());
+        mActiveItem.putName(txtItemName.getText().toString().trim());
         mCreditCardNumber = makeCreditCardNumber();
-        mPasswordItem.setCreditCardAccountNumber(mCreditCardNumber);
-        mPasswordItem.setCreditCardExpirationMonth(txtExpirationMonth.getText().toString());
-        mPasswordItem.setCreditCardExpirationYear(txtExpirationYear.getText().toString());
-        mPasswordItem.setCreditCardSecurityCode(txtSecurityCode.getText().toString());
+        mActiveItem.putCreditCardAccountNumber(mCreditCardNumber);
+        mActiveItem.putCreditCardExpirationMonth(txtExpirationMonth.getText().toString());
+        mActiveItem.putCreditCardExpirationYear(txtExpirationYear.getText().toString());
+        mActiveItem.putCreditCardSecurityCode(txtSecurityCode.getText().toString());
         String unformattedPrimaryPhoneNumber = clsFormattingMethods.unFormatPhoneNumber(txtPrimaryPhoneNumber.getText().toString());
         String unformattedAlternatePhoneNumber = clsFormattingMethods.unFormatPhoneNumber(txtAlternatePhoneNumber.getText().toString());
-        mPasswordItem.setPrimaryPhoneNumber(unformattedPrimaryPhoneNumber);
-        mPasswordItem.setAlternatePhoneNumber(unformattedAlternatePhoneNumber);
+        mActiveItem.putPrimaryPhoneNumber(unformattedPrimaryPhoneNumber);
+        mActiveItem.putAlternatePhoneNumber(unformattedAlternatePhoneNumber);
+        mActiveItem.update();
 
-        // save the changes
+        // save the changes to Dropbox
         EventBus.getDefault().post(new clsEvents.saveChangesToDropbox());
         mIsDirty = false;
     }
@@ -501,6 +505,7 @@ public class EditCreditCardFragment extends Fragment implements TextWatcher {
 
             // Do Fragment menu item stuff here
             case R.id.action_save:
+                // TODO: Implement action_save
                 Toast.makeText(getActivity(), "TO COME: action_save Click", Toast.LENGTH_SHORT).show();
 /*                if (txtItemName.hasFocus()) {
                     validateItemName();
@@ -515,16 +520,18 @@ public class EditCreditCardFragment extends Fragment implements TextWatcher {
                 return true;
 
             case R.id.action_cancel:
+                // TODO: Implement action_cancel
                 Toast.makeText(getActivity(), "TO COME: action_cancel Click", Toast.LENGTH_SHORT).show();
 /*                mIsDirty = false;
                 if (mIsNewPasswordItem) {
                     // delete the newly created password item
-                    MainActivity.deletePasswordItem(mPasswordItem.getItemID());
+                    MainActivity.deletePasswordItem(mActiveItem.getItemID());
                 }
                 EventBus.getDefault().post(new clsEvents.PopBackStack());*/
                 return true;
 
             case R.id.action_clear:
+                // TODO: Implement action_clear
                 Toast.makeText(getActivity(), "TO COME: action_clear", Toast.LENGTH_SHORT).show();
 /*                txtCreditCardPart1.setText("");
                 txtCreditCardPart2.setText("");
@@ -572,8 +579,6 @@ public class EditCreditCardFragment extends Fragment implements TextWatcher {
         super.onDestroy();
         MyLog.i("EditCreditCardFragment", "onDestroy()");
         EventBus.getDefault().unregister(this);
-
-
     }
 
     @Override

@@ -17,13 +17,13 @@ import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.android.AndroidAuthSession;
 import com.dropbox.client2.session.AppKeyPair;
 import com.lbconsulting.password2.R;
-import com.lbconsulting.password2.classes_async.DownloadTextFile;
 import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
 import com.lbconsulting.password2.classes.clsItemValues;
 import com.lbconsulting.password2.classes.clsLabPasswords;
 import com.lbconsulting.password2.classes.clsUserValues;
+import com.lbconsulting.password2.classes_async.DownloadTextFile;
 import com.lbconsulting.password2.fragments.AppPasswordFragment;
 import com.lbconsulting.password2.fragments.EditCreditCardFragment;
 import com.lbconsulting.password2.fragments.EditGeneralAccountFragment;
@@ -75,8 +75,11 @@ public class MainActivity extends Activity implements DownloadTextFile.DownloadF
             mActiveFragmentID = savedInstanceState.getInt(ARG_ACTIVE_FRAGMENT_ID);
         }
 
+
         EventBus.getDefault().register(this);
         MySettings.setContext(this);
+        // TODO: remove the setActiveUserID line
+        MySettings.setActiveUserID(1);
 
         AppKeyPair appKeys = new AppKeyPair(APP_KEY, APP_SECRET);
         AndroidAuthSession session = new AndroidAuthSession(appKeys);
@@ -103,8 +106,21 @@ public class MainActivity extends Activity implements DownloadTextFile.DownloadF
 
     //region onEvent
 
-    public void onEvent(clsEvents.test event){
+
+    public void onEvent(clsEvents.test event) {
         updatePasswordsData();
+    }
+
+    public void onEvent(clsEvents.PopBackStack event) {
+        FragmentManager fm = getFragmentManager();
+        MyLog.i("MainActivity", "onEvent: BackStackEntryCount=" + fm.getBackStackEntryCount());
+        if (fm.getBackStackEntryCount() < 2 && MySettings.getActiveFragmentID() != MySettings.FRAG_ITEMS_LIST) {
+            MySettings.setActiveFragmentID(MySettings.FRAG_ITEMS_LIST);
+            showFragment(MySettings.FRAG_ITEMS_LIST, false);
+        } else {
+            fm.popBackStack();
+        }
+
     }
 
     public void onEvent(clsEvents.onDropboxDataFileChange event) {
@@ -160,7 +176,7 @@ public class MainActivity extends Activity implements DownloadTextFile.DownloadF
 
         showFragment(MySettings.getActiveFragmentID(), false);
 
-;
+        ;
 
     }
 
@@ -336,7 +352,7 @@ public class MainActivity extends Activity implements DownloadTextFile.DownloadF
         }
     }
 
-    private  void updatePasswordsData() {
+    private void updatePasswordsData() {
         // This method starts the first of a series of async tasks
         // that reads and decrypts the Dropbox data file, and
         // updates the SQLite database
@@ -367,7 +383,7 @@ public class MainActivity extends Activity implements DownloadTextFile.DownloadF
 
         } else if (id == R.id.action_refresh_from_dropbox) {
             updatePasswordsData();
-            Toast.makeText(this, "TO COME: action_refresh_from_dropbox", Toast.LENGTH_SHORT).show();
+            // Toast.makeText(this, "TO COME: action_refresh_from_dropbox", Toast.LENGTH_SHORT).show();
 
 /*            try {
                 mPasswordsDropboxDataFile.update();

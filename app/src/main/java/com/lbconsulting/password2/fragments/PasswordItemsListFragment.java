@@ -1,6 +1,9 @@
 package com.lbconsulting.password2.fragments;
 
 import android.app.Fragment;
+import android.app.LoaderManager;
+import android.content.CursorLoader;
+import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.text.Editable;
@@ -11,37 +14,33 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.lbconsulting.password2.R;
-import com.lbconsulting.password2.adapters.PasswordItemsListViewAdapter;
+import com.lbconsulting.password2.adapters.ItemsCursorAdapter;
 import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
-import com.lbconsulting.password2.classes.clsItem;
 import com.lbconsulting.password2.classes.clsItemTypes;
-import com.lbconsulting.password2.classes.clsUsers;
 import com.lbconsulting.password2.database.ItemsTable;
 import com.lbconsulting.password2.database.UsersTable;
-
-import java.util.ArrayList;
 
 import de.greenrobot.event.EventBus;
 
 /**
- * Created by Loren on 3/5/2015.
  * This fragment shows lists of Password Items
  */
 public class PasswordItemsListFragment extends Fragment
-        implements View.OnClickListener, AdapterView.OnItemClickListener {
+        implements View.OnClickListener, AdapterView.OnItemClickListener,
+        LoaderManager.LoaderCallbacks<Cursor> {
 
 
-    //<editor-fold desc="Fragment Views">
+    //region Fragment views
     private EditText txtSearch;
     private Button btnCreditCards;
     private Button btnGeneralAccounts;
@@ -52,26 +51,30 @@ public class PasswordItemsListFragment extends Fragment
     private ListView lvGeneralAccounts;
     private ListView lvWebsites;
     private ListView lvSoftware;
+    //endregion
 
-    //</editor-fold>
-
-
-    //<editor-fold desc="Module Variables">
-
+    private long mActiveUserID;
     private int mActiveListView = clsItemTypes.CREDIT_CARDS;
-    private String mSearchText;
 
+    private boolean mHideCreditCards;
+    private boolean mHideGeneralAccounts;
+    private boolean mHideWebsites;
+    private boolean mHideSoftware;
 
-    //private int mActiveUserID;
-    private ArrayList<clsItem> mAllItems;
-    private ArrayList<clsItem> mAllUserItems;
-    private ArrayList<clsItem> mUserCreditCardItems;
-    private ArrayList<clsItem> mUserGeneralAccountItems;
-    private ArrayList<clsItem> mUserWebsiteItems;
-    private ArrayList<clsItem> mUserSoftwareItems;
-    private PasswordItemsListViewAdapter mAllUserItemsAdapter;
+    private LoaderManager mLoaderManager = null;
+    // The callbacks through which we will interact with the LoaderManager.
+    private LoaderManager.LoaderCallbacks<Cursor> mItemsListFragmentCallbacks;
+    private ItemsCursorAdapter mAllUserItemsAdapter;
+    private ItemsCursorAdapter mUserCreditCardItemsItemsAdapter;
+    private ItemsCursorAdapter mUserGeneralAccountItemsItemsAdapter;
+    private ItemsCursorAdapter mUserWebsiteItemsItemsAdapter;
+    private ItemsCursorAdapter mUserSoftwareItemsItemsAdapter;
 
-    //</editor-fold>
+    public static final int USER_CREDIT_CARD_ITEMS = 1;
+    public static final int USER_GENERAL_ACCOUNT_ITEMS = 2;
+    public static final int USER_SOFTWARE_ITEMS = 3;
+    public static final int USER_WEBSITE_ITEMS = 4;
+    public static final int ALL_USER_ITEMS = 5;
 
 
     public PasswordItemsListFragment() {
@@ -79,11 +82,7 @@ public class PasswordItemsListFragment extends Fragment
     }
 
     public static PasswordItemsListFragment newInstance() {
-        PasswordItemsListFragment fragment = new PasswordItemsListFragment();
-/*        Bundle args = new Bundle();
-        args.putInt(MySettings.SETTING_ACTIVE_USER_ID, userID);
-        fragment.setArguments(args);*/
-        return fragment;
+        return new PasswordItemsListFragment();
     }
 
     @Override
@@ -98,8 +97,30 @@ public class PasswordItemsListFragment extends Fragment
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         MyLog.i("PasswordItemsListFragment", "onActivityCreated()");
-        mSearchText = MySettings.getSearchText();
+
         MySettings.setOnSaveInstanceState(false);
+
+        mActiveUserID = MySettings.getActiveUserID();
+        mHideCreditCards = MySettings.getHideCreditCards();
+        mHideGeneralAccounts = MySettings.getHideGeneralAccounts();
+        mHideWebsites = MySettings.getHideWebsites();
+        mHideSoftware = MySettings.getHideSoftware();
+
+        mActiveListView = MySettings.getActiveListViewID();
+        txtSearch.setText(MySettings.getSearchText());
+
+        MySettings.setActiveFragmentID(MySettings.FRAG_ITEMS_LIST);
+        MySettings.setActiveItemID(-1);
+
+        mLoaderManager = getLoaderManager();
+        mLoaderManager.initLoader(ALL_USER_ITEMS, null, mItemsListFragmentCallbacks);
+        mLoaderManager.initLoader(USER_CREDIT_CARD_ITEMS, null, mItemsListFragmentCallbacks);
+        mLoaderManager.initLoader(USER_GENERAL_ACCOUNT_ITEMS, null, mItemsListFragmentCallbacks);
+        mLoaderManager.initLoader(USER_WEBSITE_ITEMS, null, mItemsListFragmentCallbacks);
+        mLoaderManager.initLoader(USER_SOFTWARE_ITEMS, null, mItemsListFragmentCallbacks);
+
+        // TODO: setUserNameInActionBar
+        //MainActivity.setUserNameInActionBar();
     }
 
     @Override
@@ -126,21 +147,14 @@ public class PasswordItemsListFragment extends Fragment
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (lvAllUserItems != null && mAllUserItems != null) {
-                    mSearchText = s.toString();
-                    if (s.length() == 0) {
-                        mAllUserItemsAdapter = new PasswordItemsListViewAdapter(getActivity(), mAllUserItems);
-                        lvAllUserItems.setAdapter(mAllUserItemsAdapter);
-                    } else {
-                        ArrayList<clsItem> filteredUserItems = new ArrayList<clsItem>();
-                        for (clsItem item : mAllUserItems) {
-                            if (item.getName().toLowerCase().contains(s.toString().toLowerCase())) {
-                                filteredUserItems.add(item);
-                            }
-                        }
-                        mAllUserItemsAdapter = new PasswordItemsListViewAdapter(getActivity(), filteredUserItems);
-                        lvAllUserItems.setAdapter(mAllUserItemsAdapter);
-                    }
+                // Filter the items list based on the search text
+                if (mLoaderManager == null) {
+                    return;
+                }
+                switch (mActiveListView) {
+                    case ALL_USER_ITEMS:
+                        mLoaderManager.restartLoader(ALL_USER_ITEMS, null, mItemsListFragmentCallbacks);
+                        break;
                 }
             }
 
@@ -165,11 +179,25 @@ public class PasswordItemsListFragment extends Fragment
         lvWebsites = (ListView) rootView.findViewById(R.id.lvWebsites);
         lvSoftware = (ListView) rootView.findViewById(R.id.lvSoftware);
 
+        mAllUserItemsAdapter = new ItemsCursorAdapter(getActivity(), null, 0);
+        mUserCreditCardItemsItemsAdapter = new ItemsCursorAdapter(getActivity(), null, 0);
+        mUserGeneralAccountItemsItemsAdapter = new ItemsCursorAdapter(getActivity(), null, 0);
+        mUserWebsiteItemsItemsAdapter = new ItemsCursorAdapter(getActivity(), null, 0);
+        mUserSoftwareItemsItemsAdapter = new ItemsCursorAdapter(getActivity(), null, 0);
+
+        lvAllUserItems.setAdapter(mAllUserItemsAdapter);
+        lvCreditCards.setAdapter(mUserCreditCardItemsItemsAdapter);
+        lvGeneralAccounts.setAdapter(mUserGeneralAccountItemsItemsAdapter);
+        lvWebsites.setAdapter(mUserWebsiteItemsItemsAdapter);
+        lvSoftware.setAdapter(mUserSoftwareItemsItemsAdapter);
+
         lvAllUserItems.setOnItemClickListener(this);
         lvCreditCards.setOnItemClickListener(this);
         lvGeneralAccounts.setOnItemClickListener(this);
         lvWebsites.setOnItemClickListener(this);
         lvSoftware.setOnItemClickListener(this);
+
+        mItemsListFragmentCallbacks = this;
 
         return rootView;
     }
@@ -181,71 +209,29 @@ public class PasswordItemsListFragment extends Fragment
     }
 
     private void updateUI() {
-/*        MainActivity.setUserNameInActionBar();
-        if (MainActivity.getPasswordsData() != null) {
-            mAllItems = MainActivity.getPasswordsData().getPasswordItems();
-            if (mAllItems != null) {
-                MyLog.i("PasswordItemsListFragment", "updateUI()");
-                fillUserArrayLists();
-                setArrayAdapters();
-            }
-        }*/
+        mLoaderManager.restartLoader(USER_CREDIT_CARD_ITEMS, null, mItemsListFragmentCallbacks);
+        mLoaderManager.restartLoader(USER_GENERAL_ACCOUNT_ITEMS, null, mItemsListFragmentCallbacks);
+        mLoaderManager.restartLoader(USER_WEBSITE_ITEMS, null, mItemsListFragmentCallbacks);
+        mLoaderManager.restartLoader(USER_SOFTWARE_ITEMS, null, mItemsListFragmentCallbacks);
+        mLoaderManager.restartLoader(ALL_USER_ITEMS, null, mItemsListFragmentCallbacks);
     }
 
-    private void fillUserArrayLists() {
-        mAllUserItems = new ArrayList<>();
-        mUserCreditCardItems = new ArrayList<>();
-        mUserGeneralAccountItems = new ArrayList<>();
-        mUserSoftwareItems = new ArrayList<>();
-        mUserWebsiteItems = new ArrayList<>();
-
-        //int lastPasswordItemID = -1;
-        for (clsItem item : mAllItems) {
-/*            if (item.getItemID() > lastPasswordItemID) {
-                lastPasswordItemID = item.getItemID();
-            }*/
-            if (item.getUser_ID() == MySettings.getActiveUserID()) {
-                mAllUserItems.add(item);
-                switch (item.getItemType_ID()) {
-                    case clsItemTypes.CREDIT_CARDS:
-                        mUserCreditCardItems.add(item);
-                        break;
-
-                    case clsItemTypes.GENERAL_ACCOUNTS:
-                        mUserGeneralAccountItems.add(item);
-                        break;
-
-                    case clsItemTypes.SOFTWARE:
-                        mUserSoftwareItems.add(item);
-                        break;
-
-                    case clsItemTypes.WEBSITES:
-                        mUserWebsiteItems.add(item);
-                        break;
-                }
+    private void showKeyBoard(final EditText txt) {
+        final InputMethodManager imm = (InputMethodManager) getActivity()
+                .getSystemService(getActivity().INPUT_METHOD_SERVICE);
+        txt.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                txt.requestFocus();
+                imm.showSoftInput(txt, 0);
             }
-        }
-        // MainActivity.setLastPasswordItemID(lastPasswordItemID);
+        }, 100);
     }
 
-    private void setArrayAdapters() {
-        mAllUserItemsAdapter = new PasswordItemsListViewAdapter(getActivity(), mAllUserItems);
-        PasswordItemsListViewAdapter userCreditCardItemsAdapter =
-                new PasswordItemsListViewAdapter(getActivity(), mUserCreditCardItems);
-        PasswordItemsListViewAdapter userGeneralAccountItemsAdapter =
-                new PasswordItemsListViewAdapter(getActivity(), mUserGeneralAccountItems);
-        PasswordItemsListViewAdapter userSoftwareItemsAdapter =
-                new PasswordItemsListViewAdapter(getActivity(), mUserSoftwareItems);
-        PasswordItemsListViewAdapter userWebsiteItemsAdapter =
-                new PasswordItemsListViewAdapter(getActivity(), mUserWebsiteItems);
-
-        // placing text into txtSearch triggers onTextChanged event that sets lvAllUserItems adapter
-        txtSearch.setText(mSearchText);
-
-        lvCreditCards.setAdapter(userCreditCardItemsAdapter);
-        lvGeneralAccounts.setAdapter(userGeneralAccountItemsAdapter);
-        lvSoftware.setAdapter(userSoftwareItemsAdapter);
-        lvWebsites.setAdapter(userWebsiteItemsAdapter);
+    private void hideKeyBoard(EditText txt) {
+        InputMethodManager imm = (InputMethodManager) getActivity()
+                .getSystemService(getActivity().INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(txt.getWindowToken(), 0);
     }
 
     @Override
@@ -268,6 +254,7 @@ public class PasswordItemsListFragment extends Fragment
 
             // Do Fragment menu item stuff here
             case R.id.action_new:
+                // TODO: Implement action_new
                 Toast.makeText(getActivity(), "TO COME: action_new", Toast.LENGTH_SHORT).show();
 
              /*   final clsItem newPasswordItem = MainActivity.createNewPasswordItem();
@@ -336,15 +323,13 @@ public class PasswordItemsListFragment extends Fragment
                 return true;
 
             case R.id.action_show_search:
-                Toast.makeText(getActivity(), "TO COME: action_show_search", Toast.LENGTH_SHORT).show();
-/*                setupDisplay(clsItemTypes.ALL_ITEMS);
-                getActivity().invalidateOptionsMenu();*/
+                setupDisplay(clsItemTypes.ALL_ITEMS);
+                getActivity().invalidateOptionsMenu();
                 return true;
 
             case R.id.action_show_categories:
-                Toast.makeText(getActivity(), "TO COME: action_show_categories", Toast.LENGTH_SHORT).show();
-/*                setupDisplay(clsItemTypes.CREDIT_CARDS);
-                getActivity().invalidateOptionsMenu();*/
+                setupDisplay(clsItemTypes.CREDIT_CARDS);
+                getActivity().invalidateOptionsMenu();
                 return true;
 
             default:
@@ -356,20 +341,12 @@ public class PasswordItemsListFragment extends Fragment
 
     @Override
     public void onResume() {
-        MyLog.i("PasswordItemsListFragment", "onResume()");
-        // Restore preferences
-
-/*        mActiveListView = MySettings.getActiveListViewID();
-        MySettings.setActiveFragmentID(MySettings.FRAG_ITEMS_LIST);
-        MySettings.setActiveItemID(-1);
-        setupDisplay(mActiveListView);
-        //MainActivity.sortPasswordsData();
-        if (mActiveListView == clsItemTypes.ALL_ITEMS) {
-            mSearchText = MySettings.getSearchText();
-            txtSearch.setText(mSearchText);
-        }
-        updateUI();*/
         super.onResume();
+        MyLog.i("PasswordItemsListFragment", "onResume()");
+
+
+        setupDisplay(mActiveListView);
+
     }
 
     @Override
@@ -377,7 +354,8 @@ public class PasswordItemsListFragment extends Fragment
         super.onPause();
         MyLog.i("PasswordItemsListFragment", "onPause()");
         MySettings.setActiveListViewID(mActiveListView);
-        MySettings.setSearchText(mSearchText);
+        MySettings.setSearchText(txtSearch.getText().toString());
+        hideKeyBoard(txtSearch);
     }
 
     @Override
@@ -520,64 +498,138 @@ public class PasswordItemsListFragment extends Fragment
     }
 
     private void setupDisplay(int displayType) {
+
         switch (displayType) {
-            case clsItemTypes.CREDIT_CARDS:
+            case USER_CREDIT_CARD_ITEMS:
                 txtSearch.setVisibility(View.GONE);
                 lvAllUserItems.setVisibility(View.GONE);
+
                 btnCreditCards.setVisibility(View.VISIBLE);
-                btnGeneralAccounts.setVisibility(View.VISIBLE);
-                btnWebsites.setVisibility(View.VISIBLE);
-                btnSoftware.setVisibility(View.VISIBLE);
+
+                if (mHideGeneralAccounts) {
+                    btnGeneralAccounts.setVisibility(View.GONE);
+                } else {
+                    btnGeneralAccounts.setVisibility(View.VISIBLE);
+                }
+
+                if (mHideWebsites) {
+                    btnWebsites.setVisibility(View.GONE);
+                } else {
+                    btnWebsites.setVisibility(View.VISIBLE);
+                }
+
+                if (mHideSoftware) {
+                    btnSoftware.setVisibility(View.GONE);
+                } else {
+                    btnSoftware.setVisibility(View.VISIBLE);
+                }
+
                 lvCreditCards.setVisibility(View.VISIBLE);
                 lvGeneralAccounts.setVisibility(View.GONE);
                 lvWebsites.setVisibility(View.GONE);
                 lvSoftware.setVisibility(View.GONE);
                 mActiveListView = clsItemTypes.CREDIT_CARDS;
+                hideKeyBoard(txtSearch);
                 break;
 
-            case clsItemTypes.GENERAL_ACCOUNTS:
+            case USER_GENERAL_ACCOUNT_ITEMS:
                 txtSearch.setVisibility(View.GONE);
                 lvAllUserItems.setVisibility(View.GONE);
-                btnCreditCards.setVisibility(View.VISIBLE);
+
+                if (mHideCreditCards) {
+                    btnCreditCards.setVisibility(View.GONE);
+                } else {
+                    btnCreditCards.setVisibility(View.VISIBLE);
+                }
+
                 btnGeneralAccounts.setVisibility(View.VISIBLE);
-                btnWebsites.setVisibility(View.VISIBLE);
-                btnSoftware.setVisibility(View.VISIBLE);
+
+                if (mHideWebsites) {
+                    btnWebsites.setVisibility(View.GONE);
+                } else {
+                    btnWebsites.setVisibility(View.VISIBLE);
+                }
+
+                if (mHideSoftware) {
+                    btnSoftware.setVisibility(View.GONE);
+                } else {
+                    btnSoftware.setVisibility(View.VISIBLE);
+                }
+
                 lvCreditCards.setVisibility(View.GONE);
                 lvGeneralAccounts.setVisibility(View.VISIBLE);
                 lvWebsites.setVisibility(View.GONE);
                 lvSoftware.setVisibility(View.GONE);
                 mActiveListView = clsItemTypes.GENERAL_ACCOUNTS;
+                hideKeyBoard(txtSearch);
                 break;
 
-            case clsItemTypes.SOFTWARE:
+            case USER_WEBSITE_ITEMS:
                 txtSearch.setVisibility(View.GONE);
                 lvAllUserItems.setVisibility(View.GONE);
-                btnCreditCards.setVisibility(View.VISIBLE);
-                btnGeneralAccounts.setVisibility(View.VISIBLE);
-                btnWebsites.setVisibility(View.VISIBLE);
-                btnSoftware.setVisibility(View.VISIBLE);
-                lvCreditCards.setVisibility(View.GONE);
-                lvGeneralAccounts.setVisibility(View.GONE);
-                lvWebsites.setVisibility(View.GONE);
-                lvSoftware.setVisibility(View.VISIBLE);
-                mActiveListView = clsItemTypes.SOFTWARE;
-                break;
 
-            case clsItemTypes.WEBSITES:
-                txtSearch.setVisibility(View.GONE);
-                lvAllUserItems.setVisibility(View.GONE);
-                btnCreditCards.setVisibility(View.VISIBLE);
-                btnGeneralAccounts.setVisibility(View.VISIBLE);
+                if (mHideCreditCards) {
+                    btnCreditCards.setVisibility(View.GONE);
+                } else {
+                    btnCreditCards.setVisibility(View.VISIBLE);
+                }
+
+                if (mHideGeneralAccounts) {
+                    btnGeneralAccounts.setVisibility(View.GONE);
+                } else {
+                    btnGeneralAccounts.setVisibility(View.VISIBLE);
+                }
+
                 btnWebsites.setVisibility(View.VISIBLE);
-                btnSoftware.setVisibility(View.VISIBLE);
+
+                if (mHideSoftware) {
+                    btnSoftware.setVisibility(View.GONE);
+                } else {
+                    btnSoftware.setVisibility(View.VISIBLE);
+                }
+
                 lvCreditCards.setVisibility(View.GONE);
                 lvGeneralAccounts.setVisibility(View.GONE);
                 lvWebsites.setVisibility(View.VISIBLE);
                 lvSoftware.setVisibility(View.GONE);
                 mActiveListView = clsItemTypes.WEBSITES;
+                hideKeyBoard(txtSearch);
                 break;
 
-            case clsItemTypes.ALL_ITEMS:
+            case USER_SOFTWARE_ITEMS:
+                txtSearch.setVisibility(View.GONE);
+                lvAllUserItems.setVisibility(View.GONE);
+
+                if (mHideCreditCards) {
+                    btnCreditCards.setVisibility(View.GONE);
+                } else {
+                    btnCreditCards.setVisibility(View.VISIBLE);
+                }
+
+                if (mHideGeneralAccounts) {
+                    btnGeneralAccounts.setVisibility(View.GONE);
+                } else {
+                    btnGeneralAccounts.setVisibility(View.VISIBLE);
+                }
+
+                if (mHideWebsites) {
+                    btnWebsites.setVisibility(View.GONE);
+                } else {
+                    btnWebsites.setVisibility(View.VISIBLE);
+                }
+
+                btnSoftware.setVisibility(View.VISIBLE);
+
+                lvCreditCards.setVisibility(View.GONE);
+                lvGeneralAccounts.setVisibility(View.GONE);
+                lvWebsites.setVisibility(View.GONE);
+                lvSoftware.setVisibility(View.VISIBLE);
+                mActiveListView = clsItemTypes.SOFTWARE;
+                hideKeyBoard(txtSearch);
+                break;
+
+            case ALL_USER_ITEMS:
+                //txtSearch.setText(MySettings.getSearchText());
                 txtSearch.setVisibility(View.VISIBLE);
                 lvAllUserItems.setVisibility(View.VISIBLE);
                 btnCreditCards.setVisibility(View.GONE);
@@ -589,7 +641,7 @@ public class PasswordItemsListFragment extends Fragment
                 lvWebsites.setVisibility(View.GONE);
                 lvSoftware.setVisibility(View.GONE);
                 mActiveListView = clsItemTypes.ALL_ITEMS;
-                txtSearch.setText("");
+                showKeyBoard(txtSearch);
                 break;
         }
     }
@@ -597,15 +649,108 @@ public class PasswordItemsListFragment extends Fragment
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        TextView tvItemName = (TextView) view.findViewById(R.id.tvItemName);
-        if (tvItemName != null) {
-            clsItem item = (clsItem) tvItemName.getTag();
-            if (item != null) {
-                int itemID = item.getID();
-                MySettings.setActiveItemID(itemID);
-                //MainActivity.setActivePosition(position);
-                EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_ITEM_DETAIL, false));
-            }
+        MySettings.setActiveItemID(id);
+        EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_ITEM_DETAIL, false));
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+
+        CursorLoader cursorLoader = null;
+        String sortOrder = ItemsTable.SORT_ORDER_ITEM_NAME;
+        switch (id) {
+            case USER_CREDIT_CARD_ITEMS:
+                MyLog.i("PasswordItemsListFragment", "onCreateLoader. Loading USER_CREDIT_CARD_ITEMS");
+                cursorLoader = ItemsTable.getUserItemsCursorLoader(getActivity(), mActiveUserID,
+                        USER_CREDIT_CARD_ITEMS, txtSearch.getText().toString(), sortOrder);
+                break;
+
+            case USER_GENERAL_ACCOUNT_ITEMS:
+                MyLog.i("PasswordItemsListFragment", "onCreateLoader. Loading USER_GENERAL_ACCOUNT_ITEMS");
+                cursorLoader = ItemsTable.getUserItemsCursorLoader(getActivity(), mActiveUserID,
+                        USER_GENERAL_ACCOUNT_ITEMS, txtSearch.getText().toString(), sortOrder);
+                break;
+
+            case USER_WEBSITE_ITEMS:
+                MyLog.i("PasswordItemsListFragment", "onCreateLoader. Loading USER_WEBSITE_ITEMS");
+                cursorLoader = ItemsTable.getUserItemsCursorLoader(getActivity(), mActiveUserID,
+                        USER_WEBSITE_ITEMS, txtSearch.getText().toString(), sortOrder);
+                break;
+
+            case USER_SOFTWARE_ITEMS:
+                MyLog.i("PasswordItemsListFragment", "onCreateLoader. Loading USER_SOFTWARE_ITEMS");
+                cursorLoader = ItemsTable.getUserItemsCursorLoader(getActivity(), mActiveUserID,
+                        USER_SOFTWARE_ITEMS, txtSearch.getText().toString(), sortOrder);
+                break;
+
+            case ALL_USER_ITEMS:
+                MyLog.i("PasswordItemsListFragment", "onCreateLoader. Loading ALL_USER_ITEMS");
+                cursorLoader = ItemsTable.getUserItemsCursorLoader(getActivity(), mActiveUserID,
+                        ALL_USER_ITEMS, txtSearch.getText().toString(), sortOrder);
+                break;
+        }
+
+        return cursorLoader;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor newCursor) {
+        // The asynchronous load is complete and the newCursor is now available for use.
+        switch (loader.getId()) {
+            case USER_CREDIT_CARD_ITEMS:
+                MyLog.i("PasswordItemsListFragment", "onLoadFinished USER_CREDIT_CARD_ITEMS");
+                mUserCreditCardItemsItemsAdapter.swapCursor(newCursor);
+                break;
+
+            case USER_GENERAL_ACCOUNT_ITEMS:
+                MyLog.i("PasswordItemsListFragment", "onLoadFinished USER_GENERAL_ACCOUNT_ITEMS");
+                mUserGeneralAccountItemsItemsAdapter.swapCursor(newCursor);
+                break;
+
+            case USER_WEBSITE_ITEMS:
+                MyLog.i("PasswordItemsListFragment", "onLoadFinished USER_WEBSITE_ITEMS");
+                mUserWebsiteItemsItemsAdapter.swapCursor(newCursor);
+                break;
+
+            case USER_SOFTWARE_ITEMS:
+                MyLog.i("PasswordItemsListFragment", "onLoadFinished USER_SOFTWARE_ITEMS");
+                mUserSoftwareItemsItemsAdapter.swapCursor(newCursor);
+                break;
+
+            case ALL_USER_ITEMS:
+                MyLog.i("PasswordItemsListFragment", "onLoadFinished ALL_USER_ITEMS");
+                mAllUserItemsAdapter.swapCursor(newCursor);
+                break;
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        switch (loader.getId()) {
+            case USER_CREDIT_CARD_ITEMS:
+                MyLog.i("PasswordItemsListFragment", "onLoaderReset USER_CREDIT_CARD_ITEMS");
+                mUserCreditCardItemsItemsAdapter.swapCursor(null);
+                break;
+
+            case USER_GENERAL_ACCOUNT_ITEMS:
+                MyLog.i("PasswordItemsListFragment", "onLoaderReset USER_GENERAL_ACCOUNT_ITEMS");
+                mUserGeneralAccountItemsItemsAdapter.swapCursor(null);
+                break;
+
+            case USER_WEBSITE_ITEMS:
+                MyLog.i("PasswordItemsListFragment", "onLoaderReset USER_WEBSITE_ITEMS");
+                mUserWebsiteItemsItemsAdapter.swapCursor(null);
+                break;
+
+            case USER_SOFTWARE_ITEMS:
+                MyLog.i("PasswordItemsListFragment", "onLoaderReset USER_SOFTWARE_ITEMS");
+                mUserSoftwareItemsItemsAdapter.swapCursor(null);
+                break;
+
+            case ALL_USER_ITEMS:
+                MyLog.i("PasswordItemsListFragment", "onLoaderReset ALL_USER_ITEMS");
+                mAllUserItemsAdapter.swapCursor(null);
+                break;
         }
     }
 }

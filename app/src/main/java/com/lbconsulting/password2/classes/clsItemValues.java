@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 
 import com.lbconsulting.password2.database.ItemsTable;
+import com.lbconsulting.password2.fragments.PasswordItemsListFragment;
 
 /**
  * This class gets and sets item data values.
@@ -349,4 +350,64 @@ public class clsItemValues {
     }
 
 
+    public String getItemDetail() {
+        StringBuilder sb = new StringBuilder();
+        String formattedCreditCardNumber = "";
+        clsFormattingMethods.creditCard card = null;
+        switch (getItemTypeID()) {
+            case PasswordItemsListFragment.USER_CREDIT_CARD_ITEMS:
+                if (!getCreditCardAccountNumber().isEmpty()) {
+                    card = clsFormattingMethods.getCreditCardType(getCreditCardAccountNumber());
+                }
+                String cardType = "UNKNOWN";
+                String formattedCardNumber = "";
+                if (card != null) {
+                    cardType = card.getCardType();
+                    formattedCardNumber = card.getFormattedCardNumber();
+                }
+
+                sb.append(cardType).append(":\n").append(formattedCardNumber);
+
+                sb.append(System.getProperty("line.separator")).append("Expires: ").append(getCreditCardExpirationMonth())
+                        .append("/").append(getCreditCardExpirationYear());
+
+                sb.append(System.getProperty("line.separator")).append("Security Code: ").append(getCardCreditSecurityCode());
+
+                String formattedPrimaryPhoneNumber = clsFormattingMethods.formatPhoneNumber(getPrimaryPhoneNumber());
+                sb.append(System.getProperty("line.separator")).append("Primary: ").append(formattedPrimaryPhoneNumber);
+
+                String formattedAltPhoneNumber = clsFormattingMethods.formatPhoneNumber(getAlternatePhoneNumber());
+                sb.append(System.getProperty("line.separator")).append("Alternate: ").append(formattedAltPhoneNumber);
+
+                break;
+
+            case clsItemTypes.GENERAL_ACCOUNTS:
+                sb.append("Account Number: ").append(getGeneralAccountNumber());
+
+                formattedPrimaryPhoneNumber = clsFormattingMethods.formatPhoneNumber(getPrimaryPhoneNumber());
+                sb.append(System.getProperty("line.separator")).append("Primary: ").append(formattedPrimaryPhoneNumber);
+
+                formattedAltPhoneNumber = clsFormattingMethods.formatPhoneNumber(getAlternatePhoneNumber());
+                sb.append(System.getProperty("line.separator")).append("Alternate: ").append(formattedAltPhoneNumber);
+
+                break;
+
+            case clsItemTypes.SOFTWARE:
+                String formattedKeyCode = clsFormattingMethods.formatTypicalAccountNumber(getSoftwareKeyCode(), getSoftwareSubgroupLength());
+                sb.append("Software Key Code:\n").append(formattedKeyCode);
+                break;
+        }
+
+        return sb.toString();
+    }
+
+    public String getWebsiteDetail() {
+        StringBuilder sb = new StringBuilder();
+        sb
+                .append("URL:\n  ").append(getWebsiteURL()).append(System.getProperty("line.separator"))
+                .append(System.getProperty("line.separator"))
+                .append("User ID: ").append(getWebsiteUserID()).append(System.getProperty("line.separator"))
+                .append("Password:\n  ").append(getWebsitePassword());
+        return sb.toString();
+    }
 }

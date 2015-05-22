@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 
 import com.lbconsulting.password2.classes.MyLog;
+import com.lbconsulting.password2.fragments.PasswordItemsListFragment;
 
 /**
  * SQLite table to hold Password Items data
@@ -212,21 +213,38 @@ public class ItemsTable {
     }
 
 
-
-    public static CursorLoader getAllUserItems(Context context, long userID, String sortOrder) {
+    public static CursorLoader getUserItemsCursorLoader(Context context,
+                                                        long userID, int itemType, String search,
+                                                        String sortOrder) {
         CursorLoader cursorLoader = null;
         if (userID > 0) {
             Uri uri = CONTENT_URI;
             String[] projection = PROJECTION_ALL;
-            String selection = COL_USER_ID + " = ?";
-            String selectionArgs[] = new String[]{String.valueOf(userID)};
+            String selection = null;
+            String selectionArgs[] = null;
+
+            if (itemType == PasswordItemsListFragment.ALL_USER_ITEMS) {
+                if (search.isEmpty()) {
+                    selection = COL_USER_ID + " = ?";
+                    selectionArgs = new String[]{String.valueOf(userID)};
+                } else {
+                    selection = COL_USER_ID + " = ? AND " + COL_ITEM_NAME + " Like '%" + search + "%'";
+                    selectionArgs = new String[]{String.valueOf(userID)};
+                }
+
+            } else {
+                selection = COL_USER_ID + " = ? AND " + COL_ITEM_TYPE_ID + " = ?";
+                selectionArgs = new String[]{String.valueOf(userID), String.valueOf(itemType)};
+            }
+
+
             try {
                 cursorLoader = new CursorLoader(context, uri, projection, selection, selectionArgs, sortOrder);
             } catch (Exception e) {
-                MyLog.e("ItemsTable", "getAllUserItems: Exception; " + e.getMessage());
+                MyLog.e("ItemsTable", "getUserItemsCursorLoader: Exception; " + e.getMessage());
             }
         } else {
-            MyLog.e("ItemsTable", "getAllUserItems: Unable to get items cursor. userID not greater than 0.");
+            MyLog.e("ItemsTable", "getUserItemsCursorLoader: Unable to get items cursor. userID not greater than 0.");
         }
         return cursorLoader;
     }
@@ -355,6 +373,6 @@ public class ItemsTable {
         String[] selectionArgs = {String.valueOf(0)};
         numberOfDeletedRecords = cr.delete(uri, where, selectionArgs);
 
-        return  numberOfDeletedRecords;
+        return numberOfDeletedRecords;
     }
 }

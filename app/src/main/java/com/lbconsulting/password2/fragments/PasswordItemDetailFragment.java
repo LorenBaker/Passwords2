@@ -25,8 +25,8 @@ import com.lbconsulting.password2.R;
 import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
-import com.lbconsulting.password2.classes.clsItem;
 import com.lbconsulting.password2.classes.clsItemTypes;
+import com.lbconsulting.password2.classes.clsItemValues;
 
 import de.greenrobot.event.EventBus;
 
@@ -35,7 +35,8 @@ import de.greenrobot.event.EventBus;
  */
 public class PasswordItemDetailFragment extends Fragment implements View.OnClickListener {
 
-    private clsItem mPasswordItem;
+    private long mActiveItemID;
+    private clsItemValues mActiveItem;
     private boolean mIsDirty = false;
     private boolean mTextChangedListenersEnabled = false;
 
@@ -57,10 +58,6 @@ public class PasswordItemDetailFragment extends Fragment implements View.OnClick
         return new PasswordItemDetailFragment();
     }
 
-    /**
-     * Mandatory empty constructor for the fragment manager to instantiate the
-     * fragment (e.g. upon screen orientation changes).
-     */
     public PasswordItemDetailFragment() {
     }
 
@@ -117,8 +114,6 @@ public class PasswordItemDetailFragment extends Fragment implements View.OnClick
             }
         });
 
-
-        // updateUI();
         return rootView;
 
     }
@@ -127,72 +122,72 @@ public class PasswordItemDetailFragment extends Fragment implements View.OnClick
         MyLog.i("PasswordItemDetailFragment", "updateUI");
         // inhibit text change event when loading updating the UI.
         mTextChangedListenersEnabled = false;
-     /*   if (!mIsDirty) {
-            mPasswordItem = MainActivity.getActivePasswordItem();
-            // fill the UI views
-            tvPasswordItemName.setText(mPasswordItem.getItemName());
-            tvItemDetail.setText(mPasswordItem.getItemDetail());
-            tvWebsiteDetail.setText(mPasswordItem.getWebsiteDetail());
-            // don't change comments if the user has made edits
-            if (!mIsDirty) {
-                txtComments.setText(mPasswordItem.getComments());
-            }
 
-            btnGoToWebsite.setEnabled(true);
-            if (mPasswordItem.getWebsiteURL() == null) {
-                btnGoToWebsite.setEnabled(false);
-            }
+        mActiveItem = new clsItemValues(getActivity(), mActiveItemID);
+        // fill the UI views
+        tvPasswordItemName.setText(mActiveItem.getItemName());
+        tvItemDetail.setText(mActiveItem.getItemDetail());
+        tvWebsiteDetail.setText(mActiveItem.getWebsiteDetail());
+        // don't change comments if the user has made edits
+        if (!mIsDirty) {
+            txtComments.setText(mActiveItem.getComments());
+        }
 
-            btnCopyPassword.setEnabled(true);
-            if (mPasswordItem.getWebsitePassword() == null) {
-                btnCopyPassword.setEnabled(false);
-            }
+        btnGoToWebsite.setEnabled(true);
+        if (mActiveItem.getWebsiteURL().isEmpty()) {
+            btnGoToWebsite.setEnabled(false);
+        }
 
-            btnCallAlternate.setEnabled(true);
-            if (mPasswordItem.getAlternatePhoneNumber() == null) {
-                btnCallAlternate.setEnabled(false);
-            }
+        btnCopyPassword.setEnabled(true);
+        if (mActiveItem.getWebsitePassword().isEmpty()) {
+            btnCopyPassword.setEnabled(false);
+        }
 
-            btnCallPrimary.setEnabled(true);
-            if (mPasswordItem.getPrimaryPhoneNumber() == null) {
-                btnCallPrimary.setEnabled(false);
-            }
+        btnCallAlternate.setEnabled(true);
+        if (mActiveItem.getAlternatePhoneNumber().isEmpty()) {
+            btnCallAlternate.setEnabled(false);
+        }
 
-            btnCopyAccountNumber.setEnabled(true);
-            switch (mPasswordItem.getItemTypeID()) {
-                case clsItemTypes.CREDIT_CARDS:
-                    if (mPasswordItem.getCreditCardAccountNumber() == null) {
-                        btnCopyAccountNumber.setEnabled(false);
-                    }
-                    break;
+        btnCallPrimary.setEnabled(true);
+        if (mActiveItem.getPrimaryPhoneNumber().isEmpty()) {
+            btnCallPrimary.setEnabled(false);
+        }
 
-                case clsItemTypes.GENERAL_ACCOUNTS:
-                    if (mPasswordItem.getGeneralAccountNumber() == null) {
-                        btnCopyAccountNumber.setEnabled(false);
-                    }
-                    break;
+        btnCopyAccountNumber.setEnabled(true);
+        switch (mActiveItem.getItemTypeID()) {
+            case clsItemTypes.CREDIT_CARDS:
+                if (mActiveItem.getCreditCardAccountNumber().isEmpty()) {
+                    btnCopyAccountNumber.setEnabled(false);
+                }
+                break;
 
-                case clsItemTypes.SOFTWARE:
-                    if (mPasswordItem.getSoftwareKeyCode() == null) {
-                        btnCopyAccountNumber.setEnabled(false);
-                    }
-                    break;
-            }
+            case clsItemTypes.GENERAL_ACCOUNTS:
+                if (mActiveItem.getGeneralAccountNumber() .isEmpty()) {
+                    btnCopyAccountNumber.setEnabled(false);
+                }
+                break;
 
-            if (mPasswordItem.getItemTypeID() == clsItemTypes.WEBSITES) {
-                tvItemDetail.setVisibility(View.GONE);
-                btnEditItem.setVisibility(View.GONE);
-                btnCopyAccountNumber.setVisibility(View.GONE);
-                btnCallAlternate.setVisibility(View.GONE);
-                btnCallPrimary.setVisibility(View.GONE);
-            } else {
-                tvItemDetail.setVisibility(View.VISIBLE);
-                btnEditItem.setVisibility(View.VISIBLE);
-                btnCopyAccountNumber.setVisibility(View.VISIBLE);
-                btnCallAlternate.setVisibility(View.VISIBLE);
-                btnCallPrimary.setVisibility(View.VISIBLE);
-            }
-        }*/
+            case clsItemTypes.SOFTWARE:
+                if (mActiveItem.getSoftwareKeyCode() .isEmpty()) {
+                    btnCopyAccountNumber.setEnabled(false);
+                }
+                break;
+        }
+
+        if (mActiveItem.getItemTypeID() == PasswordItemsListFragment.USER_WEBSITE_ITEMS) {
+            tvItemDetail.setVisibility(View.GONE);
+            btnEditItem.setVisibility(View.GONE);
+            btnCopyAccountNumber.setVisibility(View.GONE);
+            btnCallAlternate.setVisibility(View.GONE);
+            btnCallPrimary.setVisibility(View.GONE);
+        } else {
+            tvItemDetail.setVisibility(View.VISIBLE);
+            btnEditItem.setVisibility(View.VISIBLE);
+            btnCopyAccountNumber.setVisibility(View.VISIBLE);
+            btnCallAlternate.setVisibility(View.VISIBLE);
+            btnCallPrimary.setVisibility(View.VISIBLE);
+        }
+
         mTextChangedListenersEnabled = true;
     }
 
@@ -206,6 +201,7 @@ public class PasswordItemDetailFragment extends Fragment implements View.OnClick
             MyLog.i("EditCreditCardFragment", "onActivityCreated(): savedInstanceState");
             mIsDirty = savedInstanceState.getBoolean(MySettings.ARG_IS_DIRTY);
         }
+        mActiveItemID = MySettings.getActiveItemID();
 
         if (getActivity().getActionBar() != null) {
             getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -237,13 +233,14 @@ public class PasswordItemDetailFragment extends Fragment implements View.OnClick
 
     @Override
     public void onPause() {
-        mTextChangedListenersEnabled = false;
-        //txtComments.removeTextChangedListener(mCommentsTextWatcher);
         super.onPause();
         MyLog.i("PasswordItemDetailFragment", "onPause()");
-        if (mIsDirty && mPasswordItem != null && txtComments != null) {
-            mPasswordItem.setComments(txtComments.getText().toString().trim());
-            // save comment changes
+        mTextChangedListenersEnabled = false;
+
+        if (mIsDirty && mActiveItem != null && txtComments != null) {
+            mActiveItem.putComments(txtComments.getText().toString().trim());
+            mActiveItem.update();
+            // save comment changes to Dropbox
             EventBus.getDefault().post(new clsEvents.saveChangesToDropbox());
         }
         if (getActivity().getActionBar() != null) {
@@ -270,15 +267,17 @@ public class PasswordItemDetailFragment extends Fragment implements View.OnClick
 
             // Do Fragment menu item stuff here
             case R.id.action_discard:
+                // TODO: Implement action_discard
                 Toast.makeText(getActivity(), "TO COME: action_discard", Toast.LENGTH_SHORT).show();
 /*                MainActivity.deletePasswordItem(MySettings.getActiveItemID());
                 EventBus.getDefault().post(new clsEvents.PopBackStack());*/
                 return true;
 
             case R.id.action_new:
+                // TODO: Implement action_new
                 Toast.makeText(getActivity(), "TO COME: action_new", Toast.LENGTH_SHORT).show();
 /*                clsItem newPasswordItem = MainActivity.createNewPasswordItem();
-                switch (mPasswordItem.getItemTypeID()) {
+                switch (mActiveItem.getItemTypeID()) {
                     case clsItemTypes.CREDIT_CARDS:
                         newPasswordItem.setItemTypeID(clsItemTypes.CREDIT_CARDS);
                         EventBus.getDefault().post(new clsEvents.replaceFragment(newPasswordItem.getItemID(),
@@ -322,7 +321,7 @@ public class PasswordItemDetailFragment extends Fragment implements View.OnClick
         String textForClip = "";
         switch (v.getId()) {
             case R.id.btnCallAlternate:
-                String alternatePhoneNumber = mPasswordItem.getAlternatePhoneNumber();
+                String alternatePhoneNumber = mActiveItem.getAlternatePhoneNumber();
                 if (!alternatePhoneNumber.isEmpty()) {
                     Intent intent = new Intent(Intent.ACTION_CALL);
                     intent.setData(Uri.parse("tel:" + alternatePhoneNumber));
@@ -332,7 +331,7 @@ public class PasswordItemDetailFragment extends Fragment implements View.OnClick
                 break;
 
             case R.id.btnCallPrimary:
-                String primaryPhoneNumber = mPasswordItem.getPrimaryPhoneNumber();
+                String primaryPhoneNumber = mActiveItem.getPrimaryPhoneNumber();
                 if (!primaryPhoneNumber.isEmpty()) {
                     Intent intent = new Intent(Intent.ACTION_CALL);
                     intent.setData(Uri.parse("tel:" + primaryPhoneNumber));
@@ -342,20 +341,20 @@ public class PasswordItemDetailFragment extends Fragment implements View.OnClick
                 break;
 
             case R.id.btnCopyAccountNumber:
-                switch (mPasswordItem.getItemType_ID()) {
+                switch (mActiveItem.getItemTypeID()) {
                     case clsItemTypes.CREDIT_CARDS:
                         label = "Credit Card Number";
-                        textForClip = mPasswordItem.getCreditCardAccountNumber();
+                        textForClip = mActiveItem.getCreditCardAccountNumber();
                         break;
 
                     case clsItemTypes.GENERAL_ACCOUNTS:
                         label = "Account Number";
-                        textForClip = mPasswordItem.getGeneralAccountNumber();
+                        textForClip = mActiveItem.getGeneralAccountNumber();
                         break;
 
                     case clsItemTypes.SOFTWARE:
                         label = "Software Key Code";
-                        textForClip = mPasswordItem.getSoftwareKeyCode();
+                        textForClip = mActiveItem.getSoftwareKeyCode();
                         break;
                 }
 
@@ -366,7 +365,7 @@ public class PasswordItemDetailFragment extends Fragment implements View.OnClick
 
             case R.id.btnCopyPassword:
                 label = "Website Password";
-                textForClip = mPasswordItem.getWebsitePassword();
+                textForClip = mActiveItem.getWebsitePassword();
                 clip = ClipData.newPlainText(label, textForClip);
                 clipboard.setPrimaryClip(clip);
                 Toast.makeText(getActivity(), label + ": " + textForClip + " copied.", Toast.LENGTH_SHORT).show();
@@ -375,12 +374,12 @@ public class PasswordItemDetailFragment extends Fragment implements View.OnClick
             case R.id.btnGoToWebsite:
                 // copy the website password to the clipboard
                 label = "Website Password";
-                textForClip = mPasswordItem.getWebsitePassword();
+                textForClip = mActiveItem.getWebsitePassword();
                 clip = ClipData.newPlainText(label, textForClip);
                 clipboard.setPrimaryClip(clip);
 
                 // open the website
-                String websiteURL = mPasswordItem.getWebsiteURL();
+                String websiteURL = mActiveItem.getWebsiteURL();
                 if (!websiteURL.startsWith("http://") && !websiteURL.startsWith("https://")) {
                     websiteURL = "http://" + websiteURL;
                 }
@@ -391,13 +390,14 @@ public class PasswordItemDetailFragment extends Fragment implements View.OnClick
                 break;
 
             case R.id.btnEditItem:
-                switch (mPasswordItem.getItemType_ID()) {
+                // TODO: Implement btnEditItem
+                switch (mActiveItem.getItemTypeID()) {
                     case clsItemTypes.CREDIT_CARDS:
                         EventBus.getDefault().post(new clsEvents
                                 .showFragment(MySettings.FRAG_EDIT_CREDIT_CARD, false));
                         break;
 
-                    case clsItemTypes.GENERAL_ACCOUNTS:
+/*                    case clsItemTypes.GENERAL_ACCOUNTS:
                         EventBus.getDefault().post(new clsEvents
                                 .showFragment(MySettings.FRAG_EDIT_GENERAL_ACCOUNT, false));
                         break;
@@ -405,14 +405,15 @@ public class PasswordItemDetailFragment extends Fragment implements View.OnClick
                     case clsItemTypes.SOFTWARE:
                         EventBus.getDefault().post(new clsEvents
                                 .showFragment(MySettings.FRAG_EDIT_SOFTWARE, false));
-                        break;
+                        break;*/
                 }
                 //Toast.makeText(getActivity(), "TO COME: btnEditItem", Toast.LENGTH_SHORT).show();
                 break;
 
             case R.id.btnEditWebsite:
-                EventBus.getDefault().post(new clsEvents
-                        .showFragment(MySettings.FRAG_EDIT_WEBSITE, false));
+                // TODO: Implement btnEditWebsite
+/*                EventBus.getDefault().post(new clsEvents
+                        .showFragment(MySettings.FRAG_EDIT_WEBSITE, false));*/
                 //Toast.makeText(getActivity(), "TO COME: btnEditWebsite", Toast.LENGTH_SHORT).show();
                 break;
 

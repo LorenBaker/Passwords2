@@ -226,7 +226,7 @@ public class clsItem {
         return Name;
     }
 
-    public String getItemDetail() {
+/*    public String getItemDetail() {
         StringBuilder sb = new StringBuilder();
         String formattedCreditCardNumber = "";
         clsFormattingMethods.creditCard card = null;
@@ -276,14 +276,14 @@ public class clsItem {
                 String formattedKeyCode = clsFormattingMethods.formatTypicalAccountNumber(SoftwareKeyCode, SoftwareSubgroupLength);
                 sb.append("Software Key Code:\n").append(formattedKeyCode);
                 break;
-/*            case clsItemTypes.WEBSITES:
-                break;*/
+*//*            case clsItemTypes.WEBSITES:
+                break;*//*
 
         }
         return sb.toString();
-    }
+    }*/
 
-    public String getWebsiteDetail() {
+/*    public String getWebsiteDetail() {
         StringBuilder sb = new StringBuilder();
         sb
                 .append("URL:\n  ").append(WebsiteURL).append(System.getProperty("line.separator"))
@@ -291,6 +291,6 @@ public class clsItem {
                 .append("User ID: ").append(WebsiteUserID).append(System.getProperty("line.separator"))
                 .append("Password:\n  ").append(WebsitePassword);
         return sb.toString();
-    }
+    }*/
 
 }

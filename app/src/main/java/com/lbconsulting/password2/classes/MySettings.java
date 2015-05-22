@@ -42,6 +42,14 @@ public class MySettings {
     private static final String SETTING_ON_SAVE_INSTANCE_STATE = "onSaveInstanceState";
     private static final String SETTING_SEARCH_TEXT = "searchText";
 
+
+    private static final String SETTING_HIDE_CREDIT_CARDS = "hideCreditCards";
+    private static final String SETTING_HIDE_GENERAL_ACCOUNTS = "hideGeneralAccounts";
+    private static final String SETTING_HIDE_WEBSITES = "hideWebsites";
+    private static final String SETTING_HIDE_SOFTWARE = "hideSoftware";
+
+
+
     private static final String SETTING_DROPBOX_FOLDER_NAME = "dropboxFolderName";
     //private static final String DEFAULT_DROPBOX_PATH = "No Folder Selected";
     // TODO: remove the Test Passwords Data reference
@@ -117,6 +125,75 @@ public class MySettings {
         editor.apply();
     }
 
+    //region Hide Categories
+    public static boolean getHideCreditCards() {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        return passwordsSavedState.getBoolean(SETTING_HIDE_CREDIT_CARDS, false);
+    }
+
+    public static void setHideCreditCards(boolean value) {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        SharedPreferences.Editor editor = passwordsSavedState.edit();
+        editor.putBoolean(SETTING_HIDE_CREDIT_CARDS, value);
+        editor.apply();
+    }
+
+    public static boolean getHideGeneralAccounts() {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        return passwordsSavedState.getBoolean(SETTING_HIDE_GENERAL_ACCOUNTS, false);
+    }
+
+    public static void setHideGeneralAccounts(boolean value) {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        SharedPreferences.Editor editor = passwordsSavedState.edit();
+        editor.putBoolean(SETTING_HIDE_GENERAL_ACCOUNTS, value);
+        editor.apply();
+    }
+
+    public static boolean getHideWebsites() {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        return passwordsSavedState.getBoolean(SETTING_HIDE_WEBSITES, false);
+    }
+
+    public static void setHideWebsites(boolean value) {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        SharedPreferences.Editor editor = passwordsSavedState.edit();
+        editor.putBoolean(SETTING_HIDE_WEBSITES, value);
+        editor.apply();
+    }
+
+    public static boolean getHideSoftware() {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        return passwordsSavedState.getBoolean(SETTING_HIDE_SOFTWARE, false);
+    }
+
+    public static void setHideSoftware(boolean value) {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        SharedPreferences.Editor editor = passwordsSavedState.edit();
+        editor.putBoolean(SETTING_HIDE_SOFTWARE, value);
+        editor.apply();
+    }
+
+    public static void setHideCategories(boolean hideCreditCards, boolean hideGeneralAccounts,
+                                         boolean hideWebsites, boolean hideSoftware) {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        SharedPreferences.Editor editor = passwordsSavedState.edit();
+        editor.putBoolean(SETTING_HIDE_CREDIT_CARDS, hideCreditCards);
+        editor.putBoolean(SETTING_HIDE_GENERAL_ACCOUNTS, hideGeneralAccounts);
+        editor.putBoolean(SETTING_HIDE_WEBSITES, hideWebsites);
+        editor.putBoolean(SETTING_HIDE_SOFTWARE, hideSoftware);
+        editor.apply();
+    }
+    //endregion
 
     //region Active Settings
     public static int getActiveFragmentID() {
