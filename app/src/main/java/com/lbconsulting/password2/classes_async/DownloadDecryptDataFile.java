@@ -61,7 +61,7 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Long, Boolean> {
     }
 
     public DownloadDecryptDataFile(Context context, DropboxAPI<?> api, String dropboxFullFilename, boolean isVerbose) {
-        // DownloadFinishedListener callback
+        // folderFinishedListener callback
         // We set the context this way so we don't accidentally leak activities
         mContext = context.getApplicationContext();
 
@@ -74,7 +74,7 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Long, Boolean> {
         try {
             mCallback = (DownloadFinishedListener) context;
         } catch (ClassCastException e) {
-            String errorMessage = context.toString() + " must implement DownloadFinishedListener";
+            String errorMessage = context.toString() + " must implement folderFinishedListener";
             MyLog.e("DownloadDecryptDataFile", "DownloadDecryptDataFile: " + errorMessage);
             throw new ClassCastException(errorMessage);
         }
@@ -108,6 +108,7 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Long, Boolean> {
     private String readFile() {
         try {
             Entry existingEntry = mDBApi.metadata(mDropboxFullFilename, 1, null, false, null);
+            // TODO: Store rev to be able to retrieve past data files
             MyLog.i("DownloadDecryptDataFile", "readFile: File exists; " + existingEntry.bytes + " bytes; rev is now: " + existingEntry.rev);
             if (existingEntry.bytes == 0) {
                 MyLog.e("DownloadDecryptDataFile", "readFile: File" + existingEntry.fileName() + " exists but is empty!");
@@ -270,7 +271,7 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Long, Boolean> {
             userValues = new clsUserValues(mContext, user.getUserID());
             if (userValues != null && !userValues.hasData()) {
                 // insert new user into the UsersTable
-                UsersTable.CreateNewUser(mContext, user.getUserID(), user.getUserName());
+                UsersTable.createNewUser(mContext, user.getUserID(), user.getUserName());
                 userValues = new clsUserValues(mContext, user.getUserID());
             }
             // as needed, update user fields

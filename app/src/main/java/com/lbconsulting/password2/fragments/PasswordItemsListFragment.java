@@ -28,6 +28,7 @@ import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
 import com.lbconsulting.password2.classes.clsItemTypes;
+import com.lbconsulting.password2.classes.clsUserValues;
 import com.lbconsulting.password2.database.ItemsTable;
 import com.lbconsulting.password2.database.UsersTable;
 
@@ -120,8 +121,7 @@ public class PasswordItemsListFragment extends Fragment
         mLoaderManager.initLoader(USER_WEBSITE_ITEMS, null, mItemsListFragmentCallbacks);
         mLoaderManager.initLoader(USER_SOFTWARE_ITEMS, null, mItemsListFragmentCallbacks);
 
-        // TODO: setUserNameInActionBar
-        //MainActivity.setUserNameInActionBar();
+        setUserNameInActionBar();
     }
 
     @Override
@@ -235,6 +235,24 @@ public class PasswordItemsListFragment extends Fragment
         imm.hideSoftInputFromWindow(txt.getWindowToken(), 0);
     }
 
+    private void setUserNameInActionBar() {
+        clsUserValues activeUser = new clsUserValues(getActivity(), MySettings.getActiveUserID());
+        if (activeUser != null) {
+            String userName = activeUser.getUserName();
+            String actionBarTitle = "";
+            if (userName.isEmpty()) {
+                actionBarTitle = "Passwords";
+            } else {
+                if (userName.endsWith("s")) {
+                    actionBarTitle = userName + "' Passwords";
+                } else {
+                    actionBarTitle = userName + "'s Passwords";
+                }
+            }
+            EventBus.getDefault().post(new clsEvents.setActionBarTitle(actionBarTitle));
+        }
+    }
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_frag_password_items_list, menu);
@@ -251,12 +269,20 @@ public class PasswordItemsListFragment extends Fragment
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
+        if (mActiveUserID < 1) {
+            showSelectUserDialog();
+            return true;
+        } else {
+            switch (item.getItemId()) {
 
-            // Do Fragment menu item stuff here
-            case R.id.action_new:
-                // TODO: Implement action_new
-                Toast.makeText(getActivity(), "TO COME: action_new", Toast.LENGTH_SHORT).show();
+                case R.id.action_test:
+                    EventBus.getDefault().post(new clsEvents.test());
+                    return true;
+
+                // Do Fragment menu item stuff here
+                case R.id.action_new:
+                    // TODO: Implement action_new
+                    Toast.makeText(getActivity(), "TO COME: action_new", Toast.LENGTH_SHORT).show();
 
              /*   final clsItem newPasswordItem = MainActivity.createNewPasswordItem();
 
@@ -320,22 +346,23 @@ public class PasswordItemsListFragment extends Fragment
                     itemTypesDialog.show();
                 }*/
 
-                //Toast.makeText(getActivity(), "TO COME: action_new", Toast.LENGTH_SHORT).show();
-                return true;
+                    //Toast.makeText(getActivity(), "TO COME: action_new", Toast.LENGTH_SHORT).show();
+                    return true;
 
-            case R.id.action_show_search:
-                setupDisplay(clsItemTypes.ALL_ITEMS);
-                getActivity().invalidateOptionsMenu();
-                return true;
+                case R.id.action_show_search:
+                    setupDisplay(clsItemTypes.ALL_ITEMS);
+                    getActivity().invalidateOptionsMenu();
+                    return true;
 
-            case R.id.action_show_categories:
-                setupDisplay(clsItemTypes.CREDIT_CARDS);
-                getActivity().invalidateOptionsMenu();
-                return true;
+                case R.id.action_show_categories:
+                    setupDisplay(clsItemTypes.CREDIT_CARDS);
+                    getActivity().invalidateOptionsMenu();
+                    return true;
 
-            default:
-                // Not implemented here
-                return false;
+                default:
+                    // Not implemented here
+                    return false;
+            }
         }
     }
 
@@ -369,25 +396,35 @@ public class PasswordItemsListFragment extends Fragment
     @Override
     public void onClick(View v) {
 
-        switch (v.getId()) {
+        if (mActiveUserID < 1) {
+            showSelectUserDialog();
 
-            case R.id.btnCreditCards:
-                setupDisplay(clsItemTypes.CREDIT_CARDS);
-                break;
+        } else {
+            switch (v.getId()) {
 
-            case R.id.btnGeneralAccounts:
-                setupDisplay(clsItemTypes.GENERAL_ACCOUNTS);
-                break;
+                case R.id.btnCreditCards:
+                    setupDisplay(clsItemTypes.CREDIT_CARDS);
+                    break;
 
-            case R.id.btnSoftware:
-                setupDisplay(clsItemTypes.SOFTWARE);
-                break;
+                case R.id.btnGeneralAccounts:
+                    setupDisplay(clsItemTypes.GENERAL_ACCOUNTS);
+                    break;
 
-            case R.id.btnWebsites:
-                setupDisplay(clsItemTypes.WEBSITES);
-                break;
+                case R.id.btnSoftware:
+                    setupDisplay(clsItemTypes.SOFTWARE);
+                    break;
 
+                case R.id.btnWebsites:
+                    setupDisplay(clsItemTypes.WEBSITES);
+                    break;
+            }
         }
+    }
+
+    private void showSelectUserDialog() {
+        String title = "No User Selected";
+        String message = "Please go to menu \"Settings\" to select or create a User.";
+        EventBus.getDefault().post(new clsEvents.showOkDialog(title, message));
     }
 
 

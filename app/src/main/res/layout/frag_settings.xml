@@ -1,43 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_marginTop="10dp">
+    android:layout_height="wrap_content">
 
-    <Button
-        android:id="@+id/btnSelectUser"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="@style/setting_button"
-        android:text="@string/btnSelectUser_text" />
+        android:layout_height="match_parent"
+        android:layout_marginTop="10dp"
+        android:orientation="vertical">
 
-    <Button
-        android:id="@+id/btnUserSettings"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="@style/setting_button"
-        android:text="@string/btnUserSettings_text" />
+        <Button
+            android:id="@+id/btnSelectUser"
+            style="@style/setting_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btnSelectUser_text" />
+
+        <Button
+            android:id="@+id/btnUserSettings"
+            style="@style/setting_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btnUserSettings_text" />
 
 
-    <Button
-        android:id="@+id/btnSelectDropboxFolder"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="@style/setting_button"
-        android:text="Select Dropbox Folder\nCurrent Folder:\n" />
+        <Button
+            android:id="@+id/btnSelectDropboxFolder"
+            style="@style/setting_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btnSelectDropboxFolder_text" />
 
-    <Button
-        android:id="@+id/btnChangeAppPassword"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="@style/setting_button"
-        android:text="@string/btnChangeAppPassword_text" />
+        <Button
+            android:id="@+id/btnChangeAppPassword"
+            style="@style/setting_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btnChangeAppPassword_text" />
 
-    <Button
-        android:id="@+id/btnSelectPasswordLongevity"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="@style/setting_button"
-        android:text="Select Password Longevity\nCurrent Longevity: 30 min" />
-</LinearLayout>
+        <Button
+            android:id="@+id/btnSelectPasswordLongevity"
+            style="@style/setting_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btnSelectPasswordLongevity_text" />
+
+
+        <Button
+            android:id="@+id/btnHideItemCategories"
+            style="@style/setting_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btnHideItemCategories_text" />
+    </LinearLayout>
+</ScrollView>

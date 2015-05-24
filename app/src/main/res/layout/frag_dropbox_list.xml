@@ -12,19 +12,18 @@
         android:background="@drawable/rec_genoa_whitesmoke_stroke"
         android:hint="Folder Name" />
 
+    <ProgressBar
+        android:id="@+id/pbDropboxList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
+
     <ListView
         android:id="@+id/lvFolders"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"/>
-
-    <TextView
-        android:id="@+id/tvFolderPath"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="@style/tvPasswordStyle"
-        android:hint="Folder Path"
-        android:visibility="gone"/>
+        android:layout_weight="1"
+        android:visibility="visible"/>
 
     <LinearLayout
         android:layout_width="match_parent"

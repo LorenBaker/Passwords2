@@ -715,9 +715,9 @@ public class AppPasswordFragment extends Fragment implements View.OnClickListene
         if (mActiveUser != null) {
             btnSelectUser.setText(getString(R.string.btnSelectUser_text) + mActiveUser.getUserName());
         } else {
-            btnSelectUser.setText(getString(R.string.btnSelectUser_text) + "User Not Selected");
+            btnSelectUser.setText(getString(R.string.btnSelectUser_text) + getActivity().getString(R.string.UserNotSelected_text));
         }
-        btnSelectDropboxFolder.setText(getString(R.string.btnSelectDropboxFolder_setText)
+        btnSelectDropboxFolder.setText(getString(R.string.btnSelectDropboxFolder_text)
                 + MySettings.getDropboxFolderName());
     }
 

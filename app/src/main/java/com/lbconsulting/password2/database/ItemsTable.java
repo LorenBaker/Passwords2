@@ -161,7 +161,7 @@ public class ItemsTable {
                 newUserID = Long.parseLong(newUserUri.getLastPathSegment());
             }
         } catch (Exception e) {
-            MyLog.e("ItemsTable", "CreateNewUser: Exception" + e.getMessage());
+            MyLog.e("ItemsTable", "createNewUser: Exception" + e.getMessage());
         }
         return newUserID;
     }

@@ -20,11 +20,11 @@ import com.lbconsulting.password2.R;
 import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
-import com.lbconsulting.password2.classes.clsItemValues;
 import com.lbconsulting.password2.classes.clsLabPasswords;
-import com.lbconsulting.password2.classes.clsUserValues;
 import com.lbconsulting.password2.classes_async.DownloadDecryptDataFile;
+import com.lbconsulting.password2.classes_async.DownloadDropboxFolders;
 import com.lbconsulting.password2.fragments.AppPasswordFragment;
+import com.lbconsulting.password2.fragments.DropboxListFragment;
 import com.lbconsulting.password2.fragments.EditCreditCardFragment;
 import com.lbconsulting.password2.fragments.EditGeneralAccountFragment;
 import com.lbconsulting.password2.fragments.EditSoftwareFragment;
@@ -37,22 +37,19 @@ import com.lbconsulting.password2.fragments.UserSettingsFragment;
 import de.greenrobot.event.EventBus;
 
 
-public class MainActivity extends Activity implements DownloadDecryptDataFile.DownloadFinishedListener {
+public class MainActivity extends Activity implements DownloadDecryptDataFile.DownloadFinishedListener{
 
     private static final String APP_KEY = "kz0qsqlw52f41cy";
     private static final String APP_SECRET = "owdln6x88inn9vo";
-    private DropboxAPI<AndroidAuthSession> mDBApi;
+    private static DropboxAPI<AndroidAuthSession> mDBApi;
 
-    private static final String ARG_ACTIVE_ITEM_ID = "argActiveItemID";
-    private clsItemValues mActiveItem;
-    private long mActiveItemID = -1;
+    public static DropboxAPI<AndroidAuthSession> getDropboxAPI() {
+        return mDBApi;
+    }
 
-    private static final String ARG_ACTIVE_USER_ID = "argActiveUserID";
-    private clsUserValues mActiveUser;
-    private long mActiveUserID = -1;
 
-    private static final String ARG_ACTIVE_FRAGMENT_ID = "argActiveFragmentID";
-    private int mActiveFragmentID = -1;
+    private android.app.ActionBar mActionBar;
+
 
     private clsLabPasswords mLabPasswords;
     private boolean mTwoPane;
@@ -65,15 +62,7 @@ public class MainActivity extends Activity implements DownloadDecryptDataFile.Do
         MyLog.i("MainActivity", "onCreate");
         setContentView(R.layout.activity_main);
 
-        if (savedInstanceState != null) {
-            mActiveItemID = savedInstanceState.getLong(ARG_ACTIVE_ITEM_ID);
-            mActiveItem = new clsItemValues(this, mActiveItemID);
-
-            mActiveUserID = savedInstanceState.getLong(ARG_ACTIVE_USER_ID);
-            mActiveUser = new clsUserValues(this, mActiveUserID);
-
-            mActiveFragmentID = savedInstanceState.getInt(ARG_ACTIVE_FRAGMENT_ID);
-        }
+        mActionBar = getActionBar();
 
 
         EventBus.getDefault().register(this);
@@ -106,9 +95,9 @@ public class MainActivity extends Activity implements DownloadDecryptDataFile.Do
 
     //region onEvent
 
-
     public void onEvent(clsEvents.test event) {
-        updatePasswordsData();
+     /*   String dropboxFullFilename = MySettings.getDropboxFilename();
+        new DownloadDropboxFolders(this, mDBApi, "/", mFolderHashMap).execute();*/
     }
 
     public void onEvent(clsEvents.PopBackStack event) {
@@ -127,6 +116,10 @@ public class MainActivity extends Activity implements DownloadDecryptDataFile.Do
         updatePasswordsData();
     }
 
+    public void onEvent(clsEvents.saveChangesToDropbox event) {
+        // TODO: Implement saveChangesToDropbox
+    }
+
 
     public void onEvent(clsEvents.showFragment event) {
         MySettings.setActiveFragmentID(event.getFragmentID());
@@ -138,21 +131,23 @@ public class MainActivity extends Activity implements DownloadDecryptDataFile.Do
     public void onEvent(clsEvents.showOkDialog event) {
         showOkDialog(this, event.getTitle(), event.getMessage());
     }
+
+    public void onEvent(clsEvents.setActionBarTitle event) {
+        setActionBarTitle(event.getTitle());
+    }
     //endregion
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         MyLog.i("MainActivity", "onRestoreInstanceState");
-        if (savedInstanceState != null) {
-            mActiveItemID = savedInstanceState.getLong(ARG_ACTIVE_ITEM_ID);
-            mActiveItem = new clsItemValues(this, mActiveItemID);
+/*        mActiveUserID = MySettings.getActiveUserID();
+        mActiveUser = new clsUserValues(this, mActiveUserID);
 
-            mActiveUserID = savedInstanceState.getLong(ARG_ACTIVE_USER_ID);
-            mActiveUser = new clsUserValues(this, mActiveUserID);
+        mActiveItemID = MySettings.getActiveItemID();
+        mActiveItem = new clsItemValues(this, mActiveItemID);
 
-            mActiveFragmentID = savedInstanceState.getInt(ARG_ACTIVE_FRAGMENT_ID);
-        }
+        mActiveFragmentID = MySettings.getActiveFragmentID();*/
     }
 
     @Override
@@ -183,7 +178,7 @@ public class MainActivity extends Activity implements DownloadDecryptDataFile.Do
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (mActiveItem != null) {
+/*        if (mActiveItem != null) {
             outState.putLong(ARG_ACTIVE_ITEM_ID, mActiveItem.getItemID());
         }
 
@@ -191,7 +186,7 @@ public class MainActivity extends Activity implements DownloadDecryptDataFile.Do
             outState.putLong(ARG_ACTIVE_USER_ID, mActiveUser.getUserID());
         }
 
-        outState.putInt(ARG_ACTIVE_FRAGMENT_ID, mActiveFragmentID);
+        outState.putInt(ARG_ACTIVE_FRAGMENT_ID, mActiveFragmentID);*/
     }
 
     @Override
@@ -328,7 +323,7 @@ public class MainActivity extends Activity implements DownloadDecryptDataFile.Do
                     break;
 
                 // TODO: show FRAG_DROPBOX_LIST
-/*                case MySettings.FRAG_DROPBOX_LIST:
+                case MySettings.FRAG_DROPBOX_LIST:
                     // don't replace fragment if restarting from onSaveInstanceState
                     if (!MySettings.getOnSaveInstanceState()) {
                         fm.beginTransaction()
@@ -339,7 +334,7 @@ public class MainActivity extends Activity implements DownloadDecryptDataFile.Do
                                 .commit();
                         MyLog.i("MainActivity", "showFragments: FRAG_DROPBOX_LIST");
                     }
-                    break;*/
+                    break;
 
             }
         }
@@ -386,11 +381,9 @@ public class MainActivity extends Activity implements DownloadDecryptDataFile.Do
             return true;
 
         } else if (id == R.id.action_settings) {
-            Toast.makeText(this, "TO COME: action_settings", Toast.LENGTH_SHORT).show();
-/*
+            // Toast.makeText(this, "TO COME: action_settings", Toast.LENGTH_SHORT).show();
             MySettings.setActiveFragmentID(MySettings.FRAG_SETTINGS);
-            showFragment()*/
-            ;
+            showFragment(MySettings.FRAG_SETTINGS, false);
             return true;
 
         } else if (id == R.id.action_help) {
@@ -408,7 +401,7 @@ public class MainActivity extends Activity implements DownloadDecryptDataFile.Do
         return super.onOptionsItemSelected(item);
     }
 
-    public static void showOkDialog(Context context, String title, String message) {
+    private static void showOkDialog(Context context, String title, String message) {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
         // set dialog title and message
         alertDialogBuilder
@@ -426,6 +419,10 @@ public class MainActivity extends Activity implements DownloadDecryptDataFile.Do
 
         // show it
         alertDialog.show();
+    }
+
+    private void setActionBarTitle(String title) {
+        mActionBar.setTitle(title);
     }
 
     @Override
@@ -447,4 +444,5 @@ public class MainActivity extends Activity implements DownloadDecryptDataFile.Do
         EventBus.getDefault().post(new clsEvents.updateUI());
         //MyLog.i("MainActivity", "onFileDownloadFinished: encrypted file length = " + encryptedFileContent.length() + " bytes.");
     }
+
 }

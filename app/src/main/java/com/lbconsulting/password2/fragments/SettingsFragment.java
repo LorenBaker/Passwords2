@@ -1,7 +1,11 @@
 package com.lbconsulting.password2.fragments;
 
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.Fragment;
+import android.content.DialogInterface;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -18,7 +22,8 @@ import com.lbconsulting.password2.R;
 import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
-import com.lbconsulting.password2.classes.clsUsers;
+import com.lbconsulting.password2.classes.clsUserValues;
+import com.lbconsulting.password2.database.UsersTable;
 
 import java.util.ArrayList;
 
@@ -28,14 +33,14 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
 
     // fragment state variables
 
-    private ArrayList<clsUsers> mUsers;
-    private clsUsers mActiveUser;
+    private clsUserValues mActiveUser;
 
     private Button btnSelectUser;
     private Button btnUserSettings;
     private Button btnSelectPasswordLongevity;
     private Button btnChangeAppPassword;
     private Button btnSelectDropboxFolder;
+    private Button btnHideItemCategories;
 
     private EditText txtAppPassword;
     private EditText txtConfirmAppPassword;
@@ -60,6 +65,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         MyLog.i("SettingsFragment", "onCreate()");
+        EventBus.getDefault().register(this);
         setHasOptionsMenu(true);
     }
 
@@ -74,27 +80,34 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
         btnSelectPasswordLongevity = (Button) rootView.findViewById(R.id.btnSelectPasswordLongevity);
         btnChangeAppPassword = (Button) rootView.findViewById(R.id.btnChangeAppPassword);
         btnSelectDropboxFolder = (Button) rootView.findViewById(R.id.btnSelectDropboxFolder);
+        btnHideItemCategories = (Button) rootView.findViewById(R.id.btnHideItemCategories);
 
         btnSelectUser.setOnClickListener(this);
         btnUserSettings.setOnClickListener(this);
         btnSelectPasswordLongevity.setOnClickListener(this);
         btnChangeAppPassword.setOnClickListener(this);
         btnSelectDropboxFolder.setOnClickListener(this);
+        btnHideItemCategories.setOnClickListener(this);
 
         return rootView;
     }
 
 
     @Override
-    public void onActivityCreated( Bundle savedInstanceState) {
+    public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         MyLog.i("SettingsFragment", "onActivityCreated()");
         if (getActivity().getActionBar() != null) {
             getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
         }
+        EventBus.getDefault().post(new clsEvents.setActionBarTitle(getActivity().getString(R.string.actionBarTitle_Settings)));
         MySettings.setOnSaveInstanceState(false);
     }
 
+    public void onEvent(clsEvents.updateUI event) {
+        MyLog.i("SettingsFragment", "onEvent.updateUI");
+        updateUI();
+    }
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -111,23 +124,29 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
     }
 
     private void updateUI() {
-/*        if (MainActivity.getPasswordsData() != null) {
-            mUsers = MainActivity.getPasswordsData().getUsers();
-            if (mUsers != null) {
-                mActiveUser = MySettings.getActiveUser();
-                if (mActiveUser != null) {
-                    btnSelectUser.setText(getString(R.string.btnSelectUser_text) + mActiveUser.getUserName());
-                } else {
-                    btnSelectUser.setText(getString(R.string.btnSelectUser_text) + getString(R.string.none_text));
-                }
-            }
-            int passwordLongevity = (int) MySettings.getPasswordLongevity() / 60000;
-            String longevityDescription = getLongevityDescription(passwordLongevity);
-            btnSelectPasswordLongevity.setText("Select Password Longevity\n\nCurrent Longevity: " + longevityDescription);
+        long activeUserID = MySettings.getActiveUserID();
+        mActiveUser = new clsUserValues(getActivity(), activeUserID);
 
-            btnSelectDropboxFolder.setText(getString(R.string.btnSelectDropboxFolder_setText)
-                    + MySettings.getDropboxFolderName());
-        }*/
+        // set btnSelectUser text
+        String activeUserName = mActiveUser.getUserName();
+        String btnText = getActivity().getString(R.string.btnSelectUser_text);
+        if (activeUserName.isEmpty()) {
+            btnText = btnText + getActivity().getString(R.string.UserNotSelected_text);
+        } else {
+            btnText = btnText + activeUserName;
+        }
+        btnSelectUser.setText(btnText);
+
+        int passwordLongevity = (int) MySettings.getPasswordLongevity() / 60000;
+        String longevityDescription = getLongevityDescription(passwordLongevity);
+        btnSelectPasswordLongevity
+                .setText(getActivity().getString(R.string.btnSelectPasswordLongevity_text)
+                        + longevityDescription);
+
+        btnSelectDropboxFolder
+                .setText(getString(R.string.btnSelectDropboxFolder_text)
+                        + MySettings.getDropboxFolderName());
+
     }
 
     private String getLongevityDescription(int longevity) {
@@ -196,6 +215,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
     public void onDestroy() {
         super.onDestroy();
         MyLog.i("SettingsFragment", "onDestroy()");
+        EventBus.getDefault().unregister(this);
     }
 
 
@@ -203,27 +223,25 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btnSelectUser:
-                 Toast.makeText(getActivity(), "TO COME: btnSelectUser", Toast.LENGTH_SHORT).show();
-/*                if (MainActivity.getPasswordsData() != null) {
-                    // Strings to Show In Dialog with Radio Buttons
-                    final ArrayList<clsUsers> users = MainActivity.getPasswordsData().getUsers();
-                    ArrayList<String> userNames = new ArrayList<>();
-                    if (users != null) {
-                        for (clsUsers user : users) {
-                            if (user.getUserID() > 0) {
-                                userNames.add(user.getUserName());
-                            }
-                        }
-                    }
-                    CharSequence[] names = userNames.toArray(new CharSequence[userNames.size()]);
-                    int selectedUserPosition = -1;
+                //Toast.makeText(getActivity(), "TO COME: btnSelectUser", Toast.LENGTH_SHORT).show();
 
-                    if (mActiveUser != null) {
-                        for (int i = 0; i < names.length; i++) {
-                            if (names[i].toString().equals(mActiveUser.getUserName())) {
-                                selectedUserPosition = i;
-                                break;
-                            }
+                // Strings to Show In Dialog with Radio Buttons
+                final ArrayList<String> userNames = new ArrayList<>();
+                final Cursor cursor = UsersTable.getAllUsersCursor(getActivity(), UsersTable.SORT_ORDER_USER_NAME);
+                if (cursor != null) {
+                    while (cursor.moveToNext()) {
+                        userNames.add(cursor.getString(cursor.getColumnIndex(UsersTable.COL_USER_NAME)));
+                    }
+
+                    final CharSequence[] names = userNames.toArray(new CharSequence[userNames.size()]);
+                    int selectedUserPosition = -1;
+                    long activeUserID = MySettings.getActiveUserID();
+                    mActiveUser = new clsUserValues(getActivity(), activeUserID);
+
+                    for (int i = 0; i < names.length; i++) {
+                        if (names[i].toString().equals(mActiveUser.getUserName())) {
+                            selectedUserPosition = i;
+                            break;
                         }
                     }
                     // Creating and Building the Dialog
@@ -231,23 +249,23 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                     builder.setTitle("Select User");
                     builder.setSingleChoiceItems(names, selectedUserPosition, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int item) {
-                            if (users != null) {
-                                mActiveUser = users.get(item);
-                            }
+                        public void onClick(DialogInterface dialog, int position) {
+                            // find the new user
+                            String newUserName = userNames.get(position);
+                            Cursor newUserCursor = UsersTable.getUser(getActivity(), newUserName);
+                            mActiveUser = new clsUserValues(getActivity(), newUserCursor);
                             selectActiveUser();
                             dialog.dismiss();
                         }
                     });
                     usersDialog = builder.create();
                     usersDialog.show();
-                }*/
+                }
                 break;
 
             case R.id.btnUserSettings:
-                Toast.makeText(getActivity(), "TO COME: btnUserSettings", Toast.LENGTH_SHORT).show();
-
-                //EventBus.getDefault().post(new clsEvents.replaceFragment(-1, MySettings.FRAG_USER_SETTINGS, false));
+                //Toast.makeText(getActivity(), "TO COME: btnUserSettings", Toast.LENGTH_SHORT).show();
+                EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_USER_SETTINGS, false));
                 break;
 
             case R.id.btnSelectPasswordLongevity:
@@ -329,15 +347,15 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
                 break;
 
             case R.id.btnSelectDropboxFolder:
-                Toast.makeText(getActivity(), "TO COME: btnSelectDropboxFolder", Toast.LENGTH_SHORT).show();
-               // EventBus.getDefault().post(new clsEvents.replaceFragment(-1, MySettings.FRAG_DROPBOX_LIST, false));
+                //Toast.makeText(getActivity(), "TO COME: btnSelectDropboxFolder", Toast.LENGTH_SHORT).show();
+                EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_DROPBOX_LIST, false));
                 break;
 
             case R.id.btnChangeAppPassword:
                 Toast.makeText(getActivity(), "TO COME: btnChangeAppPassword", Toast.LENGTH_SHORT).show();
 
-            /*    // custom dialog
-                final Dialog changePasswordDialog = new Dialog(getActivity());
+                // custom dialog
+/*                final Dialog changePasswordDialog = new Dialog(getActivity());
                 changePasswordDialog.setContentView(R.layout.dialog_app_change_password);
                 changePasswordDialog.setTitle("Change Password");
 
@@ -446,6 +464,13 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
                 });
 
                 changePasswordDialog.show();*/
+
+                break;
+
+            case R.id.btnHideItemCategories:
+                Toast.makeText(getActivity(), "TO COME: btnHideItemCategories", Toast.LENGTH_SHORT).show();
+
+                break;
         }
 
     }
@@ -477,9 +502,6 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
     private void selectActiveUser() {
         MySettings.setActiveUserID(mActiveUser.getUserID());
         updateUI();
-/*        if (saveToDropbox) {
-            EventBus.getDefault().post(new clsEvents.saveChangesToDropbox());
-        }*/
-        EventBus.getDefault().post(new clsEvents.showFragment( MySettings.FRAG_ITEMS_LIST, false));
+        EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_ITEMS_LIST, false));
     }
 }

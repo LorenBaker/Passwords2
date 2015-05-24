@@ -15,9 +15,21 @@ public class clsUserValues {
     Cursor mUserCursor;
     private ContentValues cv;
 
+
     public clsUserValues(Context context, long userID) {
         mContext = context;
         mUserCursor = UsersTable.getUser(context, userID);
+        constructClass();
+    }
+
+
+    public clsUserValues(Context context, Cursor userCursor) {
+        mContext = context;
+        mUserCursor = userCursor;
+        constructClass();
+    }
+
+    private void constructClass() {
         if (mUserCursor != null && mUserCursor.getCount() > 0) {
             mUserCursor.moveToFirst();
         } else {
@@ -31,10 +43,9 @@ public class clsUserValues {
         return mUserCursor != null;
     }
 
-
     public long getUserID() {
         long result = -1;
-        if (mUserCursor != null) {
+        if (mUserCursor != null && mUserCursor.getCount() > 0) {
             result = mUserCursor.getLong((mUserCursor.getColumnIndex(UsersTable.COL_USER_ID)));
         }
         return result;
@@ -43,7 +54,7 @@ public class clsUserValues {
 
     public String getUserName() {
         String result = "";
-        if (mUserCursor != null) {
+        if (mUserCursor != null && mUserCursor.getCount() > 0) {
             result = mUserCursor.getString((mUserCursor.getColumnIndex(UsersTable.COL_USER_NAME)));
         }
         return result;

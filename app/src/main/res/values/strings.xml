@@ -25,17 +25,16 @@
     <string name="txtAppPassword_hint">Password</string>
     <string name="btnDisplay_text">Display</string>
     <string name="btnCreateNewUser_text">Create New User</string>
-    <string name="btnSelectDropboxFolder_text">Select Dropbox Folder\nCurrent folder:\n</string>
     <string name="btnOK_text">OK</string>
     <string name="btnCancel_text">Cancel</string>
     <string name="btnYes_text">Yes</string>
     <string name="btnNo_text">No</string>
     <string name="btnEditUserName_text">Edit User Name:\u0020</string>
     <string name="btnChangeAppPassword_text">Change Application Password</string>
-    <string name="btnSelectDropboxFolder_setText">"Select Dropbox Folder\nCurrent folder:\n"</string>
     <string name="btnDisplay_setText_Display">Display</string>
     <string name="btnDisplay_setText_Hide">Hide</string>
     <string name="btnSelectUser_text">Select User\nCurrent user:\u0020</string>
+    <string name="UserNotSelected_text">Not Selected</string>
     <string name="btnSelectUser_dialog_setTitle">Select User</string>
     <string name="none_text">NONE</string>
     <string name="btnUserSettings_text">User Settings: New, Edit, Delete</string>
@@ -48,6 +47,14 @@
     <string name="deleteUser_dialog_message">Do you want to permanently delete user \"</string>
     <string name="noUsersExist_dialog_title">No Users Exist</string>
     <string name="noUsersExist_dialog_message">Please select \" Create New User\"</string>
+    <string name="btnHideItemCategories_text">Hide Item Categories</string>
+    <string name="btnSelectPasswordLongevity_text">Select Password Longevity\nCurrent Longevity:\u0020</string>
+    <string name="btnSelectDropboxFolder_text">Select Dropbox Folder\nCurrent Folder:\n</string>
+    <string name="actionBarTitle_Settings">Settings</string>
+    <string name="actionBarTitle_userSettings">User Settings</string>
+    <string name="newDropboxFolderDialog_title">Enter Dropbox Folder Name</string>
+    <string name="newDropboxFolderEditText_hint">New Dropbox Folder Name</string>
+    <string name="newDropboxFolderDialogPositiveButton_text">Create Folder</string>
 
 
 </resources>

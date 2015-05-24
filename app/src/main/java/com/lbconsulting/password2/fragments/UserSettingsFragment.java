@@ -1,8 +1,12 @@
 package com.lbconsulting.password2.fragments;
 
 
+import android.app.AlertDialog;
 import android.app.Fragment;
+import android.content.DialogInterface;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -10,15 +14,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.Toast;
+import android.widget.EditText;
 
 import com.lbconsulting.password2.R;
 import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
-import com.lbconsulting.password2.classes.clsUsers;
-
-import java.util.ArrayList;
+import com.lbconsulting.password2.classes.clsUserValues;
+import com.lbconsulting.password2.database.UsersTable;
 
 import de.greenrobot.event.EventBus;
 
@@ -26,8 +29,8 @@ public class UserSettingsFragment extends Fragment implements View.OnClickListen
 
     // fragment state variables
 
-    private ArrayList<clsUsers> mUsers;
-    private clsUsers mActiveUser;
+    // private ArrayList<clsUsers> mUsers;
+    private clsUserValues mActiveUser;
 
     private Button btnCreateNewUser;
     private Button btnEditUserName;
@@ -68,13 +71,16 @@ public class UserSettingsFragment extends Fragment implements View.OnClickListen
 
 
     @Override
-    public void onActivityCreated( Bundle savedInstanceState) {
+    public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         MyLog.i("UserSettingsFragment", "onActivityCreated()");
-        if(getActivity().getActionBar()!=null) {
+        if (getActivity().getActionBar() != null) {
             getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
             MySettings.setOnSaveInstanceState(false);
         }
+
+        EventBus.getDefault().post(new clsEvents
+                .setActionBarTitle(getActivity().getString(R.string.actionBarTitle_userSettings)));
     }
 
     @Override
@@ -93,19 +99,15 @@ public class UserSettingsFragment extends Fragment implements View.OnClickListen
     }
 
     private void updateUI() {
-/*        if (MainActivity.getPasswordsData() != null) {
-            mUsers = MainActivity.getPasswordsData().getUsers();
-            if (mUsers != null) {
-                mActiveUser = MySettings.getActiveUser();
-                if (mActiveUser != null) {
-                    btnEditUserName.setText(getString(R.string.btnEditUserName_text) + mActiveUser.getUserName());
-                    btnDeleteUser.setText(getString(R.string.btnDeleteUser_text) + mActiveUser.getUserName());
-                } else {
-                    btnEditUserName.setText(getString(R.string.btnEditUserName_text) + getString(R.string.none_text));
-                    btnDeleteUser.setText(getString(R.string.btnDeleteUser_text) + getString(R.string.none_text));
-                }
-            }
-        }*/
+
+        mActiveUser = new clsUserValues(getActivity(), MySettings.getActiveUserID());
+        if (mActiveUser.getUserName().isEmpty()) {
+            btnEditUserName.setText(getString(R.string.btnEditUserName_text) + getString(R.string.none_text));
+            btnDeleteUser.setText(getString(R.string.btnDeleteUser_text) + getString(R.string.none_text));
+        } else {
+            btnEditUserName.setText(getString(R.string.btnEditUserName_text) + mActiveUser.getUserName());
+            btnDeleteUser.setText(getString(R.string.btnDeleteUser_text) + mActiveUser.getUserName());
+        }
     }
 
 
@@ -136,7 +138,7 @@ public class UserSettingsFragment extends Fragment implements View.OnClickListen
     public void onPause() {
         super.onPause();
         MyLog.i("UserSettingsFragment", "onPause()");
-        if(getActivity().getActionBar()!=null) {
+        if (getActivity().getActionBar() != null) {
             getActivity().getActionBar().setDisplayHomeAsUpEnabled(false);
         }
     }
@@ -154,8 +156,8 @@ public class UserSettingsFragment extends Fragment implements View.OnClickListen
         switch (v.getId()) {
 
             case R.id.btnCreateNewUser:
-                Toast.makeText(getActivity(), "TO COME: btnCreateNewUser", Toast.LENGTH_SHORT).show();
-/*                AlertDialog.Builder newUserDialog = new AlertDialog.Builder(getActivity());
+                // Toast.makeText(getActivity(), "TO COME: btnCreateNewUser", Toast.LENGTH_SHORT).show();
+                AlertDialog.Builder newUserDialog = new AlertDialog.Builder(getActivity());
 
                 newUserDialog.setTitle(getActivity().getString(R.string.enterNewUserName_dialog_title));
                 newUserDialog.setMessage("");
@@ -166,43 +168,43 @@ public class UserSettingsFragment extends Fragment implements View.OnClickListen
                 input.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
                 newUserDialog.setView(input);
 
-                newUserDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        String newUserName = input.getText().toString().trim();
-                        if (isUnique(newUserName)) {
-                            int newUserID = MainActivity.getNextUserID();
-                            mActiveUser = new clsUsers();
-                            mActiveUser.setUserID(newUserID);
-                            mActiveUser.setUserName(newUserName);
-                            MySettings.setActiveUserID(newUserID);
-                            //MySettings.setActiveUserName(newUserName);
-                            MainActivity.addNewUser(mActiveUser);
-                            selectActiveUser();
-                            dialog.dismiss();
-                        } else {
-                            dialog.dismiss();
-                            MyLog.e("UserSettingsFragment", "onClick OK: new user is not unique");
-                            MainActivity.showOkDialog(getActivity(), "Failed to create new user",
-                                    "The provide user name \"" + newUserName + "\" already exists!");
-                        }
-                    }
-                });
+                newUserDialog.setPositiveButton(getActivity().getString(R.string.btnOK_text),
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                String newUserName = input.getText().toString().trim();
+                                boolean userExists = UsersTable.userExists(getActivity(), newUserName);
+                                if (!userExists) {
+                                    long newUserID = MySettings.getNextUserID();
+                                    UsersTable.createNewUser(getActivity(), newUserID, newUserName);
+                                    mActiveUser = new clsUserValues(getActivity(), newUserID);
+                                    selectActiveUser();
+                                    dialog.dismiss();
+                                } else {
+                                    dialog.dismiss();
+                                    MyLog.e("UserSettingsFragment", "btnCreateNewUser OK: new user is not unique");
+                                    String title = "Failed to create new user";
+                                    String message = "The provide user name \"" + newUserName + "\" already exists!";
+                                    EventBus.getDefault().post(new clsEvents.showOkDialog(title, message));
+                                }
+                            }
+                        });
 
-                newUserDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        // Canceled.
-                        dialog.dismiss();
-                    }
-                });
+                newUserDialog.setNegativeButton(getActivity().getString(R.string.btnCancel_text),
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                // Canceled.
+                                dialog.dismiss();
+                            }
+                        });
 
-                newUserDialog.show();*/
+                newUserDialog.show();
 
                 break;
 
             case R.id.btnEditUserName:
-                Toast.makeText(getActivity(), "TO COME: btnEditUserName", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getActivity(), "TO COME: btnEditUserName", Toast.LENGTH_SHORT).show();
 
-/*                //btnEditUserName
+                //btnEditUserName
                 AlertDialog.Builder editUserDialog = new AlertDialog.Builder(getActivity());
 
                 editUserDialog.setTitle(getActivity().getString(R.string.editUserName_dialog_title));
@@ -220,15 +222,19 @@ public class UserSettingsFragment extends Fragment implements View.OnClickListen
                         getActivity().getString(R.string.btnOK_text), new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 String newUserName = editUserNameInput.getText().toString().trim();
-                                if (isUnique(newUserName)) {
-                                    mActiveUser.setUserName(newUserName);
+                                boolean userExists = UsersTable.userExists(getActivity(), newUserName);
+                                if (!userExists) {
+                                    mActiveUser = new clsUserValues(getActivity(), MySettings.getActiveUserID());
+                                    mActiveUser.putUserName(newUserName);
+                                    mActiveUser.update();
                                     selectActiveUser();
                                     dialog.dismiss();
                                 } else {
                                     dialog.dismiss();
-                                    MyLog.e("UserSettingsFragment", "onClick OK: new user name is not unique");
-                                    MainActivity.showOkDialog(getActivity(), "Failed to edit user name",
-                                            "The provide use name \"" + newUserName + "\" already exists!");
+                                    MyLog.e("UserSettingsFragment", "btnEditUserName OK: new user is not unique");
+                                    String title = "Failed to edit user name";
+                                    String message = "The provide user name \"" + newUserName + "\" already exists!";
+                                    EventBus.getDefault().post(new clsEvents.showOkDialog(title, message));
                                 }
                             }
                         });
@@ -242,13 +248,14 @@ public class UserSettingsFragment extends Fragment implements View.OnClickListen
                         }
                 );
 
-                editUserDialog.show();*/
+                editUserDialog.show();
                 break;
 
             case R.id.btnDeleteUser:
-                Toast.makeText(getActivity(), "TO COME: btnDeleteUser", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getActivity(), "TO COME: btnDeleteUser", Toast.LENGTH_SHORT).show();
 
-/*                AlertDialog.Builder deleteUserDialog = new AlertDialog.Builder(getActivity());
+                mActiveUser = new clsUserValues(getActivity(), MySettings.getActiveUserID());
+                AlertDialog.Builder deleteUserDialog = new AlertDialog.Builder(getActivity());
 
                 deleteUserDialog.setTitle(getActivity().getString(R.string.deleteUser_dialog_title));
                 StringBuilder msg = new StringBuilder();
@@ -262,19 +269,23 @@ public class UserSettingsFragment extends Fragment implements View.OnClickListen
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                deleteUserAndAllRelatedPasswordItems(mActiveUser.getUserID());
-                                // set the Active user to the first user
-                                if (MainActivity.getPasswordsData() != null
-                                        && MainActivity.getPasswordsData().getUsers() != null) {
-                                    ArrayList<clsUsers> users = MainActivity.getPasswordsData().getUsers();
-                                    if (users.size() > 0) {
-                                        MySettings.setActiveUserID(users.get(0).getUserID());
-                                        mActiveUser = users.get(0);
-                                    } else {
-                                        String title = getActivity().getString(R.string.noUsersExist_dialog_title);
-                                        String message = getActivity().getString(R.string.noUsersExist_dialog_message);
-                                        MainActivity.showOkDialog(getActivity(), title, message);
-                                    }
+                                UsersTable.deleteUser(getActivity(), mActiveUser.getUserID());
+                                Cursor cursor = UsersTable.getAllUsersCursor(getActivity(), UsersTable.SORT_ORDER_USER_NAME);
+                                if (cursor != null && cursor.getCount() > 0) {
+                                    // set the Active user to the first user
+                                    cursor.moveToFirst();
+                                    long userID = cursor.getLong(cursor.getColumnIndex(UsersTable.COL_USER_ID));
+                                    mActiveUser = new clsUserValues(getActivity(), userID);
+                                    selectActiveUser();
+
+                                } else {
+                                    // no users exist in the database
+                                    MySettings.setActiveUserID(-1);
+                                    mActiveUser = new clsUserValues(getActivity(), -1);
+                                    updateUI();
+                                    String title = getActivity().getString(R.string.noUsersExist_dialog_title);
+                                    String message = getActivity().getString(R.string.noUsersExist_dialog_message);
+                                    EventBus.getDefault().post(new clsEvents.showOkDialog(title, message));
                                 }
                             }
                         }
@@ -289,7 +300,7 @@ public class UserSettingsFragment extends Fragment implements View.OnClickListen
                         }
                 );
 
-                deleteUserDialog.show();*/
+                deleteUserDialog.show();
                 break;
         }
 
@@ -337,7 +348,7 @@ public class UserSettingsFragment extends Fragment implements View.OnClickListen
         }*/
     }
 
-    private boolean isUnique(String newUserName) {
+/*    private boolean isUnique(String newUserName) {
         // TODO: Move to Main Activity ??
         boolean result = true;
         for (clsUsers user : mUsers) {
@@ -347,12 +358,12 @@ public class UserSettingsFragment extends Fragment implements View.OnClickListen
             }
         }
         return result;
-    }
+    }*/
 
     private void selectActiveUser() {
         MySettings.setActiveUserID(mActiveUser.getUserID());
         updateUI();
-            EventBus.getDefault().post(new clsEvents.saveChangesToDropbox());
-        EventBus.getDefault().post(new clsEvents.showFragment( MySettings.FRAG_ITEMS_LIST, false));
+        EventBus.getDefault().post(new clsEvents.saveChangesToDropbox());
+        EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_ITEMS_LIST, false));
     }
 }

@@ -72,7 +72,7 @@ public class UsersTable {
     // Create Methods
     // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public static long CreateNewUser(Context context, long userID, String userName) {
+    public static long createNewUser(Context context, long userID, String userName) {
 
         if (userID < 1) {
             return ILLEGAL_USER_ID;
@@ -119,7 +119,7 @@ public class UsersTable {
                 newUserID = Long.parseLong(newUserUri.getLastPathSegment());
             }
         } catch (Exception e) {
-            MyLog.e("UsersTable", "CreateNewUser: Exception" + e.getMessage());
+            MyLog.e("UsersTable", "createNewUser: Exception" + e.getMessage());
         }
         return newUserID;
     }
@@ -149,7 +149,7 @@ public class UsersTable {
     }
 
 
-    private static Cursor getUser(Context context, String userName) {
+    public static Cursor getUser(Context context, String userName) {
         Cursor cursor = null;
         if (!userName.isEmpty()) {
             Uri uri = CONTENT_URI;
@@ -214,6 +214,21 @@ public class UsersTable {
         boolean userExists = false;
         if (userID > 0) {
             Cursor cursor = getUser(context, userID);
+            if (cursor != null && cursor.getCount() > 0) {
+                userExists = true;
+            }
+
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        return userExists;
+    }
+
+    public static boolean userExists(Context context, String userName) {
+        boolean userExists = false;
+        if (!userName.isEmpty()) {
+            Cursor cursor = getUser(context, userName);
             if (cursor != null && cursor.getCount() > 0) {
                 userExists = true;
             }

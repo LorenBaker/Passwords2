@@ -2,8 +2,6 @@ package com.lbconsulting.password2.classes;
 
 
 public class clsEvents {
-
-    // TODO: remove class test
     public static class test {
         public test() {
         }
@@ -14,6 +12,11 @@ public class clsEvents {
         }
     }
 
+
+    public static class folderHashMapUpdated {
+        public folderHashMapUpdated() {
+        }
+    }
     public static class showFragment {
         int mFragmentID;
         boolean mIsNewPasswordItem;
@@ -37,6 +40,18 @@ public class clsEvents {
         }
     }
 
+    public static class setActionBarTitle {
+        String mTitle;
+
+        public setActionBarTitle(String title) {
+            mTitle = title;
+        }
+
+        public String getTitle() {
+            return mTitle;
+        }
+    }
+
     //****************************************************************************
 
     public static class readLabPasswordDataComplete {
@@ -56,18 +71,18 @@ public class clsEvents {
         }
     }
 
-    public static class openAndReadLabPasswordDataAsync{
-        public openAndReadLabPasswordDataAsync(){
+    public static class openAndReadLabPasswordDataAsync {
+        public openAndReadLabPasswordDataAsync() {
         }
     }
 
-    public static class readLabPasswordDataAsync{
-        public readLabPasswordDataAsync(){
+    public static class readLabPasswordDataAsync {
+        public readLabPasswordDataAsync() {
         }
     }
 
-    public static class openAndSaveLabPasswordDataAsync{
-        public openAndSaveLabPasswordDataAsync(){
+    public static class openAndSaveLabPasswordDataAsync {
+        public openAndSaveLabPasswordDataAsync() {
         }
     }
 

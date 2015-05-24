@@ -49,7 +49,6 @@ public class MySettings {
     private static final String SETTING_HIDE_SOFTWARE = "hideSoftware";
 
 
-
     private static final String SETTING_DROPBOX_FOLDER_NAME = "dropboxFolderName";
     //private static final String DEFAULT_DROPBOX_PATH = "No Folder Selected";
     // TODO: remove the Test Passwords Data reference
@@ -104,16 +103,46 @@ public class MySettings {
         editor.apply();
     }
 
-    public static long getLastItemID() {
+    //region Last Item and User IDs
+    private static long getLastItemID() {
         SharedPreferences passwordsSavedState =
                 mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
         return passwordsSavedState.getLong(SETTING_LAST_ITEM_ID, -1);
     }
 
-    public static long getLastUserID() {
+    public static long getNextItemID() {
+        long nexItemID = getLastItemID();
+        nexItemID++;
+        setLastItemID(nexItemID);
+        return nexItemID;
+    }
+
+    private static void setLastItemID(long lastItemID) {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        SharedPreferences.Editor editor = passwordsSavedState.edit();
+        editor.putLong(SETTING_LAST_ITEM_ID, lastItemID);
+        editor.apply();
+    }
+
+    private static long getLastUserID() {
         SharedPreferences passwordsSavedState =
                 mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
         return passwordsSavedState.getLong(SETTING_LAST_USER_ID, -1);
+    }
+
+    public static long getNextUserID() {
+        long nextUserID = getLastUserID();
+        nextUserID++;
+        setLastUserID(nextUserID);
+        return nextUserID;
+    }
+    private static void setLastUserID(long lastUserID) {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        SharedPreferences.Editor editor = passwordsSavedState.edit();
+        editor.putLong(SETTING_LAST_USER_ID, lastUserID);
+        editor.apply();
     }
 
     public static void setLastItemAndUserIDs(long lastItemID, long lastUserID) {
@@ -124,6 +153,9 @@ public class MySettings {
         editor.putLong(SETTING_LAST_USER_ID, lastUserID);
         editor.apply();
     }
+    //endregion
+
+
 
     //region Hide Categories
     public static boolean getHideCreditCards() {
@@ -488,6 +520,5 @@ public class MySettings {
         }
         return key;
     }
-
 
 }
