@@ -22,7 +22,7 @@ import com.lbconsulting.password2.R;
 import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
-import com.lbconsulting.password2.classes.clsFormattingMethods;
+import com.lbconsulting.password2.classes.clsUtils;
 import com.lbconsulting.password2.classes.clsItemValues;
 import com.lbconsulting.password2.database.ItemsTable;
 
@@ -184,7 +184,7 @@ public class EditSoftwareFragment extends Fragment {
     }
 
     private String getFormattedKeyCode() {
-        return clsFormattingMethods.formatTypicalAccountNumber(
+        return clsUtils.formatTypicalAccountNumber(
                 txtKeyCode.getText().toString().trim(), mSubgroupLength);
     }
 
@@ -279,7 +279,7 @@ public class EditSoftwareFragment extends Fragment {
                 position = 0;
             }
 
-            String formattedKeyCode = clsFormattingMethods.formatTypicalAccountNumber(mActiveItem.getSoftwareKeyCode(), mSubgroupLength);
+            String formattedKeyCode = clsUtils.formatTypicalAccountNumber(mActiveItem.getSoftwareKeyCode(), mSubgroupLength);
             txtKeyCode.setText(formattedKeyCode);
             spnSpacing.setSelection(position);
             mIsDirty = false;
@@ -291,7 +291,7 @@ public class EditSoftwareFragment extends Fragment {
     private void updatePasswordItem() {
 
         mActiveItem.putName(txtItemName.getText().toString().trim());
-        String unformattedKeyCode = clsFormattingMethods.unformatKeyCode(txtKeyCode.getText().toString().trim());
+        String unformattedKeyCode = clsUtils.unformatKeyCode(txtKeyCode.getText().toString().trim());
         mActiveItem.putSoftwareKeyCode(unformattedKeyCode);
         mActiveItem.putSoftwareSubgroupLength(mSubgroupLength);
         mActiveItem.update();

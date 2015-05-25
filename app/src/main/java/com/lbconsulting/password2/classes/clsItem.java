@@ -229,11 +229,11 @@ public class clsItem {
 /*    public String getItemDetail() {
         StringBuilder sb = new StringBuilder();
         String formattedCreditCardNumber = "";
-        clsFormattingMethods.creditCard card = null;
+        clsUtils.creditCard card = null;
         switch (ItemType_ID) {
             case clsItemTypes.CREDIT_CARDS:
                 if (CreditCardAccountNumber != null) {
-                    card = clsFormattingMethods.getCreditCardType(CreditCardAccountNumber);
+                    card = clsUtils.getCreditCardType(CreditCardAccountNumber);
                 }
                 String cardType = "UNKNOWN";
                 String formattedCardNumber = "";
@@ -251,11 +251,11 @@ public class clsItem {
                     sb.append(System.getProperty("line.separator")).append("Security Code: ").append(CreditCardSecurityCode);
                 }
                 if (PrimaryPhoneNumber != null) {
-                    String formattedPrimaryPhoneNumber = clsFormattingMethods.formatPhoneNumber(PrimaryPhoneNumber);
+                    String formattedPrimaryPhoneNumber = clsUtils.formatPhoneNumber(PrimaryPhoneNumber);
                     sb.append(System.getProperty("line.separator")).append("Primary: ").append(formattedPrimaryPhoneNumber);
                 }
                 if (AlternatePhoneNumber != null) {
-                    String formattedAltPhoneNumber = clsFormattingMethods.formatPhoneNumber(AlternatePhoneNumber);
+                    String formattedAltPhoneNumber = clsUtils.formatPhoneNumber(AlternatePhoneNumber);
                     sb.append(System.getProperty("line.separator")).append("Alternate: ").append(formattedAltPhoneNumber);
                 }
                 break;
@@ -263,17 +263,17 @@ public class clsItem {
             case clsItemTypes.GENERAL_ACCOUNTS:
                 sb.append("Account Number: ").append(GeneralAccountNumber);
                 if (PrimaryPhoneNumber != null) {
-                    String formattedPrimaryPhoneNumber = clsFormattingMethods.formatPhoneNumber(PrimaryPhoneNumber);
+                    String formattedPrimaryPhoneNumber = clsUtils.formatPhoneNumber(PrimaryPhoneNumber);
                     sb.append(System.getProperty("line.separator")).append("Primary: ").append(formattedPrimaryPhoneNumber);
                 }
                 if (AlternatePhoneNumber != null) {
-                    String formattedAltPhoneNumber = clsFormattingMethods.formatPhoneNumber(AlternatePhoneNumber);
+                    String formattedAltPhoneNumber = clsUtils.formatPhoneNumber(AlternatePhoneNumber);
                     sb.append(System.getProperty("line.separator")).append("Alternate: ").append(formattedAltPhoneNumber);
                 }
                 break;
 
             case clsItemTypes.SOFTWARE:
-                String formattedKeyCode = clsFormattingMethods.formatTypicalAccountNumber(SoftwareKeyCode, SoftwareSubgroupLength);
+                String formattedKeyCode = clsUtils.formatTypicalAccountNumber(SoftwareKeyCode, SoftwareSubgroupLength);
                 sb.append("Software Key Code:\n").append(formattedKeyCode);
                 break;
 *//*            case clsItemTypes.WEBSITES:

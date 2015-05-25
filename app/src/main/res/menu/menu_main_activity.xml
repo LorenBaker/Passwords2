@@ -6,10 +6,19 @@
         app:showAsAction="withText|ifRoom" />-->
 
     <item
+        android:id="@+id/action_progress_bar"
+        android:title="Loading..."
+        android:visible="false"
+        android:orderInCategory="5"
+        android:showAsAction="ifRoom"
+        android:actionLayout="@layout/action_view_progress" />
+
+    <item
         android:id="@+id/action_settings"
         android:title="Settings"
         android:orderInCategory="10"
         android:showAsAction="never" />
+
     <item
         android:id="@+id/action_save_to_dropbox"
         android:title="Save to Dropbox"

@@ -6,7 +6,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:orientation="vertical">
 
@@ -33,18 +33,18 @@
             android:text="@string/btnSelectDropboxFolder_text" />
 
         <Button
-            android:id="@+id/btnChangeAppPassword"
+            android:id="@+id/btnAppPasswordSettings"
             style="@style/setting_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/btnChangeAppPassword_text" />
+            android:text="@string/btnAppPasswordSettings_text" />
 
         <Button
-            android:id="@+id/btnSelectPasswordLongevity"
+            android:id="@+id/btnNetworkingSettings"
             style="@style/setting_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/btnSelectPasswordLongevity_text" />
+            android:text="@string/btnNetworkingSettings_text" />
 
 
         <Button

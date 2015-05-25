@@ -19,7 +19,7 @@ import com.lbconsulting.password2.R;
 import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
-import com.lbconsulting.password2.classes.clsFormattingMethods;
+import com.lbconsulting.password2.classes.clsUtils;
 import com.lbconsulting.password2.classes.clsItemValues;
 import com.lbconsulting.password2.database.ItemsTable;
 
@@ -107,7 +107,7 @@ public class EditGeneralAccountFragment extends Fragment implements TextWatcher 
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
-                    String formattedPrimaryPhoneNumber = clsFormattingMethods
+                    String formattedPrimaryPhoneNumber = clsUtils
                             .formatPhoneNumber(txtPrimaryPhoneNumber.getText().toString().trim());
                     txtPrimaryPhoneNumber.setText(formattedPrimaryPhoneNumber);
                 }
@@ -121,7 +121,7 @@ public class EditGeneralAccountFragment extends Fragment implements TextWatcher 
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
-                    String formattedAlternatePhoneNumber = clsFormattingMethods
+                    String formattedAlternatePhoneNumber = clsUtils
                             .formatPhoneNumber(txtAlternatePhoneNumber.getText().toString().trim());
                     txtAlternatePhoneNumber.setText(formattedAlternatePhoneNumber);
                 }
@@ -217,8 +217,8 @@ public class EditGeneralAccountFragment extends Fragment implements TextWatcher 
 
             txtAccountNumber.setText((mActiveItem.getGeneralAccountNumber()));
 
-            String formattedPrimaryPhoneNumber = clsFormattingMethods.formatPhoneNumber(mActiveItem.getPrimaryPhoneNumber());
-            String formattedAlternatePhoneNumber = clsFormattingMethods.formatPhoneNumber(mActiveItem.getAlternatePhoneNumber());
+            String formattedPrimaryPhoneNumber = clsUtils.formatPhoneNumber(mActiveItem.getPrimaryPhoneNumber());
+            String formattedAlternatePhoneNumber = clsUtils.formatPhoneNumber(mActiveItem.getAlternatePhoneNumber());
             txtPrimaryPhoneNumber.setText(formattedPrimaryPhoneNumber);
             txtAlternatePhoneNumber.setText(formattedAlternatePhoneNumber);
         }
@@ -231,9 +231,9 @@ public class EditGeneralAccountFragment extends Fragment implements TextWatcher 
         mActiveItem.putName(txtItemName.getText().toString().trim());
         mActiveItem.putGeneralAccountNumber(txtAccountNumber.getText().toString().trim());
 
-        String unformattedPrimaryPhoneNumber = clsFormattingMethods
+        String unformattedPrimaryPhoneNumber = clsUtils
                 .unFormatPhoneNumber(txtPrimaryPhoneNumber.getText().toString());
-        String unformattedAlternatePhoneNumber = clsFormattingMethods
+        String unformattedAlternatePhoneNumber = clsUtils
                 .unFormatPhoneNumber(txtAlternatePhoneNumber.getText().toString());
         mActiveItem.putPrimaryPhoneNumber(unformattedPrimaryPhoneNumber);
         mActiveItem.putAlternatePhoneNumber(unformattedAlternatePhoneNumber);

@@ -6,7 +6,6 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,8 +20,8 @@ import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
 import com.lbconsulting.password2.classes.clsLabPasswords;
+import com.lbconsulting.password2.classes.clsUtils;
 import com.lbconsulting.password2.classes_async.DownloadDecryptDataFile;
-import com.lbconsulting.password2.classes_async.DownloadDropboxFolders;
 import com.lbconsulting.password2.fragments.AppPasswordFragment;
 import com.lbconsulting.password2.fragments.DropboxListFragment;
 import com.lbconsulting.password2.fragments.EditCreditCardFragment;
@@ -32,12 +31,14 @@ import com.lbconsulting.password2.fragments.EditWebsiteFragment;
 import com.lbconsulting.password2.fragments.PasswordItemDetailFragment;
 import com.lbconsulting.password2.fragments.PasswordItemsListFragment;
 import com.lbconsulting.password2.fragments.SettingsFragment;
-import com.lbconsulting.password2.fragments.UserSettingsFragment;
+import com.lbconsulting.password2.fragments.Settings_AppPasswordFragment;
+import com.lbconsulting.password2.fragments.Settings_NetworkingFragment;
+import com.lbconsulting.password2.fragments.Settings_UserFragment;
 
 import de.greenrobot.event.EventBus;
 
 
-public class MainActivity extends Activity implements DownloadDecryptDataFile.DownloadFinishedListener{
+public class MainActivity extends Activity {
 
     private static final String APP_KEY = "kz0qsqlw52f41cy";
     private static final String APP_SECRET = "owdln6x88inn9vo";
@@ -49,6 +50,7 @@ public class MainActivity extends Activity implements DownloadDecryptDataFile.Do
 
 
     private android.app.ActionBar mActionBar;
+    private boolean mShowActionBarProgress;
 
 
     private clsLabPasswords mLabPasswords;
@@ -63,7 +65,7 @@ public class MainActivity extends Activity implements DownloadDecryptDataFile.Do
         setContentView(R.layout.activity_main);
 
         mActionBar = getActionBar();
-
+        mShowActionBarProgress = false;
 
         EventBus.getDefault().register(this);
         MySettings.setContext(this);
@@ -96,8 +98,17 @@ public class MainActivity extends Activity implements DownloadDecryptDataFile.Do
     //region onEvent
 
     public void onEvent(clsEvents.test event) {
-     /*   String dropboxFullFilename = MySettings.getDropboxFilename();
-        new DownloadDropboxFolders(this, mDBApi, "/", mFolderHashMap).execute();*/
+        String key = "encryptionKey";
+        String testString = "ab";
+        String encryptedTestString = clsUtils.encryptString(testString, key, true);
+        String decryptedTestString = clsUtils.decryptString(encryptedTestString,key, true);
+
+        if(testString.equals(decryptedTestString)){
+            showOkDialog(this,"Encryption Test","Success! String are the same.\n\n" + decryptedTestString);
+        }else{
+            showOkDialog(this,"Encryption Test","FAILURE! String are different!");
+        }
+
     }
 
     public void onEvent(clsEvents.PopBackStack event) {
@@ -116,10 +127,18 @@ public class MainActivity extends Activity implements DownloadDecryptDataFile.Do
         updatePasswordsData();
     }
 
+    public void onEvent(clsEvents.onPasswordsDatabaseUpdated event) {
+        EventBus.getDefault().post(new clsEvents.updateUI());
+    }
+
     public void onEvent(clsEvents.saveChangesToDropbox event) {
         // TODO: Implement saveChangesToDropbox
     }
 
+    public void onEvent(clsEvents.showProgressInActionBar event) {
+        mShowActionBarProgress = event.isVisible();
+        invalidateOptionsMenu();
+    }
 
     public void onEvent(clsEvents.showFragment event) {
         MySettings.setActiveFragmentID(event.getFragmentID());
@@ -304,10 +323,23 @@ public class MainActivity extends Activity implements DownloadDecryptDataFile.Do
                         fm.beginTransaction()
                                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                                 .replace(R.id.fragment_container,
-                                        UserSettingsFragment.newInstance(), "FRAG_USER_SETTINGS")
+                                        Settings_UserFragment.newInstance(), "FRAG_USER_SETTINGS")
                                 .addToBackStack("FRAG_USER_SETTINGS")
                                 .commit();
                         MyLog.i("MainActivity", "showFragments: FRAG_USER_SETTINGS");
+                    }
+                    break;
+
+                case MySettings.FRAG_APP_PASSWORD_SETTINGS:
+                    // don't replace fragment if restarting from onSaveInstanceState
+                    if (!MySettings.getOnSaveInstanceState()) {
+                        fm.beginTransaction()
+                                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                                .replace(R.id.fragment_container,
+                                        Settings_AppPasswordFragment.newInstance(), "FRAG_APP_PASSWORD_SETTINGS")
+                                .addToBackStack("FRAG_APP_PASSWORD_SETTINGS")
+                                .commit();
+                        MyLog.i("MainActivity", "showFragments: FRAG_APP_PASSWORD_SETTINGS");
                     }
                     break;
 
@@ -322,7 +354,19 @@ public class MainActivity extends Activity implements DownloadDecryptDataFile.Do
                     MyLog.i("MainActivity", "showFragments: FRAG_APP_PASSWORD");
                     break;
 
-                // TODO: show FRAG_DROPBOX_LIST
+                case MySettings.FRAG_NETWORKING_SETTINGS:
+                    // don't replace fragment if restarting from onSaveInstanceState
+                    if (!MySettings.getOnSaveInstanceState()) {
+                        fm.beginTransaction()
+                                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                                .replace(R.id.fragment_container,
+                                        Settings_NetworkingFragment.newInstance(), "FRAG_NETWORKING_SETTINGS")
+                                .addToBackStack("FRAG_NETWORKING_SETTINGS")
+                                .commit();
+                        MyLog.i("MainActivity", "showFragments: FRAG_NETWORKING_SETTINGS");
+                    }
+                    break;
+
                 case MySettings.FRAG_DROPBOX_LIST:
                     // don't replace fragment if restarting from onSaveInstanceState
                     if (!MySettings.getOnSaveInstanceState()) {
@@ -358,6 +402,14 @@ public class MainActivity extends Activity implements DownloadDecryptDataFile.Do
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main_activity, menu);
+
+        if (mShowActionBarProgress) {
+            menu.findItem(R.id.action_progress_bar).setVisible(true);
+        } else {
+            menu.findItem(R.id.action_progress_bar).setVisible(false);
+        }
+
+
         return true;
     }
 
@@ -423,26 +475,6 @@ public class MainActivity extends Activity implements DownloadDecryptDataFile.Do
 
     private void setActionBarTitle(String title) {
         mActionBar.setTitle(title);
-    }
-
-    @Override
-    public void onActivityReenter(int resultCode, Intent data) {
-        super.onActivityReenter(resultCode, data);
-        MyLog.d("MainActivity", "onActivityReenter");
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        MyLog.d("MainActivity", "onActivityResult");
-    }
-
-    @Override
-    public void onFileDownloadFinished(Boolean result) {
-        // TODO: validateActiveUser();
-        //validateActiveUser();
-        EventBus.getDefault().post(new clsEvents.updateUI());
-        //MyLog.i("MainActivity", "onFileDownloadFinished: encrypted file length = " + encryptedFileContent.length() + " bytes.");
     }
 
 }

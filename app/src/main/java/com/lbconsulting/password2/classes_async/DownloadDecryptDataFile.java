@@ -18,6 +18,7 @@ import com.google.gson.JsonSyntaxException;
 import com.lbconsulting.password2.classes.CryptLib;
 import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
+import com.lbconsulting.password2.classes.clsEvents;
 import com.lbconsulting.password2.classes.clsItem;
 import com.lbconsulting.password2.classes.clsItemValues;
 import com.lbconsulting.password2.classes.clsLabPasswords;
@@ -39,58 +40,54 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
+import de.greenrobot.event.EventBus;
+
 /**
  * Here we show getting metadata for a directory and downloading a file in a
  * background thread, trying to show typical exception handling and flow of
  * control for an app that downloads a file from Dropbox.
  */
 
-public class DownloadDecryptDataFile extends AsyncTask<Void, Long, Boolean> {
+public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
 
+    public final int FILE_DOWNLOAD_START = 0;
+    public final int FILE_NOT_FOUND = -1;
+    public final int FILE_FOUND_BUT_EMPTY = -2;
+    public final int FILE_DELETED = -3;
+    public final int APP_PASSWORD_KEY_IS_EMPTY = -4;
+    public final int INVALID_PASSWORD = -5;
+    public final int UNABLE_TO_PARSE_JASON = -6;
+    public final int FILE_DOWNLOAD_SUCCESS = 101;
+    public final int DATABASE_UPDATED_SUCCESS = 102;
     private final Context mContext;
     private final DropboxAPI<?> mDBApi;
     private final String mDropboxFullFilename;
     // TODO: Create verbose messages
     private final boolean mIsVerbose;
+    private int mDownloadStatus = FILE_DOWNLOAD_START;
     private String mErrorMsg;
 
-    private DownloadFinishedListener mCallback;
-
-    public interface DownloadFinishedListener {
-        void onFileDownloadFinished(Boolean result);
-    }
-
     public DownloadDecryptDataFile(Context context, DropboxAPI<?> api, String dropboxFullFilename, boolean isVerbose) {
-        // folderFinishedListener callback
         // We set the context this way so we don't accidentally leak activities
         mContext = context.getApplicationContext();
 
         mDBApi = api;
         mDropboxFullFilename = dropboxFullFilename;
         mIsVerbose = isVerbose;
-
-        // This makes sure that the container activity has implemented
-        // the callback interface. If not, it throws an exception.
-        try {
-            mCallback = (DownloadFinishedListener) context;
-        } catch (ClassCastException e) {
-            String errorMessage = context.toString() + " must implement folderFinishedListener";
-            MyLog.e("DownloadDecryptDataFile", "DownloadDecryptDataFile: " + errorMessage);
-            throw new ClassCastException(errorMessage);
-        }
-
+        mDownloadStatus = FILE_DOWNLOAD_START;
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
+        EventBus.getDefault().post(new clsEvents.showProgressInActionBar(true));
+        // TODO: show download file progressbar
         String filename = mDropboxFullFilename.substring(mDropboxFullFilename.lastIndexOf("/") + 1);
         MyLog.i("DownloadDecryptDataFile", "onPreExecute: STARTING download of " + filename);
     }
 
     @Override
-    protected Boolean doInBackground(Void... params) {
-        boolean result = false;
+    protected Integer doInBackground(Void... params) {
         String encryptedFileContent = readFile();
         if (!encryptedFileContent.isEmpty()) {
             String decryptedFileContent = decryptFile(encryptedFileContent);
@@ -98,11 +95,10 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Long, Boolean> {
                 clsLabPasswords passwordsData = parseJsonFile(decryptedFileContent);
                 if (passwordsData != null) {
                     updateSQLiteDatabase(passwordsData);
-                    result = true;
                 }
             }
         }
-        return result;
+        return mDownloadStatus;
     }
 
     private String readFile() {
@@ -110,8 +106,15 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Long, Boolean> {
             Entry existingEntry = mDBApi.metadata(mDropboxFullFilename, 1, null, false, null);
             // TODO: Store rev to be able to retrieve past data files
             MyLog.i("DownloadDecryptDataFile", "readFile: File exists; " + existingEntry.bytes + " bytes; rev is now: " + existingEntry.rev);
-            if (existingEntry.bytes == 0) {
+            if (existingEntry.bytes == 0 || existingEntry.isDeleted) {
                 MyLog.e("DownloadDecryptDataFile", "readFile: File" + existingEntry.fileName() + " exists but is empty!");
+                mDownloadStatus = FILE_FOUND_BUT_EMPTY;
+                return "";
+            }
+
+            if (existingEntry.isDeleted) {
+                MyLog.e("DownloadDecryptDataFile", "readFile: File" + existingEntry.fileName() + " has been deleted!");
+                mDownloadStatus = FILE_DELETED;
                 return "";
             }
 
@@ -194,6 +197,7 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Long, Boolean> {
         String decryptedContents = "";
         String key = MySettings.getAppPasswordKey();
         if (key.isEmpty()) {
+            mDownloadStatus = APP_PASSWORD_KEY_IS_EMPTY;
             return "";
         }
 
@@ -205,6 +209,9 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Long, Boolean> {
             decryptedContents = mCrypt.decrypt(encryptedContentsWithoutIv, key, iv);
             decryptedContents = decryptedContents.trim();
             MyLog.i("DownloadDecryptDataFile", "decryptFile: Decrypted file length = " + decryptedContents.length() + " bytes.");
+            if (decryptedContents.length() == 0) {
+                mDownloadStatus = INVALID_PASSWORD;
+            }
 
         } catch (InvalidKeyException e) {
             MyLog.e("DownloadDecryptDataFile", "decryptFile: InvalidKeyException");
@@ -240,12 +247,16 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Long, Boolean> {
             passwordsData = gson.fromJson(decryptedFileContent, clsLabPasswords.class);
 
             if (passwordsData != null) {
+                mDownloadStatus = FILE_DOWNLOAD_SUCCESS;
                 int numberOfUsers = passwordsData.getUsers().size();
                 int numberOfItems = passwordsData.getPasswordItems().size();
                 MyLog.d("DownloadDecryptDataFile", "parseJsonFile: found " + numberOfUsers + " Users; " + numberOfItems + " Items.");
+            } else {
+                mDownloadStatus = UNABLE_TO_PARSE_JASON;
             }
         } catch (JsonSyntaxException e) {
             MyLog.e("DownloadDecryptDataFile", "parseJsonFile: JsonSyntaxException: " + e.getMessage());
+            mDownloadStatus = UNABLE_TO_PARSE_JASON;
             e.printStackTrace();
         }
         return passwordsData;
@@ -371,31 +382,71 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Long, Boolean> {
         int itemsDeleted = ItemsTable.deleteItemsNotInTable(mContext);
         MyLog.i("DownloadDecryptDataFile", "updateSQLiteDatabase: deleted " + itemsDeleted + " items from the items table.");
 
+        mDownloadStatus = DATABASE_UPDATED_SUCCESS;
         PasswordsContentProvider.setSuppressChangeNotification(false);
     }
 
     @Override
-    protected void onPostExecute(Boolean result) {
-        MyLog.d("DownloadDecryptDataFile", "onPostExecute: result = " + result);
-        mCallback.onFileDownloadFinished(result);
+    protected void onPostExecute(Integer result) {
+        EventBus.getDefault().post(new clsEvents.showProgressInActionBar(false));
+        String title = "Failed to update database";
+        String message = "";
+        switch (result) {
+            case DATABASE_UPDATED_SUCCESS:
+                MyLog.i("DownloadDecryptDataFile", "onPostExecute: DATABASE_UPDATED_SUCCESS");
+                EventBus.getDefault().post(new clsEvents.onPasswordsDatabaseUpdated());
+                if(mIsVerbose){
+                    Toast.makeText(mContext, "Passwords database successfully updated.", Toast.LENGTH_SHORT).show();
+                }
+                // TODO: Hide file download progress bar
+                break;
 
-/*        if (!fileContentString.isEmpty()) {
-            MyLog.i("DownloadDecryptDataFile", "onPostExecute: File successfully downloaded.");
-            if (mIsVerbose) {
-                Toast.makeText(mContext, "File successfully downloaded.", Toast.LENGTH_SHORT).show();
-            }
-        } else {
-            // Couldn't download it, so show an error
-            MyLog.e("DownloadDecryptDataFile", "onPostExecute: ERROR: " + mErrorMsg);
-            if (mIsVerbose) {
-                showToast(mErrorMsg);
-            }
-        }*/
+            case FILE_NOT_FOUND:
+                message = "Unable to find the Passwords data file.";
+                break;
+
+            case FILE_FOUND_BUT_EMPTY:
+                message = "Passwords data file found, but is empty!";
+                break;
+
+            case FILE_DELETED:
+                message = "Passwords data file has been deleted.";
+                break;
+
+            case APP_PASSWORD_KEY_IS_EMPTY:
+                message = "Password key is empty.";
+                break;
+
+            case INVALID_PASSWORD:
+                message = "Unable to decrypt the Passwords data file. Please make sure you are using the correct application password.";
+                break;
+
+            case UNABLE_TO_PARSE_JASON:
+                message = "Unable to parse the Json string.";
+                break;
+
+            case FILE_DOWNLOAD_SUCCESS:
+                message = "File downloaded successfully, but the database was not updated?";
+                break;
+
+            case FILE_DOWNLOAD_START:
+                message = "File download started. No other status available.";
+                break;
+
+        }
+        if (!message.isEmpty()) {
+            MyLog.e("DownloadDecryptDataFile", "onPostExecute: " + message);
+            EventBus.getDefault().post(new clsEvents.showOkDialog(title, message));
+        }
     }
 
     private void showToast(String msg) {
         Toast error = Toast.makeText(mContext, msg, Toast.LENGTH_LONG);
         error.show();
+    }
+
+    public interface DownloadFinishedListener {
+        void onFileDownloadFinished(Boolean result);
     }
 
 

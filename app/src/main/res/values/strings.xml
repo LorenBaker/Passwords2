@@ -47,14 +47,34 @@
     <string name="deleteUser_dialog_message">Do you want to permanently delete user \"</string>
     <string name="noUsersExist_dialog_title">No Users Exist</string>
     <string name="noUsersExist_dialog_message">Please select \" Create New User\"</string>
-    <string name="btnHideItemCategories_text">Hide Item Categories</string>
-    <string name="btnSelectPasswordLongevity_text">Select Password Longevity\nCurrent Longevity:\u0020</string>
+    <string name="btnHideItemCategories_text">Select Hidden Item Categories</string>
     <string name="btnSelectDropboxFolder_text">Select Dropbox Folder\nCurrent Folder:\n</string>
     <string name="actionBarTitle_Settings">Settings</string>
     <string name="actionBarTitle_userSettings">User Settings</string>
     <string name="newDropboxFolderDialog_title">Enter Dropbox Folder Name</string>
     <string name="newDropboxFolderEditText_hint">New Dropbox Folder Name</string>
     <string name="newDropboxFolderDialogPositiveButton_text">Create Folder</string>
+    <string name="btnSelectPasswordLongevity_text">"Select Password Longevity\nCurrent Longevity: "</string>
+    <string name="PasswordLongevityDialog_title">App Password Longevity</string>
+    <string name="btnCreditCards_text">Credit Cards</string>
+    <string name="btnGeneralAccounts_text">General Accounts</string>
+    <string name="btnWebsites_text">Websites</string>
+    <string name="btnSoftware_text">Software</string>
+    <string name="HideItemCategoriesDialog_title">Hide Item Categories</string>
+    <string name="btnAppPasswordSettings_text">Application Password Settings</string>
+    <string name="btnNetworkingSettings_text">Networking Settings\nCurrent setting:</string>
+    <string name="invalid_password_message1">The application password must be at least ten characters long, have a minimum of one lower case, one upper case, and one number</string>
+    <string name="invalid_password_message2">The proposed password is empty!\n\n</string>
+    <string name="invalid_password_message3">"The proposed password's length of "</string>
+    <string name="invalid_password_message4">" is too short!\n\n"</string>
+
+    <string-array name="item_categories">
+        <item>Credit Cards</item>
+        <item>General Accounts</item>
+        <item>Websites</item>
+        <item>Software</item>
+        <item>Lists Start Closed</item>
+    </string-array>
 
 
 </resources>

@@ -42,27 +42,36 @@ public class PasswordItemsListFragment extends Fragment
         LoaderManager.LoaderCallbacks<Cursor> {
 
 
+    public static final int USER_CREDIT_CARD_ITEMS = 1;
+    public static final int USER_GENERAL_ACCOUNT_ITEMS = 2;
+    public static final int USER_SOFTWARE_ITEMS = 3;
+    public static final int USER_WEBSITE_ITEMS = 4;
+    public static final int ALL_USER_ITEMS = 5;
+
     //region Fragment views
     private EditText txtSearch;
     private Button btnCreditCards;
     private Button btnGeneralAccounts;
     private Button btnWebsites;
     private Button btnSoftware;
+
     private ListView lvAllUserItems;
     private ListView lvCreditCards;
     private ListView lvGeneralAccounts;
     private ListView lvWebsites;
     private ListView lvSoftware;
+
     //endregion
 
     private long mActiveUserID;
     private int mActiveListView = clsItemTypes.CREDIT_CARDS;
-
     private boolean mHideCreditCards;
     private boolean mHideGeneralAccounts;
     private boolean mHideWebsites;
     private boolean mHideSoftware;
-
+    private boolean mListsStartClosed;
+    private boolean mFirstTimeDisplayed;
+    private int mLastCategoryShown;
     private LoaderManager mLoaderManager = null;
     // The callbacks through which we will interact with the LoaderManager.
     private LoaderManager.LoaderCallbacks<Cursor> mItemsListFragmentCallbacks;
@@ -71,12 +80,6 @@ public class PasswordItemsListFragment extends Fragment
     private ItemsCursorAdapter mUserGeneralAccountItemsItemsAdapter;
     private ItemsCursorAdapter mUserWebsiteItemsItemsAdapter;
     private ItemsCursorAdapter mUserSoftwareItemsItemsAdapter;
-
-    public static final int USER_CREDIT_CARD_ITEMS = 1;
-    public static final int USER_GENERAL_ACCOUNT_ITEMS = 2;
-    public static final int USER_SOFTWARE_ITEMS = 3;
-    public static final int USER_WEBSITE_ITEMS = 4;
-    public static final int ALL_USER_ITEMS = 5;
 
 
     public PasswordItemsListFragment() {
@@ -107,6 +110,19 @@ public class PasswordItemsListFragment extends Fragment
         mHideGeneralAccounts = MySettings.getHideGeneralAccounts();
         mHideWebsites = MySettings.getHideWebsites();
         mHideSoftware = MySettings.getHideSoftware();
+        mListsStartClosed = MySettings.getListsStartClosed();
+        mFirstTimeDisplayed = true;
+
+        mLastCategoryShown = USER_CREDIT_CARD_ITEMS;
+        if (mHideCreditCards) {
+            if (!mHideGeneralAccounts) {
+                mLastCategoryShown = USER_GENERAL_ACCOUNT_ITEMS;
+            } else if (!mHideWebsites) {
+                mLastCategoryShown = USER_WEBSITE_ITEMS;
+            } else if (!mHideSoftware) {
+                mLastCategoryShown = USER_SOFTWARE_ITEMS;
+            }
+        }
 
         mActiveListView = MySettings.getActiveListViewID();
         txtSearch.setText(MySettings.getSearchText());
@@ -355,7 +371,7 @@ public class PasswordItemsListFragment extends Fragment
                     return true;
 
                 case R.id.action_show_categories:
-                    setupDisplay(clsItemTypes.CREDIT_CARDS);
+                    setupDisplay(mLastCategoryShown);
                     getActivity().invalidateOptionsMenu();
                     return true;
 
@@ -371,10 +387,7 @@ public class PasswordItemsListFragment extends Fragment
     public void onResume() {
         super.onResume();
         MyLog.i("PasswordItemsListFragment", "onResume()");
-
-
         setupDisplay(mActiveListView);
-
     }
 
     @Override
@@ -542,7 +555,18 @@ public class PasswordItemsListFragment extends Fragment
                 txtSearch.setVisibility(View.GONE);
                 lvAllUserItems.setVisibility(View.GONE);
 
-                btnCreditCards.setVisibility(View.VISIBLE);
+                if (mHideCreditCards) {
+                    btnCreditCards.setVisibility(View.GONE);
+                    lvCreditCards.setVisibility(View.GONE);
+
+                } else {
+                    btnCreditCards.setVisibility(View.VISIBLE);
+                    if (mFirstTimeDisplayed && mListsStartClosed) {
+                        lvCreditCards.setVisibility(View.GONE);
+                    } else {
+                        lvCreditCards.setVisibility(View.VISIBLE);
+                    }
+                }
 
                 if (mHideGeneralAccounts) {
                     btnGeneralAccounts.setVisibility(View.GONE);
@@ -562,12 +586,13 @@ public class PasswordItemsListFragment extends Fragment
                     btnSoftware.setVisibility(View.VISIBLE);
                 }
 
-                lvCreditCards.setVisibility(View.VISIBLE);
                 lvGeneralAccounts.setVisibility(View.GONE);
                 lvWebsites.setVisibility(View.GONE);
                 lvSoftware.setVisibility(View.GONE);
                 mActiveListView = clsItemTypes.CREDIT_CARDS;
                 hideKeyBoard(txtSearch);
+                mFirstTimeDisplayed = false;
+                mLastCategoryShown=USER_CREDIT_CARD_ITEMS;
                 break;
 
             case USER_GENERAL_ACCOUNT_ITEMS:
@@ -580,7 +605,18 @@ public class PasswordItemsListFragment extends Fragment
                     btnCreditCards.setVisibility(View.VISIBLE);
                 }
 
-                btnGeneralAccounts.setVisibility(View.VISIBLE);
+                if (mHideGeneralAccounts) {
+                    btnGeneralAccounts.setVisibility(View.GONE);
+                    lvGeneralAccounts.setVisibility(View.GONE);
+
+                } else {
+                    btnGeneralAccounts.setVisibility(View.VISIBLE);
+                    if (mFirstTimeDisplayed && mListsStartClosed) {
+                        lvGeneralAccounts.setVisibility(View.GONE);
+                    } else {
+                        lvGeneralAccounts.setVisibility(View.VISIBLE);
+                    }
+                }
 
                 if (mHideWebsites) {
                     btnWebsites.setVisibility(View.GONE);
@@ -595,11 +631,12 @@ public class PasswordItemsListFragment extends Fragment
                 }
 
                 lvCreditCards.setVisibility(View.GONE);
-                lvGeneralAccounts.setVisibility(View.VISIBLE);
                 lvWebsites.setVisibility(View.GONE);
                 lvSoftware.setVisibility(View.GONE);
                 mActiveListView = clsItemTypes.GENERAL_ACCOUNTS;
                 hideKeyBoard(txtSearch);
+                mFirstTimeDisplayed = false;
+                mLastCategoryShown=USER_GENERAL_ACCOUNT_ITEMS;
                 break;
 
             case USER_WEBSITE_ITEMS:
@@ -618,7 +655,17 @@ public class PasswordItemsListFragment extends Fragment
                     btnGeneralAccounts.setVisibility(View.VISIBLE);
                 }
 
-                btnWebsites.setVisibility(View.VISIBLE);
+                if (mHideWebsites) {
+                    btnWebsites.setVisibility(View.GONE);
+                    lvWebsites.setVisibility(View.GONE);
+                } else {
+                    btnWebsites.setVisibility(View.VISIBLE);
+                    if (mFirstTimeDisplayed && mListsStartClosed) {
+                        lvWebsites.setVisibility(View.GONE);
+                    } else {
+                        lvWebsites.setVisibility(View.VISIBLE);
+                    }
+                }
 
                 if (mHideSoftware) {
                     btnSoftware.setVisibility(View.GONE);
@@ -628,10 +675,11 @@ public class PasswordItemsListFragment extends Fragment
 
                 lvCreditCards.setVisibility(View.GONE);
                 lvGeneralAccounts.setVisibility(View.GONE);
-                lvWebsites.setVisibility(View.VISIBLE);
                 lvSoftware.setVisibility(View.GONE);
                 mActiveListView = clsItemTypes.WEBSITES;
                 hideKeyBoard(txtSearch);
+                mFirstTimeDisplayed = false;
+                mLastCategoryShown=USER_WEBSITE_ITEMS;
                 break;
 
             case USER_SOFTWARE_ITEMS:
@@ -656,18 +704,33 @@ public class PasswordItemsListFragment extends Fragment
                     btnWebsites.setVisibility(View.VISIBLE);
                 }
 
-                btnSoftware.setVisibility(View.VISIBLE);
+                if (mHideSoftware) {
+                    btnSoftware.setVisibility(View.GONE);
+                    lvSoftware.setVisibility(View.GONE);
+                } else {
+                    btnSoftware.setVisibility(View.VISIBLE);
+                    if (mFirstTimeDisplayed && mListsStartClosed) {
+                        lvSoftware.setVisibility(View.GONE);
+                    } else {
+                        lvSoftware.setVisibility(View.VISIBLE);
+                    }
+                }
 
                 lvCreditCards.setVisibility(View.GONE);
                 lvGeneralAccounts.setVisibility(View.GONE);
                 lvWebsites.setVisibility(View.GONE);
-                lvSoftware.setVisibility(View.VISIBLE);
                 mActiveListView = clsItemTypes.SOFTWARE;
                 hideKeyBoard(txtSearch);
+                mFirstTimeDisplayed = false;
+                mLastCategoryShown=USER_SOFTWARE_ITEMS;
                 break;
 
             case ALL_USER_ITEMS:
-                //txtSearch.setText(MySettings.getSearchText());
+                if (mListsStartClosed) {
+                    mFirstTimeDisplayed = true;
+                } else {
+                    mFirstTimeDisplayed = false;
+                }
                 txtSearch.setVisibility(View.VISIBLE);
                 lvAllUserItems.setVisibility(View.VISIBLE);
                 btnCreditCards.setVisibility(View.GONE);

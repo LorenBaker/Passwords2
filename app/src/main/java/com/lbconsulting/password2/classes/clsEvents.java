@@ -17,6 +17,24 @@ public class clsEvents {
         public folderHashMapUpdated() {
         }
     }
+
+    public static class onPasswordsDatabaseUpdated {
+        public onPasswordsDatabaseUpdated() {
+        }
+    }
+
+    public static class showProgressInActionBar {
+        boolean mIsVisible;
+
+        public showProgressInActionBar(boolean isVisible) {
+            mIsVisible = isVisible;
+        }
+
+        public boolean isVisible() {
+            return mIsVisible;
+        }
+    }
+
     public static class showFragment {
         int mFragmentID;
         boolean mIsNewPasswordItem;

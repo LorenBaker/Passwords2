@@ -25,7 +25,7 @@ import com.lbconsulting.password2.R;
 import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
-import com.lbconsulting.password2.classes.clsFormattingMethods;
+import com.lbconsulting.password2.classes.clsUtils;
 import com.lbconsulting.password2.classes.clsItemValues;
 import com.lbconsulting.password2.database.ItemsTable;
 
@@ -181,7 +181,7 @@ public class EditCreditCardFragment extends Fragment implements TextWatcher {
     }
 
     private int findSpinnerPosition(String creditCardAccountNumber) {
-        clsFormattingMethods.creditCard card = clsFormattingMethods.getCreditCardType(creditCardAccountNumber);
+        clsUtils.creditCard card = clsUtils.getCreditCardType(creditCardAccountNumber);
         int position = Spinner.INVALID_POSITION;
         if (card.getCardType().equals(MySettings.CreditCardNames[0])) {
             position = 0; // American Express
@@ -303,7 +303,7 @@ public class EditCreditCardFragment extends Fragment implements TextWatcher {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
-                    String formattedPrimaryPhoneNumber = clsFormattingMethods
+                    String formattedPrimaryPhoneNumber = clsUtils
                             .formatPhoneNumber(txtPrimaryPhoneNumber.getText().toString().trim());
                     txtPrimaryPhoneNumber.setText(formattedPrimaryPhoneNumber);
                 }
@@ -317,7 +317,7 @@ public class EditCreditCardFragment extends Fragment implements TextWatcher {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
-                    String formattedAlternatePhoneNumber = clsFormattingMethods
+                    String formattedAlternatePhoneNumber = clsUtils
                             .formatPhoneNumber(txtAlternatePhoneNumber.getText().toString().trim());
                     txtAlternatePhoneNumber.setText(formattedAlternatePhoneNumber);
                 }
@@ -353,10 +353,10 @@ public class EditCreditCardFragment extends Fragment implements TextWatcher {
 
     private void validateCreditCard() {
         mCreditCardNumber = makeCreditCardNumber();
-        clsFormattingMethods.creditCard card = clsFormattingMethods.getCreditCardType(mCreditCardNumber);
+        clsUtils.creditCard card = clsUtils.getCreditCardType(mCreditCardNumber);
         boolean creditCardTypeResult = !card.getCardType().equals(MySettings.UNKNOWN);
         if (creditCardTypeResult) {
-            boolean luhnTestResult = clsFormattingMethods.luhnTest(mCreditCardNumber);
+            boolean luhnTestResult = clsUtils.luhnTest(mCreditCardNumber);
             if (luhnTestResult) {
                 if (mSelectedCreditCardTypePosition == card.getCardPosition()) {
                     ivCardVerification.setImageResource(R.drawable.btn_check_buttonless_on);
@@ -437,8 +437,8 @@ public class EditCreditCardFragment extends Fragment implements TextWatcher {
             txtExpirationYear.setText(mActiveItem.getCreditCardExpirationYear());
             txtSecurityCode.setText(mActiveItem.getCardCreditSecurityCode());
 
-            String formattedPrimaryPhoneNumber = clsFormattingMethods.formatPhoneNumber(mActiveItem.getPrimaryPhoneNumber());
-            String formattedAlternatePhoneNumber = clsFormattingMethods.formatPhoneNumber(mActiveItem.getAlternatePhoneNumber());
+            String formattedPrimaryPhoneNumber = clsUtils.formatPhoneNumber(mActiveItem.getPrimaryPhoneNumber());
+            String formattedAlternatePhoneNumber = clsUtils.formatPhoneNumber(mActiveItem.getAlternatePhoneNumber());
             txtPrimaryPhoneNumber.setText(formattedPrimaryPhoneNumber);
             txtAlternatePhoneNumber.setText(formattedAlternatePhoneNumber);
 
@@ -467,8 +467,8 @@ public class EditCreditCardFragment extends Fragment implements TextWatcher {
         mActiveItem.putCreditCardExpirationMonth(txtExpirationMonth.getText().toString());
         mActiveItem.putCreditCardExpirationYear(txtExpirationYear.getText().toString());
         mActiveItem.putCreditCardSecurityCode(txtSecurityCode.getText().toString());
-        String unformattedPrimaryPhoneNumber = clsFormattingMethods.unFormatPhoneNumber(txtPrimaryPhoneNumber.getText().toString());
-        String unformattedAlternatePhoneNumber = clsFormattingMethods.unFormatPhoneNumber(txtAlternatePhoneNumber.getText().toString());
+        String unformattedPrimaryPhoneNumber = clsUtils.unFormatPhoneNumber(txtPrimaryPhoneNumber.getText().toString());
+        String unformattedAlternatePhoneNumber = clsUtils.unFormatPhoneNumber(txtAlternatePhoneNumber.getText().toString());
         mActiveItem.putPrimaryPhoneNumber(unformattedPrimaryPhoneNumber);
         mActiveItem.putAlternatePhoneNumber(unformattedAlternatePhoneNumber);
         mActiveItem.update();
