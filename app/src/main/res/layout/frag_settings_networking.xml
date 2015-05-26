@@ -11,14 +11,14 @@
         style="@style/setting_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Network Preferences" />
+        android:text="@string/btnNetworkPreferences_text" />
 
     <Button
         android:id="@+id/btnSyncPeriodicity"
         style="@style/setting_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Sync Periodicity" />
+        android:text="@string/btnSyncPeriodicity_text" />
 
 
 </LinearLayout>

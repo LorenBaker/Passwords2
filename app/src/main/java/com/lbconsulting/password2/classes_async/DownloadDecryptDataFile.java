@@ -15,6 +15,7 @@ import com.dropbox.client2.exception.DropboxServerException;
 import com.dropbox.client2.exception.DropboxUnlinkedException;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.lbconsulting.password2.R;
 import com.lbconsulting.password2.classes.CryptLib;
 import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
@@ -57,6 +58,7 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
     public final int APP_PASSWORD_KEY_IS_EMPTY = -4;
     public final int INVALID_PASSWORD = -5;
     public final int UNABLE_TO_PARSE_JASON = -6;
+    public final int NOT_OK_TO_DOWNLOAD_FILE = -7;
     public final int FILE_DOWNLOAD_SUCCESS = 101;
     public final int DATABASE_UPDATED_SUCCESS = 102;
     private final Context mContext;
@@ -64,6 +66,7 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
     private final String mDropboxFullFilename;
     // TODO: Create verbose messages
     private final boolean mIsVerbose;
+    private final boolean mIsOkToDownloadDataFile;
     private int mDownloadStatus = FILE_DOWNLOAD_START;
     private String mErrorMsg;
 
@@ -75,6 +78,7 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
         mDropboxFullFilename = dropboxFullFilename;
         mIsVerbose = isVerbose;
         mDownloadStatus = FILE_DOWNLOAD_START;
+        mIsOkToDownloadDataFile = MySettings.isOkToUseNetwork();
     }
 
     @Override
@@ -88,15 +92,19 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
 
     @Override
     protected Integer doInBackground(Void... params) {
-        String encryptedFileContent = readFile();
-        if (!encryptedFileContent.isEmpty()) {
-            String decryptedFileContent = decryptFile(encryptedFileContent);
-            if (!decryptedFileContent.isEmpty()) {
-                clsLabPasswords passwordsData = parseJsonFile(decryptedFileContent);
-                if (passwordsData != null) {
-                    updateSQLiteDatabase(passwordsData);
+        if (mIsOkToDownloadDataFile) {
+                        String encryptedFileContent = readFile();
+            if (!encryptedFileContent.isEmpty()) {
+                String decryptedFileContent = decryptFile(encryptedFileContent);
+                if (!decryptedFileContent.isEmpty()) {
+                    clsLabPasswords passwordsData = parseJsonFile(decryptedFileContent);
+                    if (passwordsData != null) {
+                        updateSQLiteDatabase(passwordsData);
+                    }
                 }
             }
+        }else{
+            mDownloadStatus=NOT_OK_TO_DOWNLOAD_FILE;
         }
         return mDownloadStatus;
     }
@@ -389,48 +397,54 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
     @Override
     protected void onPostExecute(Integer result) {
         EventBus.getDefault().post(new clsEvents.showProgressInActionBar(false));
-        String title = "Failed to update database";
+        String title = mContext.getString(R.string.downloadError_okDialogTitle);
         String message = "";
         switch (result) {
             case DATABASE_UPDATED_SUCCESS:
                 MyLog.i("DownloadDecryptDataFile", "onPostExecute: DATABASE_UPDATED_SUCCESS");
                 EventBus.getDefault().post(new clsEvents.onPasswordsDatabaseUpdated());
-                if(mIsVerbose){
-                    Toast.makeText(mContext, "Passwords database successfully updated.", Toast.LENGTH_SHORT).show();
+                if (mIsVerbose) {
+                    Toast.makeText(mContext,
+                            mContext.getString(R.string.downloadSuccess_databaseUpdatedSuccess),
+                            Toast.LENGTH_SHORT).show();
                 }
                 // TODO: Hide file download progress bar
                 break;
 
             case FILE_NOT_FOUND:
-                message = "Unable to find the Passwords data file.";
+                message = mContext.getString(R.string.downloadError_fileNotFound);
                 break;
 
             case FILE_FOUND_BUT_EMPTY:
-                message = "Passwords data file found, but is empty!";
+                message = mContext.getString(R.string.downloadError_fileFoundButEmpty);
                 break;
 
             case FILE_DELETED:
-                message = "Passwords data file has been deleted.";
+                message = mContext.getString(R.string.downloadError_fileDeleted);
                 break;
 
             case APP_PASSWORD_KEY_IS_EMPTY:
-                message = "Password key is empty.";
+                message = mContext.getString(R.string.downloadError_passwordKeyIsEmpty);
                 break;
 
             case INVALID_PASSWORD:
-                message = "Unable to decrypt the Passwords data file. Please make sure you are using the correct application password.";
+                message = mContext.getString(R.string.downloadError_invalidPassword);
                 break;
 
             case UNABLE_TO_PARSE_JASON:
-                message = "Unable to parse the Json string.";
+                message = mContext.getString(R.string.downloadError_unableToParseJason);
                 break;
 
             case FILE_DOWNLOAD_SUCCESS:
-                message = "File downloaded successfully, but the database was not updated?";
+                message = mContext.getString(R.string.downloadError_fileDownloadSuccess);
                 break;
 
             case FILE_DOWNLOAD_START:
-                message = "File download started. No other status available.";
+                message = mContext.getString(R.string.downloadError_fileDownloadStarted);
+                break;
+
+            case NOT_OK_TO_DOWNLOAD_FILE:
+                message = mContext.getString(R.string.downloadError_notOkToDownloadFile);
                 break;
 
         }

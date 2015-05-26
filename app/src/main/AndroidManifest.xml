@@ -18,6 +18,12 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
         </activity>
 
         <activity
@@ -36,7 +42,8 @@
         <provider
             android:name="com.lbconsulting.password2.database.PasswordsContentProvider"
             android:authorities="com.lbconsulting.passwords2.contentprovider"
-            android:exported="false"></provider>
+            android:exported="false">
+        </provider>
 
     </application>
 

@@ -14,9 +14,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.Toast;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 
 import com.lbconsulting.password2.R;
 import com.lbconsulting.password2.classes.MyLog;
@@ -40,12 +39,10 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
     private Button btnSelectDropboxFolder;
     private Button btnAppPasswordSettings;
     private Button btnNetworkingSettings;
-
-/*    private Button btnSelectPasswordLongevity;
-    private Button btnChangeAppPassword;*/
     private Button btnHideItemCategories;
+    private CheckBox ckShowVerboseMessages;
 
-
+    private boolean mUpdatingUI;
 
 
     public static SettingsFragment newInstance() {
@@ -75,9 +72,16 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
         btnSelectDropboxFolder = (Button) rootView.findViewById(R.id.btnSelectDropboxFolder);
         btnAppPasswordSettings = (Button) rootView.findViewById(R.id.btnAppPasswordSettings);
         btnNetworkingSettings = (Button) rootView.findViewById(R.id.btnNetworkingSettings);
-/*        btnSelectPasswordLongevity = (Button) rootView.findViewById(R.id.btnSelectPasswordLongevity);
-        btnChangeAppPassword = (Button) rootView.findViewById(R.id.btnChangeAppPassword);*/
         btnHideItemCategories = (Button) rootView.findViewById(R.id.btnHideItemCategories);
+        ckShowVerboseMessages = (CheckBox) rootView.findViewById(R.id.ckShowVerboseMessages);
+        ckShowVerboseMessages.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(!mUpdatingUI) {
+                    MySettings.setIsVerbose(isChecked);
+                }
+            }
+        });
 
         btnSelectUser.setOnClickListener(this);
         btnUserSettings.setOnClickListener(this);
@@ -122,6 +126,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
     }
 
     private void updateUI() {
+        mUpdatingUI = true;
         long activeUserID = MySettings.getActiveUserID();
         mActiveUser = new clsUserValues(getActivity(), activeUserID);
 
@@ -135,15 +140,15 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
         }
         btnSelectUser.setText(btnText);
 
-
-
         btnSelectDropboxFolder
                 .setText(getString(R.string.btnSelectDropboxFolder_text)
                         + MySettings.getDropboxFolderName());
 
+        ckShowVerboseMessages.setChecked(MySettings.isVerbose());
+
+        mUpdatingUI = false;
+
     }
-
-
 
 
     @Override
@@ -237,7 +242,6 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
                 break;
 
 
-
             case R.id.btnSelectDropboxFolder:
                 //Toast.makeText(getActivity(), "TO COME: btnSelectDropboxFolder", Toast.LENGTH_SHORT).show();
                 EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_DROPBOX_LIST, false));
@@ -249,10 +253,9 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
                 break;
 
             case R.id.btnNetworkingSettings:
-               // Toast.makeText(getActivity(), "TO COME: btnNetworkingSettings", Toast.LENGTH_SHORT).show();
+                // Toast.makeText(getActivity(), "TO COME: btnNetworkingSettings", Toast.LENGTH_SHORT).show();
                 EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_NETWORKING_SETTINGS, false));
                 break;
-
 
 
             case R.id.btnHideItemCategories:
@@ -303,10 +306,6 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
         }
 
     }
-
-
-
-
 
 
     private void selectActiveUser() {

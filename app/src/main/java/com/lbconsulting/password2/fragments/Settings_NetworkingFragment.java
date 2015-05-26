@@ -1,7 +1,10 @@
 package com.lbconsulting.password2.fragments;
 
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.Fragment;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -16,6 +19,7 @@ import com.lbconsulting.password2.R;
 import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
+import com.lbconsulting.password2.classes.clsUtils;
 
 import de.greenrobot.event.EventBus;
 
@@ -25,6 +29,11 @@ public class Settings_NetworkingFragment extends Fragment implements View.OnClic
     private Button btnNetworkPreferences;
     private Button btnSyncPeriodicity;
 
+    // Strings to Show In Dialog with Radio Buttons
+    private  String[] mSyncPreferenceList;
+    private int mNetworkPreference;
+    private  String[] mUpdatePeriodicity_list;
+    private int mUpdatePeriodicity;
 
     public Settings_NetworkingFragment() {
         // Required empty public constructor
@@ -68,6 +77,10 @@ public class Settings_NetworkingFragment extends Fragment implements View.OnClic
 
         EventBus.getDefault().post(new clsEvents
                 .setActionBarTitle("Networking Settings"));
+
+        mSyncPreferenceList = getActivity().getResources().getStringArray(R.array.syncPreference_list);
+        mUpdatePeriodicity_list = getActivity().getResources().getStringArray(R.array.updatePeriodicity_list);
+
     }
 
     @Override
@@ -86,8 +99,13 @@ public class Settings_NetworkingFragment extends Fragment implements View.OnClic
     }
 
     private void updateUI() {
+        mNetworkPreference = MySettings.getNetworkPreference();
+        btnNetworkPreferences.setText(getActivity().getString(R.string.btnNetworkPreferences_text)
+                + mSyncPreferenceList[mNetworkPreference]);
 
-
+        mUpdatePeriodicity=MySettings.getSyncPeriodicity();
+        btnSyncPeriodicity.setText(getActivity().getString(R.string.btnSyncPeriodicity_text)
+                + mUpdatePeriodicity_list[mUpdatePeriodicity].toLowerCase());
     }
 
 
@@ -136,16 +154,73 @@ public class Settings_NetworkingFragment extends Fragment implements View.OnClic
         switch (v.getId()) {
 
             case R.id.btnNetworkPreferences:
-                Toast.makeText(getActivity(), "btnNetworkPreferences Clicked", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getActivity(), "btnNetworkPreferences Clicked", Toast.LENGTH_SHORT).show();
+                showNetworkPreferenceDialog();
                 break;
 
             case R.id.btnSyncPeriodicity:
-                Toast.makeText(getActivity(), "btnSyncPeriodicity Clicked", Toast.LENGTH_SHORT).show();
-
+                //Toast.makeText(getActivity(), "btnSyncPeriodicity Clicked", Toast.LENGTH_SHORT).show();
+                showSyncPeriodicityDialog();
                 break;
 
         }
 
+    }
+
+    private void showSyncPeriodicityDialog() {
+        // Creating and Building the Dialog
+        Dialog syncPeriodicityDialog;
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("Check for updates");
+        builder.setSingleChoiceItems(mUpdatePeriodicity_list, mUpdatePeriodicity, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int position) {
+                MySettings.setSyncPeriodicity(position);
+                btnSyncPeriodicity.setText(getActivity().getString(R.string.btnSyncPeriodicity_text)
+                        + mUpdatePeriodicity_list[position].toLowerCase());
+            }
+
+        });
+
+        // Set the action buttons
+        builder.setPositiveButton(R.string.btnOK_text, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                // dialog dismissed
+            }
+        });
+
+        syncPeriodicityDialog = builder.create();
+        syncPeriodicityDialog.show();
+
+    }
+
+    private void showNetworkPreferenceDialog() {
+        // Creating and Building the Dialog
+        Dialog networkPreferenceDialog;
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("Use network");
+        builder.setSingleChoiceItems(mSyncPreferenceList, mNetworkPreference, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int position) {
+                MySettings.setNetworkPreference(position);
+                btnNetworkPreferences.setText(getActivity().getString(R.string.btnNetworkPreferences_text)
+                        + mSyncPreferenceList[position]);
+
+                // Update setIsOkToUseNetwork
+                clsUtils.setIsOkToUseNetwork(getActivity());
+            }
+
+        });
+
+        // Set the action buttons
+        builder.setPositiveButton(R.string.btnOK_text, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                // dialog dismissed
+            }
+        });
+
+        networkPreferenceDialog = builder.create();
+        networkPreferenceDialog.show();
     }
 
 

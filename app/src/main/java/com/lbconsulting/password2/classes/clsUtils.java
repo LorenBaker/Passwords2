@@ -1,6 +1,12 @@
 package com.lbconsulting.password2.classes;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.widget.Spinner;
+import android.widget.Toast;
+
+import com.lbconsulting.password2.R;
 
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;
@@ -81,6 +87,66 @@ public class clsUtils {
         }
 
         return plainTextString;
+    }
+
+    public static void setIsOkToUseNetwork(Context context) {
+        boolean isVerbose = MySettings.isVerbose();
+
+        boolean isWifiConnected = false;
+        boolean isMobileConnected = false;
+        NetworkInfo networkInfo = null;
+
+        ConnectivityManager connMgr = (ConnectivityManager)
+                context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connMgr != null) {
+            networkInfo = connMgr.getActiveNetworkInfo();
+        }
+
+        if (networkInfo != null) {
+            isWifiConnected = networkInfo.getType() == ConnectivityManager.TYPE_WIFI;
+            isMobileConnected = networkInfo.getType() == ConnectivityManager.TYPE_MOBILE;
+        }
+        // get the user's networking preference
+        int userNetworkingPreference = MySettings.getNetworkPreference();
+
+        // Check for wi-fi network availability
+        if (userNetworkingPreference == MySettings.NETWORK_WIFI_ONLY
+                && networkInfo != null
+                && isWifiConnected) {
+            // The device is connected to wi-fi ... so,
+            // Allow the download of data.
+
+            MySettings.setIsOkToUseNetwork(true);
+            if (isVerbose) {
+                Toast.makeText(context, context.getString(R.string.network_okToUseNetwork)
+                        + context.getString(R.string.network_wifi_connected), Toast.LENGTH_SHORT).show();
+            }
+
+            // Check for any network connection
+        } else if (userNetworkingPreference == MySettings.NETWORK_ANY
+                && networkInfo != null) {
+            // The device is connected to a network ... so,
+            // Allow the download of data.
+            MySettings.setIsOkToUseNetwork(true);
+            if (isVerbose) {
+                if (isWifiConnected) {
+                    Toast.makeText(context, context.getString(R.string.network_okToUseNetwork)
+                            + context.getString(R.string.network_wifi_connected), Toast.LENGTH_SHORT).show();
+                } else if (isMobileConnected) {
+                    Toast.makeText(context, context.getString(R.string.network_okToUseNetwork)
+                            + context.getString(R.string.network_mobile_connected), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+        } else {
+            // Otherwise, the app can't download content ...
+            // either because there is no network connection (mobile or Wi-Fi),
+            // or because the pref setting is WIFI Only, and there is no Wi-Fi connection.
+            MySettings.setIsOkToUseNetwork(false);
+            if (isVerbose) {
+                Toast.makeText(context, R.string.network_lost_connection, Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
 

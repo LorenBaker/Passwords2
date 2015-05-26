@@ -24,7 +24,6 @@ import com.lbconsulting.password2.R;
 import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
-import com.lbconsulting.password2.classes.clsUserValues;
 
 import java.util.regex.Pattern;
 
@@ -306,8 +305,7 @@ public class Settings_AppPasswordFragment extends Fragment implements View.OnCli
                 //Toast.makeText(getActivity(), "TO COME: btnSelectPasswordLongevity", Toast.LENGTH_SHORT).show();
 
                 // Strings to Show In Dialog with Radio Buttons
-                final CharSequence[] items = {"None", "5 min", "15 min", "30 min", "1 hr", "4 hrs", "8 hrs"};
-
+                final String[] items = getActivity().getResources().getStringArray(R.array.longevityItems_list);
                 long passwordLongevity = MySettings.getPasswordLongevity();
                 int longevity = (int) passwordLongevity / 60000;
                 int selectedLongevityPosition;
@@ -374,9 +372,18 @@ public class Settings_AppPasswordFragment extends Fragment implements View.OnCli
                         btnSelectPasswordLongevity.setText(getActivity()
                                 .getString(R.string.btnSelectPasswordLongevity_text)
                                 + newLongevityDescription);
-                        dialog.dismiss();
+                    }
+
+                });
+
+                // Set the action buttons
+                builder.setPositiveButton(R.string.btnOK_text, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        // dialog dismissed
                     }
                 });
+
                 longevityDialog = builder.create();
                 longevityDialog.show();
                 break;

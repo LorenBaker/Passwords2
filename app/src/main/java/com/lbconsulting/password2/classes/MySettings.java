@@ -40,11 +40,23 @@ public class MySettings {
     public static final int JCB = 3;
     public static final int MASTERCARD = 4;
     public static final int VISA = 5;
+
     public static final int BTN_CREDIT_CARDS = 0;
     public static final int BTN_GENERAL_ACCOUNTS = 1;
     public static final int BTN_WEBSITES = 2;
     public static final int BTN_SOFTWARE = 3;
     public static final int LISTS_START_CLOSED = 4;
+
+    public static final int NETWORK_WIFI_ONLY = 0;
+    public static final int NETWORK_ANY = 1;
+
+    public static final int NETWORK_UPDATE_10SEC = 0;
+    public static final int NETWORK_UPDATE_20SEC = 1;
+    public static final int NETWORK_UPDATE_30SEC = 2;
+    public static final int NETWORK_UPDATE_45SEC = 3;
+    public static final int NETWORK_UPDATE_60SEC = 4;
+    public static final int NETWORK_UPDATE_300SEC = 5;
+
     private static final String PASSWORDS_SAVED_STATES = "passwordsSavedStates";
     private static final String SETTING_DROPBOX_ACCESS_TOKEN = "dropboxAccessToken";
     private static final String SETTING_IS_VERBOSE = "isVerbose";
@@ -66,6 +78,12 @@ public class MySettings {
     private static final String SETTING_HIDE_SOFTWARE = "hideSoftware";
     private static final String SETTING_LISTS_START_CLOSED = "listsStartClosed";
     private static final String SETTING_DROPBOX_FOLDER_NAME = "dropboxFolderName";
+
+    public static final String SETTING_NETWORK_PREFERENCE = "networkPreference";
+    public static final String SETTING_OK_TO_USE_NETWORK = "okToUseNetwork";
+
+    public static final String SETTING_SYNC_PERIODICITY = "syncPeriodicity";
+
     //private static final String DEFAULT_DROPBOX_PATH = "No Folder Selected";
     // TODO: remove the Test Passwords Data reference
     private static final String DEFAULT_DROPBOX_PATH = "/Test Passwords Data";
@@ -90,6 +108,50 @@ public class MySettings {
         editor.putBoolean(SETTING_IS_VERBOSE, isVerbose);
         editor.apply();
     }
+
+    //region Networking Preferences
+    public static int getNetworkPreference() {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        return passwordsSavedState.getInt(SETTING_NETWORK_PREFERENCE, NETWORK_ANY);
+    }
+
+    public static void setNetworkPreference(int networkPreference) {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        SharedPreferences.Editor editor = passwordsSavedState.edit();
+        editor.putInt(SETTING_NETWORK_PREFERENCE, networkPreference);
+        editor.apply();
+    }
+
+    public static boolean isOkToUseNetwork(){
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        return passwordsSavedState.getBoolean(SETTING_OK_TO_USE_NETWORK, true);
+    }
+
+    public static void setIsOkToUseNetwork(boolean okToDownloadDataFile){
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        SharedPreferences.Editor editor = passwordsSavedState.edit();
+        editor.putBoolean(SETTING_OK_TO_USE_NETWORK, okToDownloadDataFile);
+        editor.apply();
+    }
+
+    public static int getSyncPeriodicity() {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        return passwordsSavedState.getInt(SETTING_SYNC_PERIODICITY, NETWORK_UPDATE_30SEC);
+    }
+
+    public static void setSyncPeriodicity(int periodicity) {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        SharedPreferences.Editor editor = passwordsSavedState.edit();
+        editor.putInt(SETTING_SYNC_PERIODICITY, periodicity);
+        editor.apply();
+    }
+    //endregion
 
     //region Last Item and User IDs
     private static long getLastItemID() {
@@ -410,67 +472,8 @@ public class MySettings {
         editor.putInt(STATE_APP_PASSWORD_FRAGMENT, appPasswordState);
         editor.apply();
     }
-    //endregion
 
-    public static boolean getOnSaveInstanceState() {
-        SharedPreferences passwordsSavedState =
-                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
-        return passwordsSavedState.getBoolean(SETTING_ON_SAVE_INSTANCE_STATE, false);
-    }
-
-    public static void setOnSaveInstanceState(boolean onSaveInstanceState) {
-        SharedPreferences passwordsSavedState =
-                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
-        SharedPreferences.Editor editor = passwordsSavedState.edit();
-        editor.putBoolean(SETTING_ON_SAVE_INSTANCE_STATE, onSaveInstanceState);
-        editor.apply();
-    }
-
-
-    public static String getSearchText() {
-        SharedPreferences passwordsSavedState =
-                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
-        return passwordsSavedState.getString(SETTING_SEARCH_TEXT, "");
-    }
-
-    public static void setSearchText(String searchText) {
-        SharedPreferences passwordsSavedState =
-                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
-        SharedPreferences.Editor editor = passwordsSavedState.edit();
-        editor.putString(SETTING_SEARCH_TEXT, searchText);
-        editor.apply();
-    }
-
-/*    public static class Credentials {
-        private final static String mIV = "74172ca8e67761d2";
-
-        public static String getIV() {
-            return mIV;
-        }
-
-        public static String getPassword() {
-            return getSavedAppPassword();
-        }
-
-        public static String getKey() {
-            String key = "";
-            String savedPassword = getSavedAppPassword();
-            try {
-                if (!savedPassword.isEmpty()) {
-                    key = CryptLib.SHA256(savedPassword, 32);
-                }
-            } catch (NoSuchAlgorithmException e) {
-                MyLog.e("Credentials", "getKey: NoSuchAlgorithmException");
-                e.printStackTrace();
-            } catch (UnsupportedEncodingException e) {
-                MyLog.e("Credentials", "getKey: UnsupportedEncodingException");
-                e.printStackTrace();
-            }
-            return key;
-        }
-    }*/
-
-
+    // TODO: verify that getAppPasswordKey is used
     public static String getAppPasswordKey() {
         String key = "";
         String savedPassword = getSavedAppPassword();
@@ -486,6 +489,38 @@ public class MySettings {
             e.printStackTrace();
         }
         return key;
+    }
+
+    //endregion
+
+    public static boolean getOnSaveInstanceState() {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        return passwordsSavedState.getBoolean(SETTING_ON_SAVE_INSTANCE_STATE, false);
+    }
+
+
+    public static void setOnSaveInstanceState(boolean onSaveInstanceState) {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        SharedPreferences.Editor editor = passwordsSavedState.edit();
+        editor.putBoolean(SETTING_ON_SAVE_INSTANCE_STATE, onSaveInstanceState);
+        editor.apply();
+    }
+
+    public static String getSearchText() {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        return passwordsSavedState.getString(SETTING_SEARCH_TEXT, "");
+    }
+
+
+    public static void setSearchText(String searchText) {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        SharedPreferences.Editor editor = passwordsSavedState.edit();
+        editor.putString(SETTING_SEARCH_TEXT, searchText);
+        editor.apply();
     }
 
 }

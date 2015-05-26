@@ -6,6 +6,8 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,6 +20,7 @@ import com.dropbox.client2.session.AppKeyPair;
 import com.lbconsulting.password2.R;
 import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
+import com.lbconsulting.password2.classes.NetworkReceiver;
 import com.lbconsulting.password2.classes.clsEvents;
 import com.lbconsulting.password2.classes.clsLabPasswords;
 import com.lbconsulting.password2.classes.clsUtils;
@@ -58,6 +61,9 @@ public class MainActivity extends Activity {
     private FrameLayout mFragment_container;
     private FrameLayout mDetail_container;
 
+    // The BroadcastReceiver that tracks network connectivity changes.
+    private NetworkReceiver networkReceiver = new NetworkReceiver();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,6 +75,12 @@ public class MainActivity extends Activity {
 
         EventBus.getDefault().register(this);
         MySettings.setContext(this);
+
+        // Registers BroadcastReceiver to track network connection changes.
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        networkReceiver = new NetworkReceiver();
+        this.registerReceiver(networkReceiver, filter);
+
         // TODO: remove the setActiveUserID line
         MySettings.setActiveUserID(1);
 
@@ -101,12 +113,12 @@ public class MainActivity extends Activity {
         String key = "encryptionKey";
         String testString = "ab";
         String encryptedTestString = clsUtils.encryptString(testString, key, true);
-        String decryptedTestString = clsUtils.decryptString(encryptedTestString,key, true);
+        String decryptedTestString = clsUtils.decryptString(encryptedTestString, key, true);
 
-        if(testString.equals(decryptedTestString)){
-            showOkDialog(this,"Encryption Test","Success! String are the same.\n\n" + decryptedTestString);
-        }else{
-            showOkDialog(this,"Encryption Test","FAILURE! String are different!");
+        if (testString.equals(decryptedTestString)) {
+            showOkDialog(this, "Encryption Test", "Success! String are the same.\n\n" + decryptedTestString);
+        } else {
+            showOkDialog(this, "Encryption Test", "FAILURE! String are different!");
         }
 
     }
@@ -219,6 +231,10 @@ public class MainActivity extends Activity {
         super.onDestroy();
         MyLog.i("MainActivity", "onDestroy");
         EventBus.getDefault().unregister(this);
+        // Unregisters BroadcastReceiver when app is destroyed.
+        if (networkReceiver != null) {
+            this.unregisterReceiver(networkReceiver);
+        }
     }
 
 
@@ -395,7 +411,7 @@ public class MainActivity extends Activity {
         // This method asynchronously reads and decrypts the Dropbox data file, and
         // then updates the SQLite database
         String dropboxFullFilename = MySettings.getDropboxFilename();
-        new DownloadDecryptDataFile(this, mDBApi, dropboxFullFilename, true).execute();
+        new DownloadDecryptDataFile(this, mDBApi, dropboxFullFilename, MySettings.isVerbose()).execute();
     }
 
     @Override
@@ -427,21 +443,16 @@ public class MainActivity extends Activity {
 
         } else if (id == R.id.action_refresh_from_dropbox) {
             updatePasswordsData();
-            // TODO: Show progress bar
-            // Toast.makeText(this, "TO COME: action_refresh_from_dropbox", Toast.LENGTH_SHORT).show();
-
             return true;
 
         } else if (id == R.id.action_settings) {
-            // Toast.makeText(this, "TO COME: action_settings", Toast.LENGTH_SHORT).show();
             MySettings.setActiveFragmentID(MySettings.FRAG_SETTINGS);
             showFragment(MySettings.FRAG_SETTINGS, false);
             return true;
 
         } else if (id == R.id.action_help) {
-            Toast.makeText(this, "TO COME: action_help", Toast.LENGTH_SHORT).show();
-
             // TODO: make help fragment
+            Toast.makeText(this, "TO COME: action_help", Toast.LENGTH_SHORT).show();
             return true;
 
         } else if (id == R.id.action_about) {

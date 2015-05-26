@@ -22,51 +22,93 @@
         Getting started:\n
         Step3: Enter your password, then click OK</string>
 
-    <string name="txtAppPassword_hint">Password</string>
-    <string name="btnDisplay_text">Display</string>
-    <string name="btnCreateNewUser_text">Create New User</string>
-    <string name="btnOK_text">OK</string>
-    <string name="btnCancel_text">Cancel</string>
-    <string name="btnYes_text">Yes</string>
-    <string name="btnNo_text">No</string>
-    <string name="btnEditUserName_text">Edit User Name:\u0020</string>
-    <string name="btnChangeAppPassword_text">Change Application Password</string>
-    <string name="btnDisplay_setText_Display">Display</string>
-    <string name="btnDisplay_setText_Hide">Hide</string>
-    <string name="btnSelectUser_text">Select User\nCurrent user:\u0020</string>
-    <string name="UserNotSelected_text">Not Selected</string>
-    <string name="btnSelectUser_dialog_setTitle">Select User</string>
-    <string name="none_text">NONE</string>
-    <string name="btnUserSettings_text">User Settings: New, Edit, Delete</string>
-    <string name="btnDeleteUser_text">Delete User:\u0020</string>
-    <string name="enterNewUserName_dialog_title">Enter New User Name</string>
-    <string name="newUserName_editText_hint">New User Name</string>
-    <string name="editUserName_dialog_title">Edit User Name</string>
-    <string name="editUserName_editText_hint">Edit User Name</string>
-    <string name="deleteUser_dialog_title">Confirm Deleting User</string>
-    <string name="deleteUser_dialog_message">Do you want to permanently delete user \"</string>
-    <string name="noUsersExist_dialog_title">No Users Exist</string>
-    <string name="noUsersExist_dialog_message">Please select \" Create New User\"</string>
-    <string name="btnHideItemCategories_text">Select Hidden Item Categories</string>
-    <string name="btnSelectDropboxFolder_text">Select Dropbox Folder\nCurrent Folder:\n</string>
     <string name="actionBarTitle_Settings">Settings</string>
     <string name="actionBarTitle_userSettings">User Settings</string>
-    <string name="newDropboxFolderDialog_title">Enter Dropbox Folder Name</string>
-    <string name="newDropboxFolderEditText_hint">New Dropbox Folder Name</string>
-    <string name="newDropboxFolderDialogPositiveButton_text">Create Folder</string>
-    <string name="btnSelectPasswordLongevity_text">"Select Password Longevity\nCurrent Longevity: "</string>
-    <string name="PasswordLongevityDialog_title">App Password Longevity</string>
-    <string name="btnCreditCards_text">Credit Cards</string>
-    <string name="btnGeneralAccounts_text">General Accounts</string>
-    <string name="btnWebsites_text">Websites</string>
-    <string name="btnSoftware_text">Software</string>
-    <string name="HideItemCategoriesDialog_title">Hide Item Categories</string>
     <string name="btnAppPasswordSettings_text">Application Password Settings</string>
-    <string name="btnNetworkingSettings_text">Networking Settings\nCurrent setting:</string>
+    <string name="btnCancel_text">Cancel</string>
+    <string name="btnChangeAppPassword_text">Change Application Password</string>
+    <string name="btnCreateNewUser_text">Create New User</string>
+    <string name="btnCreditCards_text">Credit Cards</string>
+    <string name="btnDeleteUser_text">Delete User:\u0020</string>
+    <string name="btnDisplay_setText_Display">Display</string>
+    <string name="btnDisplay_setText_Hide">Hide</string>
+    <string name="btnDisplay_text">Display</string>
+    <string name="btnEditUserName_text">Edit User Name:\u0020</string>
+    <string name="btnGeneralAccounts_text">General Accounts</string>
+    <string name="btnHideItemCategories_text">Select Hidden Item Categories</string>
+    <string name="btnNetworkingSettings_text">Networking Settings</string>
+    <string name="btnNetworkPreferences_text">Select Network Preference\nUse network\u0020</string>
+    <string name="btnNo_text">No</string>
+    <string name="btnOK_text">OK</string>
+    <string name="btnSelectDropboxFolder_text">Select Dropbox Folder\nCurrent Folder:\n</string>
+    <string name="btnSelectPasswordLongevity_text">"Select Password Longevity\nCurrent Longevity: "</string>
+    <string name="btnSelectUser_dialog_setTitle">Select User</string>
+    <string name="btnSelectUser_text">Select User\nCurrent user:\u0020</string>
+    <string name="btnSoftware_text">Software</string>
+    <string name="btnUserSettings_text">User Settings: New, Edit, Delete</string>
+    <string name="btnWebsites_text">Websites</string>
+    <string name="btnYes_text">Yes</string>
+    <string name="deleteUser_dialog_message">Do you want to permanently delete user\u0020\"</string>
+    <string name="deleteUser_dialog_title">Confirm Deleting User</string>
+    <string name="downloadError_fileDeleted">Passwords data file has been deleted.</string>
+    <string name="downloadError_fileDownloadStarted">File download started. No other status available.</string>
+    <string name="downloadError_fileDownloadSuccess">File downloaded successfully, but the database was not updated?</string>
+    <string name="downloadError_fileFoundButEmpty">Passwords data file found, but is empty!</string>
+    <string name="downloadError_fileNotFound">Unable to find the Passwords data file.</string>
+    <string name="downloadError_invalidPassword">Unable to decrypt the Passwords data file. Please make sure you are using the correct application password.</string>
+    <string name="downloadError_notOkToDownloadFile">Failed to download Passwords data file.\n\nThere is no network connection (mobile or Wi-Fi), or the user preference setting is WI-FI Only and there is no Wi-Fi connection.</string>
+    <string name="downloadError_okDialogTitle">Failed to update database</string>
+    <string name="downloadError_passwordKeyIsEmpty">Password key is empty.</string>
+    <string name="downloadError_unableToParseJason">Unable to parse the Json string.</string>
+    <string name="downloadSuccess_databaseUpdatedSuccess">Passwords database successfully updated.</string>
+    <string name="editUserName_dialog_title">Edit User Name</string>
+    <string name="editUserName_editText_hint">Edit User Name</string>
+    <string name="enterNewUserName_dialog_title">Enter New User Name</string>
+    <string name="HideItemCategoriesDialog_title">Hide Item Categories</string>
     <string name="invalid_password_message1">The application password must be at least ten characters long, have a minimum of one lower case, one upper case, and one number</string>
     <string name="invalid_password_message2">The proposed password is empty!\n\n</string>
     <string name="invalid_password_message3">"The proposed password's length of "</string>
     <string name="invalid_password_message4">" is too short!\n\n"</string>
+    <string name="network_lost_connection">Lost network connection.</string>
+    <string name="network_mobile_connected">Network mobile connected.</string>
+    <string name="network_okToUseNetwork">"Passwords is OK to use the network.\n"</string>
+    <string name="network_wifi_connected">Network connected to Wi-Fi.</string>
+    <string name="newDropboxFolderDialog_title">Enter Dropbox Folder Name</string>
+    <string name="newDropboxFolderDialogPositiveButton_text">Create Folder</string>
+    <string name="newDropboxFolderEditText_hint">New Dropbox Folder Name</string>
+    <string name="newUserName_editText_hint">New User Name</string>
+    <string name="none_text">NONE</string>
+    <string name="noUsersExist_dialog_message">Please select \" Create New User\"</string>
+    <string name="noUsersExist_dialog_title">No Users Exist</string>
+    <string name="PasswordLongevityDialog_title">App Password Longevity</string>
+    <string name="txtAppPassword_hint">Password</string>
+    <string name="UserNotSelected_text">Not Selected</string>
+    <string name="btnSyncPeriodicity_text">Sync Periodicity\nCheck for updates\u0020</string>
+
+
+    <string-array name="longevityItems_list">
+        <item>None</item>
+        <item>5 min</item>
+        <item>15 min</item>
+        <item>30 min</item>
+        <item>1 hr</item>
+        <item>4 hrs</item>
+        <item>8 hrs</item>
+    </string-array>
+
+    <string-array name="syncPreference_list">
+        <item>only when Wi-Fi available</item>
+        <item>when Wi-Fi or mobile available</item>
+    </string-array>
+
+    <string-array name="updatePeriodicity_list">
+        <item>Every 10 seconds</item>
+        <item>Every 20 seconds</item>
+        <item>Every 30 seconds</item>
+        <item>Every 45 seconds</item>
+        <item>Every minute</item>
+        <item>Every 5 minutes</item>
+    </string-array>
 
     <string-array name="item_categories">
         <item>Credit Cards</item>
