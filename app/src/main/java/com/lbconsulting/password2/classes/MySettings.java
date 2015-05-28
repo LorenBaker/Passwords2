@@ -474,7 +474,8 @@ public class MySettings {
         }
 
         // TODO: Remove hard coded password
-        appPassword = "GoBeavers1972";
+        //appPassword = "GoBeavers1972";
+        appPassword = NOT_AVAILABLE;
         return appPassword;
     }
 
@@ -500,7 +501,7 @@ public class MySettings {
     public static int getAppPasswordState() {
         SharedPreferences passwordsSavedState =
                 mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
-        return passwordsSavedState.getInt(STATE_APP_PASSWORD_FRAGMENT, AppPasswordFragment.STATE_STEP_0);
+        return passwordsSavedState.getInt(STATE_APP_PASSWORD_FRAGMENT, AppPasswordFragment.STATE_STEP_1_GET_FOLDER);
     }
 
     public static void setAppPasswordState(int appPasswordState) {

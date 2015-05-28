@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.lbconsulting.password2.R;
 import com.lbconsulting.password2.classes.MyLog;
@@ -35,6 +36,10 @@ public class Settings_UserFragment extends Fragment implements View.OnClickListe
     private Button btnCreateNewUser;
     private Button btnEditUserName;
     private Button btnDeleteUser;
+
+    private TextView tvFirstTimeMessage;
+
+    private int mStartupState;
 
 
     public static Settings_UserFragment newInstance() {
@@ -66,6 +71,8 @@ public class Settings_UserFragment extends Fragment implements View.OnClickListe
         btnEditUserName.setOnClickListener(this);
         btnDeleteUser.setOnClickListener(this);
 
+        tvFirstTimeMessage = (TextView) rootView.findViewById(R.id.tvFirstTimeMessage);
+
         return rootView;
     }
 
@@ -79,8 +86,25 @@ public class Settings_UserFragment extends Fragment implements View.OnClickListe
             MySettings.setOnSaveInstanceState(false);
         }
 
-        EventBus.getDefault().post(new clsEvents
-                .setActionBarTitle(getActivity().getString(R.string.actionBarTitle_userSettings)));
+        EventBus.getDefault().post(new clsEvents.setActionBarTitle(getActivity().getString(R.string.actionBarTitle_userSettings)));
+        mStartupState = MySettings.getAppPasswordState();
+        switch (mStartupState) {
+            case AppPasswordFragment.STATE_STEP_3B_CREATE_NEW_USER:
+                btnCreateNewUser.setVisibility(View.VISIBLE);
+                btnEditUserName.setVisibility(View.GONE);
+                btnDeleteUser.setVisibility(View.GONE);
+                tvFirstTimeMessage.setVisibility(View.VISIBLE);
+                tvFirstTimeMessage.setText(getResources().getString(R.string.tvFirstTimeMessage_text_Step3B));
+
+                break;
+
+            default:
+                btnCreateNewUser.setVisibility(View.VISIBLE);
+                btnEditUserName.setVisibility(View.VISIBLE);
+                btnDeleteUser.setVisibility(View.VISIBLE);
+                tvFirstTimeMessage.setVisibility(View.GONE);
+        }
+
     }
 
     @Override
@@ -179,6 +203,9 @@ public class Settings_UserFragment extends Fragment implements View.OnClickListe
                                     mActiveUser = new clsUserValues(getActivity(), newUserID);
                                     selectActiveUser();
                                     dialog.dismiss();
+                                    if (mStartupState == AppPasswordFragment.STATE_STEP_3B_CREATE_NEW_USER) {
+                                        EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_APP_PASSWORD, false));
+                                    }
                                 } else {
                                     dialog.dismiss();
                                     MyLog.e("Settings_UserFragment", "btnCreateNewUser OK: new user is not unique");
@@ -186,17 +213,19 @@ public class Settings_UserFragment extends Fragment implements View.OnClickListe
                                     String message = "The provide user name \"" + newUserName + "\" already exists!";
                                     EventBus.getDefault().post(new clsEvents.showOkDialog(title, message));
                                 }
+
                             }
                         });
+                if (mStartupState != AppPasswordFragment.STATE_STEP_3B_CREATE_NEW_USER) {
+                    newUserDialog.setNegativeButton(getActivity().getString(R.string.btnCancel_text),
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    // Canceled.
+                                    dialog.dismiss();
 
-                newUserDialog.setNegativeButton(getActivity().getString(R.string.btnCancel_text),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                // Canceled.
-                                dialog.dismiss();
-                            }
-                        });
-
+                                }
+                            });
+                }
                 newUserDialog.show();
 
                 break;

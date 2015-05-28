@@ -250,7 +250,7 @@ public class DropboxListFragment extends Fragment
                 // Set an EditText view to get user input
                 LayoutInflater inflater = (LayoutInflater) getActivity()
                         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                final View view =  inflater.inflate(R.layout.dialog_edit_text, null);
+                final View view = inflater.inflate(R.layout.dialog_edit_text, null);
                 final EditText txtNewFolderName = (EditText) view.findViewById(R.id.txtBox);
                 txtNewFolderName.setHint(getActivity().getString(R.string.newDropboxFolderEditText_hint));
                 newDropboxFolderDialog.setView(view);
@@ -290,7 +290,13 @@ public class DropboxListFragment extends Fragment
 
     private void selectFolder(String newFolderPath) {
         MySettings.setDropboxFolderName(newFolderPath);
-        EventBus.getDefault().post(new clsEvents.PopBackStack());
+
+        if (MySettings.getAppPasswordState() == AppPasswordFragment.STATE_STEP_2_DOES_FILE_EXIST) {
+            // return to the AppPasswordFragment
+            EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_APP_PASSWORD, false));
+        } else {
+            EventBus.getDefault().post(new clsEvents.PopBackStack());
+        }
     }
 
 

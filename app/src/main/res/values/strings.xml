@@ -10,11 +10,11 @@
         Getting started:\n
         Step2: Enter your password, then click OK</string>
 
-        <string name="tvFirstTimeMessage_text_Step3a">
+        <string name="tvFirstTimeMessage_text_Step5A">
         Getting started:\n
         Step3: Select user, then click OK</string>
 
-        <string name="tvFirstTimeMessage_text_Step2b">
+        <string name="tvFirstTimeMessage_text_Step3B">
         Getting started:\n
         Step2: Create new user</string>
 
@@ -84,6 +84,7 @@
     <string name="txtAppPassword_hint">Password</string>
     <string name="UserNotSelected_text">Not Selected</string>
     <string name="btnSyncPeriodicity_text">Sync Periodicity\nCheck for updates\u0020</string>
+    <string name="tvProgressBarCaption_text">Syncing with Dropbox \n . . . Please wait</string>
 
 
     <string-array name="longevityItems_list">

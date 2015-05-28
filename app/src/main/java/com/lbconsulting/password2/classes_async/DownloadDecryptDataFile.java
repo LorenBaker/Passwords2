@@ -416,7 +416,6 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
                             mContext.getString(R.string.downloadSuccess_databaseUpdatedSuccess),
                             Toast.LENGTH_SHORT).show();
                 }
-                // TODO: Hide file download progress bar
                 break;
 
             case FILE_NOT_FOUND:

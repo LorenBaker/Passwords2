@@ -83,7 +83,7 @@ public class MainActivity extends Activity {
         this.registerReceiver(networkReceiver, filter);
 
         // TODO: remove the setActiveUserID line
-       // MySettings.setActiveUserID(1);
+        // MySettings.setActiveUserID(1);
 
         AppKeyPair appKeys = new AppKeyPair(APP_KEY, APP_SECRET);
         AndroidAuthSession session = new AndroidAuthSession(appKeys);
@@ -139,7 +139,20 @@ public class MainActivity extends Activity {
                 break;
 
             default:
-                showParentFragment(activeFragmentID);
+                int startupState = MySettings.getAppPasswordState();
+                switch (startupState) {
+                    case AppPasswordFragment.STATE_STEP_3B_CREATE_NEW_USER:
+                        showFragment(MySettings.FRAG_USER_SETTINGS, false);
+                        break;
+
+                    case AppPasswordFragment.STATE_STEP_5A_GET_USER:
+                        showFragment(MySettings.FRAG_SETTINGS, false);
+                        break;
+
+                    default:
+                        showParentFragment(activeFragmentID);
+                }
+
         }
     }
 
@@ -177,7 +190,7 @@ public class MainActivity extends Activity {
     public void onEvent(clsEvents.onDropboxDataFileChange event) {
        /*count++;
         MyLog.i("MainActivity", "onDropboxDataFileChange. Count = " + count);*/
-       updatePasswordsData();
+        updatePasswordsData();
     }
 
     public void onEvent(clsEvents.onPasswordsDatabaseUpdated event) {
@@ -232,6 +245,10 @@ public class MainActivity extends Activity {
                 MyLog.e("MainActivity", "onResume: DbAuthLog: Error authenticating: " + e.getMessage());
                 e.printStackTrace();
             }
+        }
+
+        if (MySettings.getAppPassword().equals(MySettings.NOT_AVAILABLE)) {
+            showFragment(MySettings.FRAG_APP_PASSWORD, false);
         }
 
         // start the PasswordsUpdateService
