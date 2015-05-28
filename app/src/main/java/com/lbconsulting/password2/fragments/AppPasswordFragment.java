@@ -40,7 +40,7 @@ import de.greenrobot.event.EventBus;
  * <p/>
  * Path B - Data file does not exist
  * 3B	Create new user
- * 4B	Get app password
+ * 4B	Create app password
  * 5B	Save new data file
  */
 
@@ -66,16 +66,16 @@ public class AppPasswordFragment extends Fragment implements View.OnClickListene
     public static final int STATE_STEP_1_GET_FOLDER = 10;
     public static final int STATE_STEP_2_DOES_FILE_EXIST = 20;
 
-    private static final int STATE_STEP_3A_GET_APP_PASSWORD = 31;
-    private static final int STATE_STEP_4A_READ_FILE = 41;
+    public static final int STATE_STEP_3A_GET_APP_PASSWORD = 31;
+    public static final int STATE_STEP_4A_READ_FILE = 41;
     public static final int STATE_STEP_5A_GET_USER = 51;
 
     public static final int STATE_STEP_3B_CREATE_NEW_USER = 32;
-    private static final int STATE_STEP_4B_GET_APP_PASSWORD = 42;
-    private static final int STATE_STEP_5B_SAVE_FILE = 52;
+    public static final int STATE_STEP_4B_CREATE_APP_PASSWORD = 42;
+    public static final int STATE_STEP_5B_SAVE_FILE = 52;
 
-    private static final int STATE_PASSWORD_ONLY = 60;
-    private int mStartupState = STATE_STEP_1_GET_FOLDER;
+    public static final int STATE_PASSWORD_ONLY = 60;
+   //private int mStartupState = STATE_STEP_1_GET_FOLDER;
 
 
     public static AppPasswordFragment newInstance(boolean isChangingPassword) {
@@ -146,7 +146,7 @@ public class AppPasswordFragment extends Fragment implements View.OnClickListene
         super.onResume();
         MyLog.i("AppPasswordFragment", "onResume()");
         MySettings.setActiveFragmentID(MySettings.FRAG_APP_PASSWORD);
-        mStartupState = MySettings.getAppPasswordState();
+        //mStartupState = MySettings.getAppPasswordState();
         updateUI();
     }
 
@@ -155,7 +155,7 @@ public class AppPasswordFragment extends Fragment implements View.OnClickListene
 
         showButtonText();
 
-        switch (mStartupState) {
+        switch (MySettings.getAppPasswordState()) {
             case STATE_PASSWORD_ONLY:
                 MyLog.i("AppPasswordFragment", "updateUI(): State = STATE_PASSWORD_ONLY");
                 showPasswordOnly();
@@ -167,7 +167,7 @@ public class AppPasswordFragment extends Fragment implements View.OnClickListene
                 showStep1();
                 // set the next step
                 MySettings.setAppPasswordState(STATE_STEP_2_DOES_FILE_EXIST);
-                mStartupState = STATE_STEP_2_DOES_FILE_EXIST;
+
                 break;
 
             case STATE_STEP_2_DOES_FILE_EXIST:
@@ -182,19 +182,17 @@ public class AppPasswordFragment extends Fragment implements View.OnClickListene
                 // Select user
                 showStep3A();
                 MySettings.setAppPasswordState(STATE_STEP_4A_READ_FILE);
-                mStartupState = STATE_STEP_4A_READ_FILE;
+
                 break;
 
             case STATE_STEP_4A_READ_FILE:
                 MyLog.i("AppPasswordFragment", "updateUI(): State=STATE_STEP_4A_READ_FILE: Select User");
-                // Select user
-                showStep5A();
+
                 break;
 
             case STATE_STEP_5A_GET_USER:
 
                 break;
-
 
 
             case STATE_STEP_3B_CREATE_NEW_USER:
@@ -203,7 +201,7 @@ public class AppPasswordFragment extends Fragment implements View.OnClickListene
                 showStep3B();
                 break;
 
-            case STATE_STEP_4B_GET_APP_PASSWORD:
+            case STATE_STEP_4B_CREATE_APP_PASSWORD:
 
                 break;
 
@@ -220,7 +218,8 @@ public class AppPasswordFragment extends Fragment implements View.OnClickListene
     public void onEvent(clsEvents.onPasswordsDatabaseUpdated event) {
         // Startup step 4A complete - Passwords database successfully updated
         // Proceed with startup step 5A - Select user
-        showStep5A_StartUpViews();
+        MySettings.setAppPasswordState(STATE_STEP_5A_GET_USER);
+        EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_SETTINGS, false));
     }
 
     public void onEvent(clsEvents.downLoadResults event) {
@@ -473,8 +472,6 @@ public class AppPasswordFragment extends Fragment implements View.OnClickListene
 
         tvFirstTimeMessage.setVisibility(View.GONE);
 
-        btnCreateNewUser.setVisibility(View.GONE);
-        btnSelectUser.setVisibility(View.GONE);
         btnSelectDropboxFolder.setVisibility(View.GONE);
 
         txtAppPassword.setVisibility(View.GONE);
@@ -495,11 +492,11 @@ public class AppPasswordFragment extends Fragment implements View.OnClickListene
         showButtonText();
     }
 
-    private void showStep5A() {
+/*    private void showStep5A() {
         // Get password
         showStep5A_StartUpViews();
         showButtonText();
-    }
+    }*/
 
 /*    private void showStep3B() {
         // Create user
@@ -552,41 +549,42 @@ public class AppPasswordFragment extends Fragment implements View.OnClickListene
 
     private void showStep3A_StartUpViews() {
         // Get password from user
-        EventBus.getDefault().post(new clsEvents.showProgressInActionBar(false));
+        //EventBus.getDefault().post(new clsEvents.showProgressInActionBar(false));
         tvProgressBarCaption.setVisibility(View.GONE);
 
         tvFirstTimeMessage.setVisibility(View.VISIBLE);
-        tvFirstTimeMessage.setText(getResources().getString(R.string.tvFirstTimeMessage_text_Step2a));
+        tvFirstTimeMessage.setText(getResources().getString(R.string.tvFirstTimeMessage_text_Step3A));
 
         txtAppPassword.setVisibility(View.VISIBLE);
         btnDisplay.setVisibility(View.VISIBLE);
         btnOK.setVisibility(View.GONE);
         btnOkReadPasswordFile.setVisibility(View.VISIBLE);
-
-        btnCreateNewUser.setVisibility(View.GONE);
-        btnSelectUser.setVisibility(View.GONE);
-
         btnSelectDropboxFolder.setVisibility(View.GONE);
     }
 
-    private void showStep5A_StartUpViews() {
+/*    private void showStep5A_StartUpViews() {
         // Select User
-        //EventBus.getDefault().post(new clsEvents.showProgressInActionBar(false));
-        tvProgressBarCaption.setVisibility(View.GONE);
 
-        tvFirstTimeMessage.setVisibility(View.VISIBLE);
-        tvFirstTimeMessage.setText(getResources().getString(R.string.tvFirstTimeMessage_text_Step5A));
+    tvProgressBarCaption.setVisibility(View.GONE);
 
-        txtAppPassword.setVisibility(View.GONE);
-        btnDisplay.setVisibility(View.GONE);
-        btnOK.setVisibility(View.VISIBLE);
-        btnOkReadPasswordFile.setVisibility(View.GONE);
+    tvFirstTimeMessage.setVisibility(View.VISIBLE);
+    tvFirstTimeMessage.setText(
 
-        btnCreateNewUser.setVisibility(View.GONE);
-        btnSelectUser.setVisibility(View.VISIBLE);
+    getResources()
 
-        btnSelectDropboxFolder.setVisibility(View.GONE);
-    }
+    .
+
+    getString(R.string.tvFirstTimeMessage_text_Step5A)
+
+    );
+
+    txtAppPassword.setVisibility(View.GONE);
+    btnDisplay.setVisibility(View.GONE);
+    btnOK.setVisibility(View.VISIBLE);
+    btnOkReadPasswordFile.setVisibility(View.GONE);
+
+    btnSelectDropboxFolder.setVisibility(View.GONE);
+}*/
 
 /*    private void showStep3B_StartUpViews() {
         // Create new user
@@ -613,7 +611,7 @@ public class AppPasswordFragment extends Fragment implements View.OnClickListene
         tvProgressBarCaption.setVisibility(View.GONE);
 
         tvFirstTimeMessage.setVisibility(View.VISIBLE);
-        tvFirstTimeMessage.setText(getResources().getString(R.string.tvFirstTimeMessage_text_Step3b));
+        tvFirstTimeMessage.setText(getResources().getString(R.string.tvFirstTimeMessage_text_Step4B));
 
         txtAppPassword.setVisibility(View.VISIBLE);
         btnDisplay.setVisibility(View.VISIBLE);

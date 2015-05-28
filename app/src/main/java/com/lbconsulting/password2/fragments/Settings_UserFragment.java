@@ -38,7 +38,6 @@ public class Settings_UserFragment extends Fragment implements View.OnClickListe
     private Button btnDeleteUser;
 
     private TextView tvFirstTimeMessage;
-
     private int mStartupState;
 
 

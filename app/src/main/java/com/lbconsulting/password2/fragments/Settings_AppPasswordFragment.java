@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.lbconsulting.password2.R;
@@ -43,6 +44,9 @@ public class Settings_AppPasswordFragment extends Fragment implements View.OnCli
     private Button btnConfirmPasswordDisplay;
     private boolean mShowPasswordText = false;
     private boolean mShowConfirmPasswordText = false;
+
+    private TextView tvFirstTimeMessage;
+    private int mStartupState;
 
 
     public Settings_AppPasswordFragment() {
@@ -72,6 +76,8 @@ public class Settings_AppPasswordFragment extends Fragment implements View.OnCli
         btnChangeAppPassword.setOnClickListener(this);
         btnSelectPasswordLongevity.setOnClickListener(this);
 
+        tvFirstTimeMessage = (TextView) rootView.findViewById(R.id.tvFirstTimeMessage);
+
         return rootView;
     }
 
@@ -85,8 +91,21 @@ public class Settings_AppPasswordFragment extends Fragment implements View.OnCli
             MySettings.setOnSaveInstanceState(false);
         }
 
-        EventBus.getDefault().post(new clsEvents
-                .setActionBarTitle("App Password Settings"));
+        EventBus.getDefault().post(new clsEvents.setActionBarTitle("App Password Settings"));
+
+        mStartupState = MySettings.getAppPasswordState();
+        switch (mStartupState) {
+            case AppPasswordFragment.STATE_STEP_4B_CREATE_APP_PASSWORD:
+                btnChangeAppPassword.setVisibility(View.VISIBLE);
+                btnSelectPasswordLongevity.setVisibility(View.GONE);
+                tvFirstTimeMessage.setVisibility(View.VISIBLE);
+                break;
+
+            default:
+                btnChangeAppPassword.setVisibility(View.VISIBLE);
+                btnSelectPasswordLongevity.setVisibility(View.VISIBLE);
+                tvFirstTimeMessage.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -106,11 +125,22 @@ public class Settings_AppPasswordFragment extends Fragment implements View.OnCli
 
     private void updateUI() {
 
-        int passwordLongevity = (int) MySettings.getPasswordLongevity() / 60000;
-        String longevityDescription = getLongevityDescription(passwordLongevity);
-        btnSelectPasswordLongevity
-                .setText(getActivity().getString(R.string.btnSelectPasswordLongevity_text)
-                        + longevityDescription);
+        switch (mStartupState){
+            case AppPasswordFragment.STATE_STEP_3B_CREATE_NEW_USER:
+                tvFirstTimeMessage.setText(
+                        getActivity().getString(R.string.tvFirstTimeMessage_text_Step3B)
+                                + getActivity().getString(R.string.invalid_password_message1));
+
+                btnChangeAppPassword.setText("Create Application Password");
+                break;
+
+            default:
+                int passwordLongevity = (int) MySettings.getPasswordLongevity() / 60000;
+                String longevityDescription = getLongevityDescription(passwordLongevity);
+                btnSelectPasswordLongevity
+                        .setText(getActivity().getString(R.string.btnSelectPasswordLongevity_text)
+                                + longevityDescription);
+        }
     }
 
     private String getLongevityDescription(int longevity) {
@@ -191,7 +221,15 @@ public class Settings_AppPasswordFragment extends Fragment implements View.OnCli
                 // custom dialog
                 final Dialog changePasswordDialog = new Dialog(getActivity());
                 changePasswordDialog.setContentView(R.layout.dialog_app_change_password);
-                changePasswordDialog.setTitle("Change App Password");
+
+                switch (mStartupState){
+                    case AppPasswordFragment.STATE_STEP_4B_CREATE_APP_PASSWORD:
+                        changePasswordDialog.setTitle("Create Password");
+                        break;
+
+                    default:
+                        changePasswordDialog.setTitle("Change Password");
+                }
 
                 // set the custom dialog components - text, image and button
                 txtAppPassword = (EditText) changePasswordDialog.findViewById(R.id.txtAppPassword);
@@ -274,10 +312,20 @@ public class Settings_AppPasswordFragment extends Fragment implements View.OnCli
 
 
                 Button btnCancel = (Button) changePasswordDialog.findViewById(R.id.btnCancel);
-                // do nothing, close the dialog
+                switch (mStartupState) {
+                    case AppPasswordFragment.STATE_STEP_4B_CREATE_APP_PASSWORD:
+                        btnCancel.setVisibility(View.INVISIBLE);
+                        break;
+
+                    default:
+                        btnCancel.setVisibility(View.VISIBLE);
+                }
+
+
                 btnCancel.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        // do nothing, close the dialog
                         changePasswordDialog.dismiss();
                     }
                 });

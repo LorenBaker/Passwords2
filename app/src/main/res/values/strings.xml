@@ -4,23 +4,23 @@
 
     <string name="tvFirstTimeMessage_text_Step1">
         Getting started:\n
-        Step1: Select Dropbox folder</string>
+        Step 1: Select Dropbox folder.</string>
 
-        <string name="tvFirstTimeMessage_text_Step2a">
+        <string name="tvFirstTimeMessage_text_Step3A">
         Getting started:\n
-        Step2: Enter your password, then click OK</string>
+        Step 2: Enter your password, then click OK</string>
 
         <string name="tvFirstTimeMessage_text_Step5A">
         Getting started:\n
-        Step3: Select user, then click OK</string>
+        Step 3: Select user.\n\n</string>
 
         <string name="tvFirstTimeMessage_text_Step3B">
         Getting started:\n
-        Step2: Create new user</string>
+        Step 2: Create new user.</string>
 
-        <string name="tvFirstTimeMessage_text_Step3b">
+        <string name="tvFirstTimeMessage_text_Step4B">
         Getting started:\n
-        Step3: Enter your password, then click OK</string>
+        Step 3: Create your application password.</string>
 
     <string name="actionBarTitle_Settings">Settings</string>
     <string name="actionBarTitle_userSettings">User Settings</string>

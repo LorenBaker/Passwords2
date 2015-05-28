@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.TextView;
 
 import com.lbconsulting.password2.R;
 import com.lbconsulting.password2.classes.MyLog;
@@ -41,6 +42,9 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
     private Button btnNetworkingSettings;
     private Button btnHideItemCategories;
     private CheckBox ckShowVerboseMessages;
+
+    private TextView tvFirstTimeMessage;
+    private int mStartupState;
 
     private boolean mUpdatingUI;
 
@@ -90,6 +94,8 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
         btnSelectDropboxFolder.setOnClickListener(this);
         btnHideItemCategories.setOnClickListener(this);
 
+        tvFirstTimeMessage = (TextView) rootView.findViewById(R.id.tvFirstTimeMessage);
+
         return rootView;
     }
 
@@ -101,7 +107,43 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
         if (getActivity().getActionBar() != null) {
             getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
         }
+
         EventBus.getDefault().post(new clsEvents.setActionBarTitle(getActivity().getString(R.string.actionBarTitle_Settings)));
+        mStartupState = MySettings.getAppPasswordState();
+        switch (mStartupState) {
+
+            case AppPasswordFragment.STATE_STEP_1_GET_FOLDER:
+                btnSelectUser.setVisibility(View.GONE);
+                btnUserSettings.setVisibility(View.GONE);
+                btnAppPasswordSettings.setVisibility(View.GONE);
+                btnNetworkingSettings.setVisibility(View.GONE);
+                btnSelectDropboxFolder.setVisibility(View.VISIBLE);
+                btnHideItemCategories.setVisibility(View.GONE);
+                tvFirstTimeMessage.setVisibility(View.VISIBLE);
+                tvFirstTimeMessage.setText(getResources().getString(R.string.tvFirstTimeMessage_text_Step1));
+                break;
+
+            case AppPasswordFragment.STATE_STEP_5A_GET_USER:
+                btnSelectUser.setVisibility(View.VISIBLE);
+                btnUserSettings.setVisibility(View.GONE);
+                btnAppPasswordSettings.setVisibility(View.GONE);
+                btnNetworkingSettings.setVisibility(View.GONE);
+                btnSelectDropboxFolder.setVisibility(View.GONE);
+                btnHideItemCategories.setVisibility(View.GONE);
+                tvFirstTimeMessage.setVisibility(View.VISIBLE);
+                tvFirstTimeMessage.setText(getResources().getString(R.string.tvFirstTimeMessage_text_Step3B));
+
+                break;
+
+            default:
+                btnSelectUser.setVisibility(View.VISIBLE);
+                btnUserSettings.setVisibility(View.VISIBLE);
+                btnAppPasswordSettings.setVisibility(View.VISIBLE);
+                btnNetworkingSettings.setVisibility(View.VISIBLE);
+                btnSelectDropboxFolder.setVisibility(View.VISIBLE);
+                btnHideItemCategories.setVisibility(View.VISIBLE);
+                tvFirstTimeMessage.setVisibility(View.GONE);
+        }
         MySettings.setOnSaveInstanceState(false);
     }
 
