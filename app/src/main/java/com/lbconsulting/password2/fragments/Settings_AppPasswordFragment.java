@@ -100,7 +100,7 @@ public class Settings_AppPasswordFragment extends Fragment implements View.OnCli
     public void onResume() {
         super.onResume();
         MyLog.i("Settings_AppPasswordFragment", "onResume()");
-        MySettings.setActiveFragmentID(MySettings.FRAG_SETTINGS);
+        MySettings.setActiveFragmentID(MySettings.FRAG_APP_PASSWORD_SETTINGS);
         updateUI();
     }
 

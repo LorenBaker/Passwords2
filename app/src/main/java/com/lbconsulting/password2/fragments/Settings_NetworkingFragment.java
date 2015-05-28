@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -13,13 +14,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.Toast;
 
 import com.lbconsulting.password2.R;
 import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
 import com.lbconsulting.password2.classes.clsUtils;
+import com.lbconsulting.password2.services.PasswordsUpdateService;
 
 import de.greenrobot.event.EventBus;
 
@@ -30,10 +31,11 @@ public class Settings_NetworkingFragment extends Fragment implements View.OnClic
     private Button btnSyncPeriodicity;
 
     // Strings to Show In Dialog with Radio Buttons
-    private  String[] mSyncPreferenceList;
+    private String[] mSyncPreferenceList;
     private int mNetworkPreference;
-    private  String[] mUpdatePeriodicity_list;
-    private int mUpdatePeriodicity;
+    private String[] mUpdatePeriodicity_list;
+    private int mUpdatePeriodicityMinutes;
+    private int mSelectedPeriodicityPosition;
 
     public Settings_NetworkingFragment() {
         // Required empty public constructor
@@ -94,18 +96,45 @@ public class Settings_NetworkingFragment extends Fragment implements View.OnClic
     public void onResume() {
         super.onResume();
         MyLog.i("Settings_NetworkingFragment", "onResume()");
-        MySettings.setActiveFragmentID(MySettings.FRAG_SETTINGS);
+        MySettings.setActiveFragmentID(MySettings.FRAG_NETWORKING_SETTINGS);
         updateUI();
     }
 
     private void updateUI() {
-        mNetworkPreference = MySettings.getNetworkPreference();
-        btnNetworkPreferences.setText(getActivity().getString(R.string.btnNetworkPreferences_text)
-                + mSyncPreferenceList[mNetworkPreference]);
+        try {
+            mNetworkPreference = MySettings.getNetworkPreference();
+            btnNetworkPreferences.setText(getActivity().getString(R.string.btnNetworkPreferences_text)
+                    + mSyncPreferenceList[mNetworkPreference]);
 
-        mUpdatePeriodicity=MySettings.getSyncPeriodicity();
-        btnSyncPeriodicity.setText(getActivity().getString(R.string.btnSyncPeriodicity_text)
-                + mUpdatePeriodicity_list[mUpdatePeriodicity].toLowerCase());
+            mUpdatePeriodicityMinutes = MySettings.getSyncPeriodicityMinutes();
+
+            switch (mUpdatePeriodicityMinutes) {
+                case MySettings.NETWORK_UPDATE_1_MIN:
+                    mSelectedPeriodicityPosition = 0;
+                    break;
+
+                case MySettings.NETWORK_UPDATE_5_MIN:
+                    mSelectedPeriodicityPosition = 1;
+                    break;
+
+                case MySettings.NETWORK_UPDATE_10_MIN:
+                    mSelectedPeriodicityPosition = 2;
+                    break;
+
+                case MySettings.NETWORK_UPDATE_20_MIN:
+                    mSelectedPeriodicityPosition = 3;
+                    break;
+
+                case MySettings.NETWORK_UPDATE_30_MIN:
+                    mSelectedPeriodicityPosition = 4;
+                    break;
+            }
+            btnSyncPeriodicity.setText(getActivity().getString(R.string.btnSyncPeriodicity_text)
+                    + mUpdatePeriodicity_list[mSelectedPeriodicityPosition].toLowerCase());
+        } catch (Exception e) {
+            MyLog.e("Settings_NetworkingFragment", "updateUI: Exception. " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
 
@@ -172,11 +201,46 @@ public class Settings_NetworkingFragment extends Fragment implements View.OnClic
         Dialog syncPeriodicityDialog;
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Check for updates");
-        builder.setSingleChoiceItems(mUpdatePeriodicity_list, mUpdatePeriodicity, new DialogInterface.OnClickListener() {
+        builder.setSingleChoiceItems(mUpdatePeriodicity_list, mSelectedPeriodicityPosition, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int position) {
-                MySettings.setSyncPeriodicity(position);
+                mSelectedPeriodicityPosition = position;
+                switch (position) {
+                    case 0:
+                        // NETWORK_UPDATE_1_MIN
+                        MySettings.setSyncPeriodicity(1);
+                        break;
+
+                    case 1:
+                        // NETWORK_UPDATE_5_MIN
+                        MySettings.setSyncPeriodicity(5);
+                        break;
+
+                    case 2:
+                        // NETWORK_UPDATE_10_MIN
+                        MySettings.setSyncPeriodicity(10);
+                        break;
+
+                    case 3:
+                        // NETWORK_UPDATE_20_MIN
+                        MySettings.setSyncPeriodicity(20);
+                        break;
+
+                    case 4:
+                        // NETWORK_UPDATE_30_MIN
+                        MySettings.setSyncPeriodicity(30);
+                        break;
+                }
+
+
                 btnSyncPeriodicity.setText(getActivity().getString(R.string.btnSyncPeriodicity_text)
                         + mUpdatePeriodicity_list[position].toLowerCase());
+
+                // restart Passwords update service so the new periodicity can take effect.
+                Intent stopIntent = new Intent(getActivity(), PasswordsUpdateService.class);
+                getActivity().stopService(stopIntent);
+
+                Intent startIntent = new Intent(getActivity(), PasswordsUpdateService.class);
+                getActivity().startService(startIntent);
             }
 
         });

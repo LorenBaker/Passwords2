@@ -196,11 +196,11 @@ public class PasswordItemsListFragment extends Fragment
         lvWebsites = (ListView) rootView.findViewById(R.id.lvWebsites);
         lvSoftware = (ListView) rootView.findViewById(R.id.lvSoftware);
 
-        mAllUserItemsAdapter = new ItemsCursorAdapter(getActivity(), null, 0);
-        mUserCreditCardItemsItemsAdapter = new ItemsCursorAdapter(getActivity(), null, 0);
-        mUserGeneralAccountItemsItemsAdapter = new ItemsCursorAdapter(getActivity(), null, 0);
-        mUserWebsiteItemsItemsAdapter = new ItemsCursorAdapter(getActivity(), null, 0);
-        mUserSoftwareItemsItemsAdapter = new ItemsCursorAdapter(getActivity(), null, 0);
+        mAllUserItemsAdapter = new ItemsCursorAdapter(getActivity(), null, 0, "AllUserItems");
+        mUserCreditCardItemsItemsAdapter = new ItemsCursorAdapter(getActivity(), null, 0, "UserCreditCardItems");
+        mUserGeneralAccountItemsItemsAdapter = new ItemsCursorAdapter(getActivity(), null, 0,"UserGeneralAccountItems");
+        mUserWebsiteItemsItemsAdapter = new ItemsCursorAdapter(getActivity(), null, 0,"UserWebsite");
+        mUserSoftwareItemsItemsAdapter = new ItemsCursorAdapter(getActivity(), null, 0,"UserSoftware");
 
         lvAllUserItems.setAdapter(mAllUserItemsAdapter);
         lvCreditCards.setAdapter(mUserCreditCardItemsItemsAdapter);
@@ -245,10 +245,15 @@ public class PasswordItemsListFragment extends Fragment
         }, 100);
     }
 
-    private void hideKeyBoard(EditText txt) {
-        InputMethodManager imm = (InputMethodManager) getActivity()
+    private void hideKeyBoard(final EditText txt) {
+        final InputMethodManager imm = (InputMethodManager) getActivity()
                 .getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(txt.getWindowToken(), 0);
+        txt.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                imm.hideSoftInputFromWindow(txt.getWindowToken(), 0);
+            }
+        }, 100);
     }
 
     private void setUserNameInActionBar() {
@@ -387,6 +392,7 @@ public class PasswordItemsListFragment extends Fragment
     public void onResume() {
         super.onResume();
         MyLog.i("PasswordItemsListFragment", "onResume()");
+        MySettings.setActiveFragmentID(MySettings.FRAG_ITEMS_LIST);
         setupDisplay(mActiveListView);
     }
 

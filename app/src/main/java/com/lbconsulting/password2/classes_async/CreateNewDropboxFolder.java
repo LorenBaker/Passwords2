@@ -31,6 +31,12 @@ public class CreateNewDropboxFolder extends AsyncTask<Void, Void, String> {
         mNewDropboxFolderPath = selectedFolderPath + "/" + newDropboxFolderPath;
     }
 
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+        MyLog.i("CreateNewDropboxFolder", "onPreExecute");
+        MySettings.setNetworkBusy(true);
+    }
 
     @Override
     protected String doInBackground(Void... params) {
@@ -65,6 +71,7 @@ public class CreateNewDropboxFolder extends AsyncTask<Void, Void, String> {
 
     @Override
     protected void onPostExecute(String result) {
+        MySettings.setNetworkBusy(false);
         if (result.startsWith("Fail")) {
             MyLog.e("CreateNewDropboxFolder", "onPostExecute: " + result);
             String title = "Failed to create folder";

@@ -94,7 +94,7 @@ public class Settings_UserFragment extends Fragment implements View.OnClickListe
     public void onResume() {
         super.onResume();
         MyLog.i("Settings_UserFragment", "onResume()");
-        MySettings.setActiveFragmentID(MySettings.FRAG_SETTINGS);
+        MySettings.setActiveFragmentID(MySettings.FRAG_USER_SETTINGS);
         updateUI();
     }
 

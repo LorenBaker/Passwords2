@@ -6,6 +6,7 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
@@ -23,7 +24,6 @@ import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.NetworkReceiver;
 import com.lbconsulting.password2.classes.clsEvents;
 import com.lbconsulting.password2.classes.clsLabPasswords;
-import com.lbconsulting.password2.classes.clsUtils;
 import com.lbconsulting.password2.classes_async.DownloadDecryptDataFile;
 import com.lbconsulting.password2.fragments.AppPasswordFragment;
 import com.lbconsulting.password2.fragments.DropboxListFragment;
@@ -37,6 +37,7 @@ import com.lbconsulting.password2.fragments.SettingsFragment;
 import com.lbconsulting.password2.fragments.Settings_AppPasswordFragment;
 import com.lbconsulting.password2.fragments.Settings_NetworkingFragment;
 import com.lbconsulting.password2.fragments.Settings_UserFragment;
+import com.lbconsulting.password2.services.PasswordsUpdateService;
 
 import de.greenrobot.event.EventBus;
 
@@ -82,7 +83,7 @@ public class MainActivity extends Activity {
         this.registerReceiver(networkReceiver, filter);
 
         // TODO: remove the setActiveUserID line
-        MySettings.setActiveUserID(1);
+       // MySettings.setActiveUserID(1);
 
         AppKeyPair appKeys = new AppKeyPair(APP_KEY, APP_SECRET);
         AndroidAuthSession session = new AndroidAuthSession(appKeys);
@@ -110,33 +111,73 @@ public class MainActivity extends Activity {
     //region onEvent
 
     public void onEvent(clsEvents.test event) {
-        String key = "encryptionKey";
-        String testString = "ab";
-        String encryptedTestString = clsUtils.encryptString(testString, key, true);
-        String decryptedTestString = clsUtils.decryptString(encryptedTestString, key, true);
-
-        if (testString.equals(decryptedTestString)) {
-            showOkDialog(this, "Encryption Test", "Success! String are the same.\n\n" + decryptedTestString);
-        } else {
-            showOkDialog(this, "Encryption Test", "FAILURE! String are different!");
-        }
-
+        Intent intent = new Intent(this, PasswordsUpdateService.class);
+        startService(intent);
     }
 
     public void onEvent(clsEvents.PopBackStack event) {
-        FragmentManager fm = getFragmentManager();
+
+        int activeFragmentID = MySettings.getActiveFragmentID();
+        showParentFragment(activeFragmentID);
+/*        FragmentManager fm = getFragmentManager();
         MyLog.i("MainActivity", "onEvent: BackStackEntryCount=" + fm.getBackStackEntryCount());
         if (fm.getBackStackEntryCount() < 2 && MySettings.getActiveFragmentID() != MySettings.FRAG_ITEMS_LIST) {
             MySettings.setActiveFragmentID(MySettings.FRAG_ITEMS_LIST);
             showFragment(MySettings.FRAG_ITEMS_LIST, false);
         } else {
             fm.popBackStack();
-        }
+        }*/
 
     }
 
+    @Override
+    public void onBackPressed() {
+        int activeFragmentID = MySettings.getActiveFragmentID();
+        switch (activeFragmentID) {
+            case MySettings.FRAG_ITEMS_LIST: // 1
+                super.onBackPressed();
+                break;
+
+            default:
+                showParentFragment(activeFragmentID);
+        }
+    }
+
+    private void showParentFragment(int activeFragmentID) {
+        switch (activeFragmentID) {
+
+            case MySettings.FRAG_ITEM_DETAIL: //11
+            case MySettings.FRAG_SETTINGS: //12
+                showFragment(MySettings.FRAG_ITEMS_LIST, false);
+                break;
+
+            case MySettings.FRAG_EDIT_CREDIT_CARD: //111
+            case MySettings.FRAG_EDIT_GENERAL_ACCOUNT: //112
+            case MySettings.FRAG_EDIT_SOFTWARE: //113
+            case MySettings.FRAG_EDIT_WEBSITE: //114
+                showFragment(MySettings.FRAG_ITEM_DETAIL, false);
+                break;
+
+
+            case MySettings.FRAG_USER_SETTINGS: //121
+            case MySettings.FRAG_DROPBOX_LIST: //122
+            case MySettings.FRAG_APP_PASSWORD_SETTINGS: //123
+            case MySettings.FRAG_NETWORKING_SETTINGS: //124
+                showFragment(MySettings.FRAG_SETTINGS, false);
+                break;
+
+            case MySettings.FRAG_APP_PASSWORD: //1231
+                showFragment(MySettings.FRAG_APP_PASSWORD_SETTINGS, false);
+                break;
+
+        }
+    }
+
+    //private int count=0;
     public void onEvent(clsEvents.onDropboxDataFileChange event) {
-        updatePasswordsData();
+       /*count++;
+        MyLog.i("MainActivity", "onDropboxDataFileChange. Count = " + count);*/
+       updatePasswordsData();
     }
 
     public void onEvent(clsEvents.onPasswordsDatabaseUpdated event) {
@@ -172,13 +213,6 @@ public class MainActivity extends Activity {
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         MyLog.i("MainActivity", "onRestoreInstanceState");
-/*        mActiveUserID = MySettings.getActiveUserID();
-        mActiveUser = new clsUserValues(this, mActiveUserID);
-
-        mActiveItemID = MySettings.getActiveItemID();
-        mActiveItem = new clsItemValues(this, mActiveItemID);
-
-        mActiveFragmentID = MySettings.getActiveFragmentID();*/
     }
 
     @Override
@@ -200,30 +234,27 @@ public class MainActivity extends Activity {
             }
         }
 
+        // start the PasswordsUpdateService
+        Intent intent = new Intent(this, PasswordsUpdateService.class);
+        startService(intent);
+
         showFragment(MySettings.getActiveFragmentID(), false);
-
-        ;
-
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-/*        if (mActiveItem != null) {
-            outState.putLong(ARG_ACTIVE_ITEM_ID, mActiveItem.getItemID());
-        }
-
-        if (mActiveUser != null) {
-            outState.putLong(ARG_ACTIVE_USER_ID, mActiveUser.getUserID());
-        }
-
-        outState.putInt(ARG_ACTIVE_FRAGMENT_ID, mActiveFragmentID);*/
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         MyLog.i("MainActivity", "onPause");
+
+        // stop the PasswordsUpdateService
+        Intent intent = new Intent(this, PasswordsUpdateService.class);
+        stopService(intent);
+
     }
 
     @Override
@@ -322,15 +353,15 @@ public class MainActivity extends Activity {
 
                 case MySettings.FRAG_SETTINGS:
                     // don't replace fragment if restarting from onSaveInstanceState
-                    if (!MySettings.getOnSaveInstanceState()) {
-                        fm.beginTransaction()
-                                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                                .replace(R.id.fragment_container,
-                                        SettingsFragment.newInstance(), "FRAG_SETTINGS")
-                                .addToBackStack("FRAG_SETTINGS")
-                                .commit();
-                        MyLog.i("MainActivity", "showFragments: FRAG_SETTINGS");
-                    }
+                    // if (!MySettings.getOnSaveInstanceState()) {
+                    fm.beginTransaction()
+                            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                            .replace(R.id.fragment_container,
+                                    SettingsFragment.newInstance(), "FRAG_SETTINGS")
+                            .addToBackStack("FRAG_SETTINGS")
+                            .commit();
+                    MyLog.i("MainActivity", "showFragments: FRAG_SETTINGS");
+                    //}
                     break;
 
                 case MySettings.FRAG_USER_SETTINGS:
@@ -395,7 +426,6 @@ public class MainActivity extends Activity {
                         MyLog.i("MainActivity", "showFragments: FRAG_DROPBOX_LIST");
                     }
                     break;
-
             }
         }
     }

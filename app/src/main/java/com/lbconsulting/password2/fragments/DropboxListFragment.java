@@ -170,6 +170,7 @@ public class DropboxListFragment extends Fragment
     public void onResume() {
         MyLog.i("DropboxListFragment", "onResume()");
         super.onResume();
+        MySettings.setActiveFragmentID(MySettings.FRAG_DROPBOX_LIST);
     }
 
     @Override

@@ -85,6 +85,7 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
     protected void onPreExecute() {
         super.onPreExecute();
         EventBus.getDefault().post(new clsEvents.showProgressInActionBar(true));
+        MySettings.setNetworkBusy(true);
         // TODO: show download file progressbar
         String filename = mDropboxFullFilename.substring(mDropboxFullFilename.lastIndexOf("/") + 1);
         MyLog.i("DownloadDecryptDataFile", "onPreExecute: STARTING download of " + filename);
@@ -93,7 +94,7 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
     @Override
     protected Integer doInBackground(Void... params) {
         if (mIsOkToDownloadDataFile) {
-                        String encryptedFileContent = readFile();
+            String encryptedFileContent = readFile();
             if (!encryptedFileContent.isEmpty()) {
                 String decryptedFileContent = decryptFile(encryptedFileContent);
                 if (!decryptedFileContent.isEmpty()) {
@@ -103,8 +104,8 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
                     }
                 }
             }
-        }else{
-            mDownloadStatus=NOT_OK_TO_DOWNLOAD_FILE;
+        } else {
+            mDownloadStatus = NOT_OK_TO_DOWNLOAD_FILE;
         }
         return mDownloadStatus;
     }
@@ -112,8 +113,13 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
     private String readFile() {
         try {
             Entry existingEntry = mDBApi.metadata(mDropboxFullFilename, 1, null, false, null);
-            // TODO: Store rev to be able to retrieve past data files
-            MyLog.i("DownloadDecryptDataFile", "readFile: File exists; " + existingEntry.bytes + " bytes; rev is now: " + existingEntry.rev);
+            if (existingEntry != null) {
+                MyLog.i("DownloadDecryptDataFile", "readFile: File exists; " + existingEntry.bytes + " bytes; rev = " + existingEntry.rev);
+            } else {
+                mDownloadStatus = FILE_NOT_FOUND;
+                MySettings.setDropboxFileRev(MySettings.UNKNOWN);
+                return "";
+            }
             if (existingEntry.bytes == 0 || existingEntry.isDeleted) {
                 MyLog.e("DownloadDecryptDataFile", "readFile: File" + existingEntry.fileName() + " exists but is empty!");
                 mDownloadStatus = FILE_FOUND_BUT_EMPTY;
@@ -128,6 +134,8 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
 
             // The file exists ... download the latest version to a stream
             DropboxAPI.DropboxInputStream inputStream = mDBApi.getFileStream(mDropboxFullFilename, null);
+            // save the file rev to be used to check for changes in the Passwords data file
+            MySettings.setDropboxFileRev(existingEntry.rev);
             return IOUtils.toString(inputStream);
 
         } catch (DropboxUnlinkedException e) {
@@ -452,6 +460,8 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
             MyLog.e("DownloadDecryptDataFile", "onPostExecute: " + message);
             EventBus.getDefault().post(new clsEvents.showOkDialog(title, message));
         }
+
+        MySettings.setNetworkBusy(false);
     }
 
     private void showToast(String msg) {

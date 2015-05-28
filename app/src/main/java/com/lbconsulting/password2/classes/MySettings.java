@@ -19,18 +19,24 @@ public class MySettings {
     public static final String DROPBOX_FILENAME = "PasswordsDatafile.txt";
     public static final int MAX_NUMBER_OF_BACKUP_FILES = 5;
     public static final String ARG_IS_DIRTY = "arg_isDirty";
-    public static final int FRAG_APP_PASSWORD = 10;
-    public static final int FRAG_DROPBOX_LIST = 11;
-    public static final int FRAG_EDIT_CREDIT_CARD = 12;
-    public static final int FRAG_EDIT_GENERAL_ACCOUNT = 13;
-    public static final int FRAG_EDIT_SOFTWARE = 14;
-    public static final int FRAG_EDIT_WEBSITE = 15;
-    public static final int FRAG_ITEM_DETAIL = 16;
-    public static final int FRAG_ITEMS_LIST = 17;
-    public static final int FRAG_SETTINGS = 18;
-    public static final int FRAG_USER_SETTINGS = 19;
-    public static final int FRAG_APP_PASSWORD_SETTINGS = 20;
-    public static final int FRAG_NETWORKING_SETTINGS = 21;
+
+    public static final int FRAG_ITEMS_LIST = 1;
+
+    public static final int FRAG_ITEM_DETAIL = 11;
+
+    public static final int FRAG_EDIT_CREDIT_CARD = 111;
+    public static final int FRAG_EDIT_GENERAL_ACCOUNT = 112;
+    public static final int FRAG_EDIT_SOFTWARE = 113;
+    public static final int FRAG_EDIT_WEBSITE = 114;
+
+    public static final int FRAG_SETTINGS = 12;
+    public static final int FRAG_USER_SETTINGS = 121;
+    public static final int FRAG_DROPBOX_LIST = 122;
+    public static final int FRAG_APP_PASSWORD_SETTINGS = 123;
+    public static final int FRAG_APP_PASSWORD = 1231;
+    public static final int FRAG_NETWORKING_SETTINGS = 124;
+
+
     public static final String[] CreditCardNames = {"American Express", "Diners Club", "Discover", "JCB", "MasterCard", "VISA"};
     public static final String UNKNOWN = "UNKNOWN";
     public static final int UNKNOWN_CARD = -1;
@@ -50,12 +56,11 @@ public class MySettings {
     public static final int NETWORK_WIFI_ONLY = 0;
     public static final int NETWORK_ANY = 1;
 
-    public static final int NETWORK_UPDATE_10SEC = 0;
-    public static final int NETWORK_UPDATE_20SEC = 1;
-    public static final int NETWORK_UPDATE_30SEC = 2;
-    public static final int NETWORK_UPDATE_45SEC = 3;
-    public static final int NETWORK_UPDATE_60SEC = 4;
-    public static final int NETWORK_UPDATE_300SEC = 5;
+    public static final int NETWORK_UPDATE_1_MIN = 1;
+    public static final int NETWORK_UPDATE_5_MIN = 5;
+    public static final int NETWORK_UPDATE_10_MIN = 10;
+    public static final int NETWORK_UPDATE_20_MIN = 20;
+    public static final int NETWORK_UPDATE_30_MIN = 30;
 
     private static final String PASSWORDS_SAVED_STATES = "passwordsSavedStates";
     private static final String SETTING_DROPBOX_ACCESS_TOKEN = "dropboxAccessToken";
@@ -80,8 +85,10 @@ public class MySettings {
     private static final String SETTING_DROPBOX_FOLDER_NAME = "dropboxFolderName";
 
     public static final String SETTING_NETWORK_PREFERENCE = "networkPreference";
-    public static final String SETTING_OK_TO_USE_NETWORK = "okToUseNetwork";
+    public static final String SETTING_DROPBOX_FILE_REV = "dropboxFileRev";
 
+    public static final String SETTING_OK_TO_USE_NETWORK = "okToUseNetwork";
+    public static final String SETTING_NETWORK_BUSY = "networkBusy";
     public static final String SETTING_SYNC_PERIODICITY = "syncPeriodicity";
 
     //private static final String DEFAULT_DROPBOX_PATH = "No Folder Selected";
@@ -98,6 +105,7 @@ public class MySettings {
     public static boolean isVerbose() {
         SharedPreferences passwordsSavedState =
                 mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        // TODO: Set default isVerbose to false
         return passwordsSavedState.getBoolean(SETTING_IS_VERBOSE, true);
     }
 
@@ -138,19 +146,35 @@ public class MySettings {
         editor.apply();
     }
 
-    public static int getSyncPeriodicity() {
+    public static boolean getNetworkBusy(){
         SharedPreferences passwordsSavedState =
                 mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
-        return passwordsSavedState.getInt(SETTING_SYNC_PERIODICITY, NETWORK_UPDATE_30SEC);
+        return passwordsSavedState.getBoolean(SETTING_NETWORK_BUSY, false);
     }
 
-    public static void setSyncPeriodicity(int periodicity) {
+    public static void setNetworkBusy(boolean networkBusy){
         SharedPreferences passwordsSavedState =
                 mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
         SharedPreferences.Editor editor = passwordsSavedState.edit();
-        editor.putInt(SETTING_SYNC_PERIODICITY, periodicity);
+        editor.putBoolean(SETTING_NETWORK_BUSY, networkBusy);
         editor.apply();
     }
+
+    public static int getSyncPeriodicityMinutes() {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        return passwordsSavedState.getInt(SETTING_SYNC_PERIODICITY, NETWORK_UPDATE_5_MIN);
+    }
+
+    public static void setSyncPeriodicity(int periodicityMin) {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        SharedPreferences.Editor editor = passwordsSavedState.edit();
+        editor.putInt(SETTING_SYNC_PERIODICITY, periodicityMin);
+        editor.apply();
+    }
+
+
     //endregion
 
     //region Last Item and User IDs
@@ -350,7 +374,7 @@ public class MySettings {
     }
     //endregion
 
-    //region Dropbox Token and Folder Settings
+    //region Dropbox Token, Folder, and Rev Settings
     public static String getDropboxAccessToken() {
         SharedPreferences passwordsSavedState =
                 mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
@@ -381,6 +405,20 @@ public class MySettings {
 
     public static String getDropboxFilename() {
         return getDropboxFolderName() + "/" + DROPBOX_FILENAME;
+    }
+
+    public static String getDropboxFileRev() {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        return passwordsSavedState.getString(SETTING_DROPBOX_FILE_REV, UNKNOWN);
+    }
+
+    public static void setDropboxFileRev(String dropboxFileRev) {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        SharedPreferences.Editor editor = passwordsSavedState.edit();
+        editor.putString(SETTING_DROPBOX_FILE_REV, dropboxFileRev);
+        editor.apply();
     }
     //endregion
 

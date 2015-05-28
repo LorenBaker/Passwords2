@@ -13,6 +13,7 @@ import com.dropbox.client2.exception.DropboxPartialFileException;
 import com.dropbox.client2.exception.DropboxServerException;
 import com.dropbox.client2.exception.DropboxUnlinkedException;
 import com.lbconsulting.password2.classes.MyLog;
+import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsDropboxFolder;
 import com.lbconsulting.password2.classes.clsEvents;
 
@@ -66,6 +67,7 @@ public class DownloadDropboxFolders extends AsyncTask<Void, Long, Boolean> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
+        MySettings.setNetworkBusy(true);
         String folderName = mDropboxFolderPath.substring(mDropboxFolderPath.lastIndexOf("/") + 1);
         if(folderName.equals("/")){
             folderName="Dropbox";
@@ -180,14 +182,11 @@ public class DownloadDropboxFolders extends AsyncTask<Void, Long, Boolean> {
     @Override
     protected void onPostExecute(Boolean result) {
         MyLog.d("DownloadDropboxFolders", "onPostExecute: result = " + result);
+        MySettings.setNetworkBusy(false);
         EventBus.getDefault().post(new clsEvents.folderHashMapUpdated());
-       // mCallback.onFolderDownloadComplete(result);
+
     }
 
-/*    private void showToast(String msg) {
-        Toast error = Toast.makeText(mContext, msg, Toast.LENGTH_LONG);
-        error.show();
-    }*/
 
 
 }

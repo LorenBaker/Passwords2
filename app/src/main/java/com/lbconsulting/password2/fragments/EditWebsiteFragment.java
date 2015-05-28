@@ -163,7 +163,7 @@ public class EditWebsiteFragment extends Fragment implements TextWatcher {
     public void onResume() {
         super.onResume();
         MyLog.i("EditWebsiteFragment", "onResume()");
-        MySettings.setActiveFragmentID(MySettings.FRAG_EDIT_GENERAL_ACCOUNT);
+        MySettings.setActiveFragmentID(MySettings.FRAG_EDIT_WEBSITE);
         updateUI();
         showKeyBoard(txtItemName);
     }

@@ -19,10 +19,10 @@ public class ItemsCursorAdapter extends CursorAdapter {
 
     Context mContext;
 
-    public ItemsCursorAdapter(Context context, Cursor c, int flags) {
+    public ItemsCursorAdapter(Context context, Cursor c, int flags, String itemsName) {
         super(context, c, flags);
         this.mContext = context;
-        MyLog.i("ItemsCursorAdapter", "ItemsCursorAdapter constructor.");
+        MyLog.i("ItemsCursorAdapter", "ItemsCursorAdapter constructor. " + itemsName);
     }
 
     @Override
