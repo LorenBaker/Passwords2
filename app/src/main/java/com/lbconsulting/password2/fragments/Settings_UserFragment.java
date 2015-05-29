@@ -84,26 +84,7 @@ public class Settings_UserFragment extends Fragment implements View.OnClickListe
             getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
             MySettings.setOnSaveInstanceState(false);
         }
-
-        EventBus.getDefault().post(new clsEvents.setActionBarTitle(getActivity().getString(R.string.actionBarTitle_userSettings)));
-        mStartupState = MySettings.getAppPasswordState();
-        switch (mStartupState) {
-            case AppPasswordFragment.STATE_STEP_3B_CREATE_NEW_USER:
-                btnCreateNewUser.setVisibility(View.VISIBLE);
-                btnEditUserName.setVisibility(View.GONE);
-                btnDeleteUser.setVisibility(View.GONE);
-                tvFirstTimeMessage.setVisibility(View.VISIBLE);
-                tvFirstTimeMessage.setText(getResources().getString(R.string.tvFirstTimeMessage_text_Step3B));
-
-                break;
-
-            default:
-                btnCreateNewUser.setVisibility(View.VISIBLE);
-                btnEditUserName.setVisibility(View.VISIBLE);
-                btnDeleteUser.setVisibility(View.VISIBLE);
-                tvFirstTimeMessage.setVisibility(View.GONE);
-        }
-
+        mStartupState = MySettings.getStartupState();
     }
 
     @Override
@@ -124,12 +105,33 @@ public class Settings_UserFragment extends Fragment implements View.OnClickListe
     private void updateUI() {
 
         mActiveUser = new clsUserValues(getActivity(), MySettings.getActiveUserID());
-        if (mActiveUser.getUserName().isEmpty()) {
-            btnEditUserName.setText(getString(R.string.btnEditUserName_text) + getString(R.string.none_text));
-            btnDeleteUser.setText(getString(R.string.btnDeleteUser_text) + getString(R.string.none_text));
-        } else {
-            btnEditUserName.setText(getString(R.string.btnEditUserName_text) + mActiveUser.getUserName());
-            btnDeleteUser.setText(getString(R.string.btnDeleteUser_text) + mActiveUser.getUserName());
+
+        switch (mStartupState) {
+            case AppPasswordFragment.STATE_STEP_3B_CREATE_NEW_USER:
+                EventBus.getDefault().post(new clsEvents
+                        .setActionBarTitle(getActivity().getString(R.string.actionBarTitle_gettingStarted)));
+                btnCreateNewUser.setVisibility(View.VISIBLE);
+                btnEditUserName.setVisibility(View.GONE);
+                btnDeleteUser.setVisibility(View.GONE);
+                tvFirstTimeMessage.setVisibility(View.VISIBLE);
+                tvFirstTimeMessage.setText(getResources().getString(R.string.tvFirstTimeMessage_text_Step3B));
+
+                break;
+
+            default:
+                EventBus.getDefault().post(new clsEvents.setActionBarTitle(getActivity().getString(R.string.actionBarTitle_userSettings)));
+                btnCreateNewUser.setVisibility(View.VISIBLE);
+                btnEditUserName.setVisibility(View.VISIBLE);
+                btnDeleteUser.setVisibility(View.VISIBLE);
+                tvFirstTimeMessage.setVisibility(View.GONE);
+
+                if (mActiveUser.getUserName().isEmpty()) {
+                    btnEditUserName.setText(getString(R.string.btnEditUserName_text) + getString(R.string.none_text));
+                    btnDeleteUser.setText(getString(R.string.btnDeleteUser_text) + getString(R.string.none_text));
+                } else {
+                    btnEditUserName.setText(getString(R.string.btnEditUserName_text) + mActiveUser.getUserName());
+                    btnDeleteUser.setText(getString(R.string.btnDeleteUser_text) + mActiveUser.getUserName());
+                }
         }
     }
 
@@ -202,9 +204,7 @@ public class Settings_UserFragment extends Fragment implements View.OnClickListe
                                     mActiveUser = new clsUserValues(getActivity(), newUserID);
                                     selectActiveUser();
                                     dialog.dismiss();
-                                    if (mStartupState == AppPasswordFragment.STATE_STEP_3B_CREATE_NEW_USER) {
-                                        EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_APP_PASSWORD, false));
-                                    }
+
                                 } else {
                                     dialog.dismiss();
                                     MyLog.e("Settings_UserFragment", "btnCreateNewUser OK: new user is not unique");
@@ -390,8 +390,16 @@ public class Settings_UserFragment extends Fragment implements View.OnClickListe
 
     private void selectActiveUser() {
         MySettings.setActiveUserID(mActiveUser.getUserID());
-        updateUI();
-        EventBus.getDefault().post(new clsEvents.saveChangesToDropbox());
-        EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_ITEMS_LIST, false));
+
+        if (mStartupState == AppPasswordFragment.STATE_STEP_3B_CREATE_NEW_USER) {
+            // set the next step in the initial startup process
+            MySettings.setStartupState(AppPasswordFragment.STATE_STEP_4B_CREATE_APP_PASSWORD);
+            // go to FRAG_APP_PASSWORD_SETTINGS
+            EventBus.getDefault().post(new clsEvents
+                    .showFragment(MySettings.FRAG_APP_PASSWORD_SETTINGS, false));
+        }else{
+            EventBus.getDefault().post(new clsEvents.saveChangesToDropbox());
+            EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_ITEMS_LIST, false));
+        }
     }
 }

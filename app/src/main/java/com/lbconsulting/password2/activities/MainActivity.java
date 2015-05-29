@@ -43,6 +43,7 @@ import de.greenrobot.event.EventBus;
 
 
 public class MainActivity extends Activity {
+    // TODO: Verify that all cursors are closed
 
     private static final String APP_KEY = "kz0qsqlw52f41cy";
     private static final String APP_SECRET = "owdln6x88inn9vo";
@@ -139,13 +140,13 @@ public class MainActivity extends Activity {
                 break;
 
             default:
-                int startupState = MySettings.getAppPasswordState();
+                int startupState = MySettings.getStartupState();
                 switch (startupState) {
                     case AppPasswordFragment.STATE_STEP_3B_CREATE_NEW_USER:
                         showFragment(MySettings.FRAG_USER_SETTINGS, false);
                         break;
 
-                    case AppPasswordFragment.STATE_STEP_5A_GET_USER:
+                    case AppPasswordFragment.STATE_STEP_5A_SELECT_USER:
                         showFragment(MySettings.FRAG_SETTINGS, false);
                         break;
 
@@ -247,15 +248,18 @@ public class MainActivity extends Activity {
             }
         }
 
-        if (MySettings.getAppPassword().equals(MySettings.NOT_AVAILABLE)) {
+        if (MySettings.getStartupState() == AppPasswordFragment.STATE_STEP_1_SELECT_FOLDER
+                || MySettings.getAppPassword().equals(MySettings.NOT_AVAILABLE)) {
             showFragment(MySettings.FRAG_APP_PASSWORD, false);
+        } else {
+            startPasswordsUpdateService();
+            showFragment(MySettings.getActiveFragmentID(), false);
         }
+    }
 
-        // start the PasswordsUpdateService
+    private void startPasswordsUpdateService() {
         Intent intent = new Intent(this, PasswordsUpdateService.class);
         startService(intent);
-
-        showFragment(MySettings.getActiveFragmentID(), false);
     }
 
     @Override

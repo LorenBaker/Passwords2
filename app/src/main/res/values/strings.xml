@@ -2,25 +2,11 @@
     <string name="app_name">Passwords</string>
     <string name="title_password_item_detail">Password Item Detail</string>
 
-    <string name="tvFirstTimeMessage_text_Step1">
-        Getting started:\n
-        Step 1: Select Dropbox folder.</string>
-
-        <string name="tvFirstTimeMessage_text_Step3A">
-        Getting started:\n
-        Step 2: Enter your password, then click OK</string>
-
-        <string name="tvFirstTimeMessage_text_Step5A">
-        Getting started:\n
-        Step 3: Select user.\n\n</string>
-
-        <string name="tvFirstTimeMessage_text_Step3B">
-        Getting started:\n
-        Step 2: Create new user.</string>
-
-        <string name="tvFirstTimeMessage_text_Step4B">
-        Getting started:\n
-        Step 3: Create your application password.</string>
+    <string name="tvFirstTimeMessage_text_Step1">Step 1: Select Dropbox folder.</string>
+    <string name="tvFirstTimeMessage_text_Step3A">Step 2: Enter your password, then click OK.</string>
+    <string name="tvFirstTimeMessage_text_Step5A">Step 3: Select user.\n\n</string>
+    <string name="tvFirstTimeMessage_text_Step3B">Step 2: Create new user.</string>
+    <string name="tvFirstTimeMessage_text_Step4B">Step 3: Create your application password.</string>
 
     <string name="actionBarTitle_Settings">Settings</string>
     <string name="actionBarTitle_userSettings">User Settings</string>
@@ -40,7 +26,8 @@
     <string name="btnNetworkPreferences_text">Select Network Preference\nUse network\u0020</string>
     <string name="btnNo_text">No</string>
     <string name="btnOK_text">OK</string>
-    <string name="btnSelectDropboxFolder_text">Select Dropbox Folder\nCurrent Folder:\n</string>
+    <string name="btnSelectDropboxFolder_text_default">Select Dropbox Folder\nCurrent Folder:\n</string>
+    <string name="btnSelectDropboxFolder_text_state1">Select Dropbox Folder</string>
     <string name="btnSelectPasswordLongevity_text">"Select Password Longevity\nCurrent Longevity: "</string>
     <string name="btnSelectUser_dialog_setTitle">Select User</string>
     <string name="btnSelectUser_text">Select User\nCurrent user:\u0020</string>
@@ -85,6 +72,8 @@
     <string name="UserNotSelected_text">Not Selected</string>
     <string name="btnSyncPeriodicity_text">Sync Periodicity\nCheck for updates\u0020</string>
     <string name="tvProgressBarCaption_text">Syncing with Dropbox \n . . . Please wait</string>
+    <string name="select_user_dialog_title">Select User</string>
+    <string name="actionBarTitle_gettingStarted">Getting Started</string>
 
 
     <string-array name="longevityItems_list">

@@ -20,6 +20,8 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
+import de.greenrobot.event.EventBus;
+
 
 public class clsUtils {
 
@@ -147,6 +149,47 @@ public class clsUtils {
                 Toast.makeText(context, R.string.network_lost_connection, Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    public static boolean appPasswordIsValid(Context context, String password) {
+
+        // TODO: Add more tests for a valid password ??
+        String title = "Invalid Password";
+        String message = context.getString(R.string.invalid_password_message1);
+        if (password.isEmpty()) {
+            message = context.getString(R.string.invalid_password_message2) + message;
+            EventBus.getDefault().post(new clsEvents.showOkDialog(title, message));
+            return false;
+        }
+
+        if (password.length() < 10) {
+            message = context.getString(R.string.invalid_password_message3) + password.length()
+                    + context.getString(R.string.invalid_password_message4) + message;
+            EventBus.getDefault().post(new clsEvents.showOkDialog(title, message));
+            return false;
+        }
+
+        int combinations = 0;
+        if (Pattern.compile("[0-9]").matcher(password).find()) {
+            combinations = combinations + 10;
+        }
+
+        if (Pattern.compile("[a-z]").matcher(password).find()) {
+            combinations = combinations + 26;
+        }
+
+        if (Pattern.compile("[A-Z]").matcher(password).find()) {
+            combinations = combinations + 26;
+        }
+
+        if (combinations == 62) {
+            return true;
+        } else {
+            EventBus.getDefault().post(new clsEvents.showOkDialog(title, message));
+            return false;
+        }
+
+
     }
 
 

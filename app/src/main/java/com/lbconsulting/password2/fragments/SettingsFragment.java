@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -24,6 +25,7 @@ import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
 import com.lbconsulting.password2.classes.clsUserValues;
 import com.lbconsulting.password2.database.UsersTable;
+import com.lbconsulting.password2.services.PasswordsUpdateService;
 
 import java.util.ArrayList;
 
@@ -81,7 +83,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
         ckShowVerboseMessages.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(!mUpdatingUI) {
+                if (!mUpdatingUI) {
                     MySettings.setIsVerbose(isChecked);
                 }
             }
@@ -108,42 +110,9 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
             getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        EventBus.getDefault().post(new clsEvents.setActionBarTitle(getActivity().getString(R.string.actionBarTitle_Settings)));
-        mStartupState = MySettings.getAppPasswordState();
-        switch (mStartupState) {
-
-            case AppPasswordFragment.STATE_STEP_1_GET_FOLDER:
-                btnSelectUser.setVisibility(View.GONE);
-                btnUserSettings.setVisibility(View.GONE);
-                btnAppPasswordSettings.setVisibility(View.GONE);
-                btnNetworkingSettings.setVisibility(View.GONE);
-                btnSelectDropboxFolder.setVisibility(View.VISIBLE);
-                btnHideItemCategories.setVisibility(View.GONE);
-                tvFirstTimeMessage.setVisibility(View.VISIBLE);
-                tvFirstTimeMessage.setText(getResources().getString(R.string.tvFirstTimeMessage_text_Step1));
-                break;
-
-            case AppPasswordFragment.STATE_STEP_5A_GET_USER:
-                btnSelectUser.setVisibility(View.VISIBLE);
-                btnUserSettings.setVisibility(View.GONE);
-                btnAppPasswordSettings.setVisibility(View.GONE);
-                btnNetworkingSettings.setVisibility(View.GONE);
-                btnSelectDropboxFolder.setVisibility(View.GONE);
-                btnHideItemCategories.setVisibility(View.GONE);
-                tvFirstTimeMessage.setVisibility(View.VISIBLE);
-                tvFirstTimeMessage.setText(getResources().getString(R.string.tvFirstTimeMessage_text_Step3B));
-
-                break;
-
-            default:
-                btnSelectUser.setVisibility(View.VISIBLE);
-                btnUserSettings.setVisibility(View.VISIBLE);
-                btnAppPasswordSettings.setVisibility(View.VISIBLE);
-                btnNetworkingSettings.setVisibility(View.VISIBLE);
-                btnSelectDropboxFolder.setVisibility(View.VISIBLE);
-                btnHideItemCategories.setVisibility(View.VISIBLE);
-                tvFirstTimeMessage.setVisibility(View.GONE);
-        }
+        mStartupState = MySettings.getStartupState();
+        long activeUserID = MySettings.getActiveUserID();
+        mActiveUser = new clsUserValues(getActivity(), activeUserID);
         MySettings.setOnSaveInstanceState(false);
     }
 
@@ -169,27 +138,77 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
 
     private void updateUI() {
         mUpdatingUI = true;
-        long activeUserID = MySettings.getActiveUserID();
-        mActiveUser = new clsUserValues(getActivity(), activeUserID);
+        switch (mStartupState) {
 
-        // set btnSelectUser text
-        String activeUserName = mActiveUser.getUserName();
-        String btnText = getActivity().getString(R.string.btnSelectUser_text);
-        if (activeUserName.isEmpty()) {
-            btnText = btnText + getActivity().getString(R.string.UserNotSelected_text);
-        } else {
-            btnText = btnText + activeUserName;
+            case AppPasswordFragment.STATE_STEP_1_SELECT_FOLDER:
+                EventBus.getDefault().post(new clsEvents
+                        .setActionBarTitle(getActivity().getString(R.string.actionBarTitle_gettingStarted)));
+                btnSelectUser.setVisibility(View.GONE);
+                btnUserSettings.setVisibility(View.GONE);
+                btnAppPasswordSettings.setVisibility(View.GONE);
+                btnNetworkingSettings.setVisibility(View.GONE);
+                btnSelectDropboxFolder.setVisibility(View.VISIBLE);
+                btnHideItemCategories.setVisibility(View.GONE);
+                ckShowVerboseMessages.setVisibility(View.GONE);
+                tvFirstTimeMessage.setVisibility(View.VISIBLE);
+                tvFirstTimeMessage.setText(getResources().getString(R.string.tvFirstTimeMessage_text_Step1));
+
+                // set btnSelectDropboxFolder text
+                btnSelectDropboxFolder
+                        .setText(getString(R.string.btnSelectDropboxFolder_text_state1));
+                break;
+
+            case AppPasswordFragment.STATE_STEP_5A_SELECT_USER:
+                EventBus.getDefault().post(new clsEvents
+                        .setActionBarTitle(getActivity().getString(R.string.actionBarTitle_gettingStarted)));
+                btnSelectUser.setVisibility(View.VISIBLE);
+                btnUserSettings.setVisibility(View.GONE);
+                btnAppPasswordSettings.setVisibility(View.GONE);
+                btnNetworkingSettings.setVisibility(View.GONE);
+                btnSelectDropboxFolder.setVisibility(View.GONE);
+                btnHideItemCategories.setVisibility(View.GONE);
+                ckShowVerboseMessages.setVisibility(View.GONE);
+                tvFirstTimeMessage.setVisibility(View.VISIBLE);
+                tvFirstTimeMessage.setText(getResources().getString(R.string.tvFirstTimeMessage_text_Step5A));
+
+                break;
+
+            default:
+                EventBus.getDefault().post(new clsEvents.setActionBarTitle(getActivity().getString(R.string.actionBarTitle_Settings)));
+                btnSelectUser.setVisibility(View.VISIBLE);
+                btnUserSettings.setVisibility(View.VISIBLE);
+                btnAppPasswordSettings.setVisibility(View.VISIBLE);
+                btnNetworkingSettings.setVisibility(View.VISIBLE);
+                btnSelectDropboxFolder.setVisibility(View.VISIBLE);
+                btnHideItemCategories.setVisibility(View.VISIBLE);
+                ckShowVerboseMessages.setVisibility(View.VISIBLE);
+                tvFirstTimeMessage.setVisibility(View.GONE);
+
+                // set btnSelectDropboxFolder text
+                btnSelectDropboxFolder
+                        .setText(getString(R.string.btnSelectDropboxFolder_text_default)
+                                + MySettings.getDropboxFolderName());
         }
-        btnSelectUser.setText(btnText);
 
-        btnSelectDropboxFolder
-                .setText(getString(R.string.btnSelectDropboxFolder_text)
-                        + MySettings.getDropboxFolderName());
+
+        if (btnSelectUser.getVisibility() == View.VISIBLE) {
+            // set btnSelectUser text
+            String activeUserName = mActiveUser.getUserName();
+            String btnSelectUserText = getActivity().getString(R.string.btnSelectUser_text);
+            if (activeUserName.isEmpty()) {
+                btnSelectUserText = btnSelectUserText + getActivity().getString(R.string.UserNotSelected_text);
+            } else {
+                btnSelectUserText = btnSelectUserText + activeUserName;
+            }
+            btnSelectUser.setText(btnSelectUserText);
+        }
+
+        if (btnSelectDropboxFolder.getVisibility() == View.VISIBLE) {
+
+        }
 
         ckShowVerboseMessages.setChecked(MySettings.isVerbose());
-
         mUpdatingUI = false;
-
     }
 
 
@@ -243,26 +262,28 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
                 // Strings to Show In Dialog with Radio Buttons
                 final ArrayList<String> userNames = new ArrayList<>();
                 final Cursor cursor = UsersTable.getAllUsersCursor(getActivity(), UsersTable.SORT_ORDER_USER_NAME);
+
+                // fill users name array
                 if (cursor != null) {
                     while (cursor.moveToNext()) {
                         userNames.add(cursor.getString(cursor.getColumnIndex(UsersTable.COL_USER_NAME)));
                     }
 
                     final CharSequence[] names = userNames.toArray(new CharSequence[userNames.size()]);
-                    int selectedUserPosition = -1;
-                    long activeUserID = MySettings.getActiveUserID();
-                    mActiveUser = new clsUserValues(getActivity(), activeUserID);
 
+                    // find the selected user position
+                    int selectedUserPosition = -1;
                     for (int i = 0; i < names.length; i++) {
                         if (names[i].toString().equals(mActiveUser.getUserName())) {
                             selectedUserPosition = i;
                             break;
                         }
                     }
+
                     // Creating and Building the Dialog
                     Dialog usersDialog;
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                    builder.setTitle("Select User");
+                    builder.setTitle(getActivity().getString(R.string.select_user_dialog_title));
                     builder.setSingleChoiceItems(names, selectedUserPosition, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int position) {
                             // find the new user
@@ -271,10 +292,13 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
                             mActiveUser = new clsUserValues(getActivity(), newUserCursor);
                             selectActiveUser();
                             dialog.dismiss();
+                            newUserCursor.close();
                         }
                     });
                     usersDialog = builder.create();
                     usersDialog.show();
+
+                    cursor.close();
                 }
                 break;
 
@@ -352,7 +376,21 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
 
     private void selectActiveUser() {
         MySettings.setActiveUserID(mActiveUser.getUserID());
-        updateUI();
-        EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_ITEMS_LIST, false));
+
+        switch (mStartupState) {
+            case AppPasswordFragment.STATE_STEP_5A_SELECT_USER:
+                // This ends the initial startup process
+                MySettings.setStartupState(AppPasswordFragment.STATE_PASSWORD_ONLY);
+                startPasswordsUpdateService();
+
+                // ShowFRAG_ITEMS_LIST
+            default:
+                EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_ITEMS_LIST, false));
+        }
+    }
+
+    private void startPasswordsUpdateService() {
+        Intent intent = new Intent(getActivity(), PasswordsUpdateService.class);
+        getActivity().startService(intent);
     }
 }

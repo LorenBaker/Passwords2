@@ -3,7 +3,6 @@ package com.lbconsulting.password2.services;
 import android.app.Service;
 import android.content.Intent;
 import android.content.res.Configuration;
-
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -74,7 +73,8 @@ public class PasswordsUpdateService extends Service {
             MyLog.i("ServiceHandler", "Checking for revised data file.");
             try {
                 DropboxAPI.Entry existingEntry = mDBApi.metadata(mDropboxFullFilename, 1, null, false, null);
-                if (existingEntry != null) {
+                if (existingEntry != null && existingEntry.bytes > 0 && !existingEntry.isDeleted) {
+                    // the file exists
                     String rev = MySettings.getDropboxFileRev();
                     // download the data file if the file exist
                     // and if the file rev is unknown or,
@@ -84,6 +84,8 @@ public class PasswordsUpdateService extends Service {
                     } else {
                         MyLog.i("ServiceHandler", "No change in Passwords data file.");
                     }
+                }else{
+                    MyLog.i("ServiceHandler", "File not found.");
                 }
             } catch (DropboxException e) {
                 MyLog.e("ServiceHandler", "checkForRevisedDataFile: DropboxException " + e.getMessage());

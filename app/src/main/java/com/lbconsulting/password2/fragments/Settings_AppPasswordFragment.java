@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
@@ -25,8 +26,8 @@ import com.lbconsulting.password2.R;
 import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
-
-import java.util.regex.Pattern;
+import com.lbconsulting.password2.classes.clsUtils;
+import com.lbconsulting.password2.services.PasswordsUpdateService;
 
 import de.greenrobot.event.EventBus;
 
@@ -91,21 +92,9 @@ public class Settings_AppPasswordFragment extends Fragment implements View.OnCli
             MySettings.setOnSaveInstanceState(false);
         }
 
-        EventBus.getDefault().post(new clsEvents.setActionBarTitle("App Password Settings"));
 
-        mStartupState = MySettings.getAppPasswordState();
-        switch (mStartupState) {
-            case AppPasswordFragment.STATE_STEP_4B_CREATE_APP_PASSWORD:
-                btnChangeAppPassword.setVisibility(View.VISIBLE);
-                btnSelectPasswordLongevity.setVisibility(View.GONE);
-                tvFirstTimeMessage.setVisibility(View.VISIBLE);
-                break;
 
-            default:
-                btnChangeAppPassword.setVisibility(View.VISIBLE);
-                btnSelectPasswordLongevity.setVisibility(View.VISIBLE);
-                tvFirstTimeMessage.setVisibility(View.GONE);
-        }
+        mStartupState = MySettings.getStartupState();
     }
 
     @Override
@@ -125,16 +114,22 @@ public class Settings_AppPasswordFragment extends Fragment implements View.OnCli
 
     private void updateUI() {
 
-        switch (mStartupState){
-            case AppPasswordFragment.STATE_STEP_3B_CREATE_NEW_USER:
-                tvFirstTimeMessage.setText(
-                        getActivity().getString(R.string.tvFirstTimeMessage_text_Step3B)
-                                + getActivity().getString(R.string.invalid_password_message1));
-
+        switch (mStartupState) {
+            case AppPasswordFragment.STATE_STEP_4B_CREATE_APP_PASSWORD:
+                EventBus.getDefault().post(new clsEvents
+                        .setActionBarTitle(getActivity().getString(R.string.actionBarTitle_gettingStarted)));
+                btnChangeAppPassword.setVisibility(View.VISIBLE);
+                btnSelectPasswordLongevity.setVisibility(View.GONE);
+                tvFirstTimeMessage.setVisibility(View.VISIBLE);
                 btnChangeAppPassword.setText("Create Application Password");
                 break;
 
             default:
+                EventBus.getDefault().post(new clsEvents.setActionBarTitle("Password Settings"));
+                btnChangeAppPassword.setVisibility(View.VISIBLE);
+                btnSelectPasswordLongevity.setVisibility(View.VISIBLE);
+                tvFirstTimeMessage.setVisibility(View.GONE);
+
                 int passwordLongevity = (int) MySettings.getPasswordLongevity() / 60000;
                 String longevityDescription = getLongevityDescription(passwordLongevity);
                 btnSelectPasswordLongevity
@@ -222,7 +217,7 @@ public class Settings_AppPasswordFragment extends Fragment implements View.OnCli
                 final Dialog changePasswordDialog = new Dialog(getActivity());
                 changePasswordDialog.setContentView(R.layout.dialog_app_change_password);
 
-                switch (mStartupState){
+                switch (mStartupState) {
                     case AppPasswordFragment.STATE_STEP_4B_CREATE_APP_PASSWORD:
                         changePasswordDialog.setTitle("Create Password");
                         break;
@@ -336,11 +331,18 @@ public class Settings_AppPasswordFragment extends Fragment implements View.OnCli
                     @Override
                     public void onClick(View v) {
                         String appPassword = txtAppPassword.getText().toString().trim();
-                        if (appPasswordIsValid(appPassword)) {
+                        if (clsUtils.appPasswordIsValid(getActivity(), appPassword)) {
                             MySettings.setAppPassword(appPassword);
                             Toast.makeText(getActivity(), "Password \"" + appPassword + "\" saved.", Toast.LENGTH_SHORT).show();
                             EventBus.getDefault().post(new clsEvents.saveChangesToDropbox());
                             changePasswordDialog.dismiss();
+                            if (mStartupState == AppPasswordFragment.STATE_STEP_4B_CREATE_APP_PASSWORD) {
+                                // This ends the initial startup process
+                                MySettings.setStartupState(AppPasswordFragment.STATE_PASSWORD_ONLY);
+                                startPasswordsUpdateService();
+                                // ShowFRAG_ITEMS_LIST
+                                EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_ITEMS_LIST, false));
+                            }
                         }
                     }
                 });
@@ -439,6 +441,11 @@ public class Settings_AppPasswordFragment extends Fragment implements View.OnCli
 
     }
 
+    private void startPasswordsUpdateService() {
+        Intent intent = new Intent(getActivity(), PasswordsUpdateService.class);
+        getActivity().startService(intent);
+    }
+
     private void validatePasswordsAreTheSame() {
         String password = txtAppPassword.getText().toString().trim();
         String confirmAppPassword = txtConfirmAppPassword.getText().toString().trim();
@@ -452,44 +459,5 @@ public class Settings_AppPasswordFragment extends Fragment implements View.OnCli
         }
     }
 
-    private boolean appPasswordIsValid(String password) {
 
-        // TODO: Add more tests for a valid password ??
-        String title = "Invalid Password";
-        String message = getActivity().getString(R.string.invalid_password_message1);
-        if (password.isEmpty()) {
-            message = getActivity().getString(R.string.invalid_password_message2) + message;
-            EventBus.getDefault().post(new clsEvents.showOkDialog(title, message));
-            return false;
-        }
-
-        if (password.length() < 10) {
-            message = getActivity().getString(R.string.invalid_password_message3) + password.length()
-                    + getActivity().getString(R.string.invalid_password_message4) + message;
-            EventBus.getDefault().post(new clsEvents.showOkDialog(title, message));
-            return false;
-        }
-
-        int combinations = 0;
-        if (Pattern.compile("[0-9]").matcher(password).find()) {
-            combinations = combinations + 10;
-        }
-
-        if (Pattern.compile("[a-z]").matcher(password).find()) {
-            combinations = combinations + 26;
-        }
-
-        if (Pattern.compile("[A-Z]").matcher(password).find()) {
-            combinations = combinations + 26;
-        }
-
-        if (combinations == 62) {
-            return true;
-        } else {
-            EventBus.getDefault().post(new clsEvents.showOkDialog(title, message));
-            return false;
-        }
-
-
-    }
 }

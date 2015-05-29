@@ -73,7 +73,7 @@ public class MySettings {
     private static final String SETTING_ACTIVE_USER_ID = "arg_active_user_id";
     private static final String SETTING_APP_PASSWORD = "appPassword";
     private static final String SETTING_APP_PASSWORD_SAVED_TIME = "appPasswordSavedTime";
-    private static final String STATE_APP_PASSWORD_FRAGMENT = "appPasswordFragmentState";
+    private static final String SETTING_STARTUP_STATE = "startupState";
     private static final String SETTING_APP_PASSWORD_LONGEVITY = "appPasswordLongevity";
     private static final String SETTING_ON_SAVE_INSTANCE_STATE = "onSaveInstanceState";
     private static final String SETTING_SEARCH_TEXT = "searchText";
@@ -202,7 +202,7 @@ public class MySettings {
     private static long getLastUserID() {
         SharedPreferences passwordsSavedState =
                 mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
-        return passwordsSavedState.getLong(SETTING_LAST_USER_ID, -1);
+        return passwordsSavedState.getLong(SETTING_LAST_USER_ID, 0);
     }
 
     private static void setLastUserID(long lastUserID) {
@@ -475,7 +475,7 @@ public class MySettings {
 
         // TODO: Remove hard coded password
         //appPassword = "GoBeavers1972";
-        appPassword = NOT_AVAILABLE;
+        //appPassword = NOT_AVAILABLE;
         return appPassword;
     }
 
@@ -498,17 +498,17 @@ public class MySettings {
         setAppPassword(NOT_AVAILABLE);
     }
 
-    public static int getAppPasswordState() {
+    public static int getStartupState() {
         SharedPreferences passwordsSavedState =
                 mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
-        return passwordsSavedState.getInt(STATE_APP_PASSWORD_FRAGMENT, AppPasswordFragment.STATE_STEP_1_GET_FOLDER);
+        return passwordsSavedState.getInt(SETTING_STARTUP_STATE, AppPasswordFragment.STATE_STEP_1_SELECT_FOLDER);
     }
 
-    public static void setAppPasswordState(int appPasswordState) {
+    public static void setStartupState(int startupState) {
         SharedPreferences passwordsSavedState =
                 mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
         SharedPreferences.Editor editor = passwordsSavedState.edit();
-        editor.putInt(STATE_APP_PASSWORD_FRAGMENT, appPasswordState);
+        editor.putInt(SETTING_STARTUP_STATE, startupState);
         editor.apply();
     }
 

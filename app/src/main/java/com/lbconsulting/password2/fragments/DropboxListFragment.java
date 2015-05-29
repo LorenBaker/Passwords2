@@ -49,9 +49,13 @@ public class DropboxListFragment extends Fragment
     private ProgressBar pbDropboxList;
     private ListView lvFolders;
 
+    private Button btnCancel;
+
     private DropboxAPI<AndroidAuthSession> mDBApi;
     private HashMap<String, clsDropboxFolder> mFolderHashMap;
     private String mSelectedFolderPath;
+
+    private int mStartupState;
 
     public DropboxListFragment() {
 
@@ -78,10 +82,12 @@ public class DropboxListFragment extends Fragment
         }
         EventBus.getDefault().register(this);
         mDBApi = MainActivity.getDropboxAPI();
+        mStartupState = MySettings.getStartupState();
         mFolderHashMap = new HashMap<>();
         mSelectedFolderPath = "/";
         new DownloadDropboxFolders(getActivity(), mDBApi, mSelectedFolderPath, mFolderHashMap).execute();
         showProgressBar();
+
         MySettings.setOnSaveInstanceState(false);
     }
 
@@ -120,7 +126,7 @@ public class DropboxListFragment extends Fragment
         lvFolders = (ListView) rootView.findViewById(R.id.lvFolders);
         lvFolders.setOnItemClickListener(this);
 
-        Button btnCancel = (Button) rootView.findViewById(R.id.btnCancel);
+        btnCancel = (Button) rootView.findViewById(R.id.btnCancel);
         Button btnSelect = (Button) rootView.findViewById(R.id.btnSelect);
         btnCancel.setOnClickListener(this);
         btnSelect.setOnClickListener(this);
@@ -129,6 +135,9 @@ public class DropboxListFragment extends Fragment
     }
 
     private void updateUI() {
+        if (mStartupState == AppPasswordFragment.STATE_STEP_1_SELECT_FOLDER) {
+            btnCancel.setEnabled(false);
+        }
         hideProgressBar();
         if (mFolderHashMap != null && mFolderHashMap.containsKey(mSelectedFolderPath)) {
             clsDropboxFolder selectedFolder = mFolderHashMap.get(mSelectedFolderPath);
@@ -291,9 +300,12 @@ public class DropboxListFragment extends Fragment
     private void selectFolder(String newFolderPath) {
         MySettings.setDropboxFolderName(newFolderPath);
 
-        if (MySettings.getAppPasswordState() == AppPasswordFragment.STATE_STEP_2_DOES_FILE_EXIST) {
-            // return to the AppPasswordFragment
+        if (MySettings.getStartupState() == AppPasswordFragment.STATE_STEP_1_SELECT_FOLDER) {
+            // set the next step in the initial startup process
+            MySettings.setStartupState(AppPasswordFragment.STATE_STEP_2_DOES_FILE_EXIST);
+            // return to FRAG_APP_PASSWORD
             EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_APP_PASSWORD, false));
+
         } else {
             EventBus.getDefault().post(new clsEvents.PopBackStack());
         }

@@ -86,7 +86,6 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
         super.onPreExecute();
         EventBus.getDefault().post(new clsEvents.showProgressInActionBar(true));
         MySettings.setNetworkBusy(true);
-        // TODO: show download file progressbar
         String filename = mDropboxFullFilename.substring(mDropboxFullFilename.lastIndexOf("/") + 1);
         MyLog.i("DownloadDecryptDataFile", "onPreExecute: STARTING download of " + filename);
     }
@@ -113,14 +112,14 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
     private String readFile() {
         try {
             Entry existingEntry = mDBApi.metadata(mDropboxFullFilename, 1, null, false, null);
-            if (existingEntry != null) {
+            if (existingEntry != null && existingEntry.bytes > 0 && !existingEntry.isDeleted) {
                 MyLog.i("DownloadDecryptDataFile", "readFile: File exists; " + existingEntry.bytes + " bytes; rev = " + existingEntry.rev);
             } else {
                 mDownloadStatus = FILE_NOT_FOUND;
                 MySettings.setDropboxFileRev(MySettings.UNKNOWN);
                 return "";
             }
-            if (existingEntry.bytes == 0 || existingEntry.isDeleted) {
+            if (existingEntry.bytes == 0) {
                 MyLog.e("DownloadDecryptDataFile", "readFile: File" + existingEntry.fileName() + " exists but is empty!");
                 mDownloadStatus = FILE_FOUND_BUT_EMPTY;
                 return "";
