@@ -168,6 +168,7 @@ public class fragEdit_creditCard extends Fragment implements TextWatcher {
             mIsNewPasswordItem = getArguments().getBoolean(ARG_IS_NEW_PASSWORD_ITEM);
             if (mIsNewPasswordItem) {
                 mIsDirty = true;
+                mIsItemNameDirty=true;
             }
 
             if (mActiveItem != null) {
@@ -473,9 +474,14 @@ public class fragEdit_creditCard extends Fragment implements TextWatcher {
         mActiveItem.putAlternatePhoneNumber(unformattedAlternatePhoneNumber);
         mActiveItem.update();
 
+        if (mIsItemNameDirty) {
+            ItemsTable.sortItemsAsync(getActivity());
+        }
+
         // save the changes to Dropbox
         EventBus.getDefault().post(new clsEvents.saveChangesToDropbox());
         mIsDirty = false;
+        mIsItemNameDirty = false;
     }
 
     private String makeCreditCardNumber() {

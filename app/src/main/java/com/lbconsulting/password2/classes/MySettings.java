@@ -19,6 +19,7 @@ public class MySettings {
     public static final String DROPBOX_FILENAME = "PasswordsDatafile.txt";
     public static final int MAX_NUMBER_OF_BACKUP_FILES = 5;
     public static final String ARG_IS_DIRTY = "arg_isDirty";
+    public static final String DB_KEY = "9f9130ba72070ad6bb86efae49f11e10";
 
     public static final int FRAG_HOME = 1;
 

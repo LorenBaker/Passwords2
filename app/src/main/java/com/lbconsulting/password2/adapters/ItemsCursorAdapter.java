@@ -10,6 +10,8 @@ import android.widget.TextView;
 
 import com.lbconsulting.password2.R;
 import com.lbconsulting.password2.classes.MyLog;
+import com.lbconsulting.password2.classes.MySettings;
+import com.lbconsulting.password2.classes.clsUtils;
 import com.lbconsulting.password2.database.ItemsTable;
 
 /**
@@ -37,10 +39,9 @@ public class ItemsCursorAdapter extends CursorAdapter {
         if (cursor == null) {
             return;
         }
-
         TextView tvItemName = (TextView) view.findViewById(R.id.tvItemName);
-        String itemName = cursor.getString(cursor.getColumnIndex(ItemsTable.COL_ITEM_NAME));
-        tvItemName.setText(itemName);
-
+        String encryptedItemName = cursor.getString(cursor.getColumnIndex(ItemsTable.COL_ITEM_NAME));
+        String decryptedItemName = clsUtils.decryptString(encryptedItemName, MySettings.DB_KEY, false);
+        tvItemName.setText(decryptedItemName);
     }
 }

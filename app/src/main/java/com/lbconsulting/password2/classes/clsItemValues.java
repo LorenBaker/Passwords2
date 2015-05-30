@@ -334,13 +334,11 @@ public class clsItemValues {
 
 
     private String encryptValue(String value) {
-        // TODO: encrypt clsItemValues
-        return value;
+        return clsUtils.encryptString(value, MySettings.DB_KEY, false);
     }
 
     private String decryptValue(String encryptedValue) {
-        // TODO: decrypt clsItemValues
-        return encryptedValue;
+        return clsUtils.decryptString(encryptedValue, MySettings.DB_KEY, false);
     }
 
     public void update() {

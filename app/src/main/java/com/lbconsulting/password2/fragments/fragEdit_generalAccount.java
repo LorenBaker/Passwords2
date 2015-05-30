@@ -72,6 +72,7 @@ public class fragEdit_generalAccount extends Fragment implements TextWatcher {
             mIsNewPasswordItem = getArguments().getBoolean(ARG_IS_NEW_PASSWORD_ITEM);
             if (mIsNewPasswordItem) {
                 mIsDirty = true;
+                mIsItemNameDirty=true;
             }
         }
         setHasOptionsMenu(true);
@@ -207,7 +208,7 @@ public class fragEdit_generalAccount extends Fragment implements TextWatcher {
         mTextChangedListenersEnabled = false;
 
         // don't update if the user has made edits
-        if (!mIsDirty||mIsNewPasswordItem) {
+        if (!mIsDirty || mIsNewPasswordItem) {
             mActiveItem = new clsItemValues(getActivity(), mActiveItemID);
 
             txtItemName.setText(mActiveItem.getItemName());
@@ -239,9 +240,13 @@ public class fragEdit_generalAccount extends Fragment implements TextWatcher {
         mActiveItem.putAlternatePhoneNumber(unformattedAlternatePhoneNumber);
         mActiveItem.update();
 
+        if (mIsItemNameDirty) {
+            ItemsTable.sortItemsAsync(getActivity());
+        }
         // save the changes
         EventBus.getDefault().post(new clsEvents.saveChangesToDropbox());
         mIsDirty = false;
+        mIsItemNameDirty = false;
     }
 
     @Override
@@ -344,19 +349,9 @@ public class fragEdit_generalAccount extends Fragment implements TextWatcher {
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
         if (mTextChangedListenersEnabled) {
-            //String editTextName = "";
             if (txtItemName.getText().hashCode() == s.hashCode()) {
-                //editTextName = "txtItemName";
                 mIsItemNameDirty = true;
-/*            } else if (txtAccountNumber.getText().hashCode() == s.hashCode()) {
-                editTextName = "txtAccountNumber";
-            } else if (txtPrimaryPhoneNumber.getText().hashCode() == s.hashCode()) {
-                editTextName = "txtPrimaryPhoneNumber";
-            } else if (txtAlternatePhoneNumber.getText().hashCode() == s.hashCode()) {
-                editTextName = "txtAlternatePhoneNumber";*/
             }
-
-            //MyLog.d("fragEdit_generalAccount", "onTextChanged: EditText = " + editTextName);
             mIsDirty = true;
         }
     }

@@ -70,6 +70,7 @@ public class fragEdit_website extends Fragment implements TextWatcher {
             mIsNewPasswordItem = getArguments().getBoolean(ARG_IS_NEW_PASSWORD_ITEM);
             if (mIsNewPasswordItem) {
                 mIsDirty = true;
+                mIsItemNameDirty=true;
             }
         }
         setHasOptionsMenu(true);
@@ -179,7 +180,7 @@ public class fragEdit_website extends Fragment implements TextWatcher {
         mTextChangedListenersEnabled = false;
 
         // don't update if the user has made edits
-        if (!mIsDirty||mIsNewPasswordItem) {
+        if (!mIsDirty || mIsNewPasswordItem) {
             mActiveItem = new clsItemValues(getActivity(), mActiveItemID);
 
             txtItemName.setText(mActiveItem.getItemName());
@@ -207,9 +208,14 @@ public class fragEdit_website extends Fragment implements TextWatcher {
         mActiveItem.putWebsitePassword(txtPassword.getText().toString().trim());
         mActiveItem.update();
 
+        if (mIsItemNameDirty) {
+            ItemsTable.sortItemsAsync(getActivity());
+        }
+
         // save changes to Dropbox
         EventBus.getDefault().post(new clsEvents.saveChangesToDropbox());
         mIsDirty = false;
+        mIsItemNameDirty = false;
     }
 
     @Override
@@ -224,7 +230,7 @@ public class fragEdit_website extends Fragment implements TextWatcher {
 
             // Do Fragment menu item stuff here
             case R.id.action_save:
-               // Toast.makeText(getActivity(), "TO COME: action_save", Toast.LENGTH_SHORT).show();
+                // Toast.makeText(getActivity(), "TO COME: action_save", Toast.LENGTH_SHORT).show();
                 if (txtItemName.hasFocus()) {
                     validateItemName();
                     mNameValidated = true;

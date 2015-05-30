@@ -234,11 +234,14 @@ public class MainActivity extends Activity {
             }
         }
 
-        if (MySettings.getStartupState() != fragApplicationPassword.STATE_PASSWORD_ONLY) {
+        int startupState = MySettings.getStartupState();
+        if ( startupState!= fragApplicationPassword.STATE_PASSWORD_ONLY
+                && startupState != fragApplicationPassword.STATE_VALIDATING_PASSWORD) {
             MySettings.setStartupState(fragApplicationPassword.STATE_STEP_1_SELECT_FOLDER);
         }
 
-        if (MySettings.getStartupState() == fragApplicationPassword.STATE_STEP_1_SELECT_FOLDER
+        if (startupState== fragApplicationPassword.STATE_STEP_1_SELECT_FOLDER
+                || startupState == fragApplicationPassword.STATE_VALIDATING_PASSWORD
                 || MySettings.getAppPassword().equals(MySettings.NOT_AVAILABLE)) {
             showFragment(MySettings.FRAG_APP_PASSWORD, false);
         } else {

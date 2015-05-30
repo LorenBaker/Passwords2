@@ -21,6 +21,7 @@ import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
 import com.lbconsulting.password2.classes.clsItem;
+import com.lbconsulting.password2.classes.clsItemSort;
 import com.lbconsulting.password2.classes.clsItemValues;
 import com.lbconsulting.password2.classes.clsLabPasswords;
 import com.lbconsulting.password2.classes.clsUserValues;
@@ -37,6 +38,9 @@ import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -65,7 +69,6 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
     private final Context mContext;
     private final DropboxAPI<?> mDBApi;
     private final String mDropboxFullFilename;
-    // TODO: Create verbose messages
     private final boolean mIsVerbose;
     private final boolean mIsOkToDownloadDataFile;
     private int mDownloadStatus = FILE_DOWNLOAD_START;
@@ -309,8 +312,11 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
             userValues.update();
         }
 
+
         long lastItemID = 0;
         clsItemValues itemValues;
+        ArrayList<clsItemSort> sortingList = new ArrayList<>();
+
         for (clsItem item : passwordsData.getPasswordItems()) {
             if (item.getID() > lastItemID) {
                 lastItemID = item.getID();
@@ -319,76 +325,42 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
             itemValues = new clsItemValues(mContext, item.getID());
             if (itemValues != null && !itemValues.hasData()) {
                 // insert new item into the ItemsTable
-                ItemsTable.CreateNewItem(mContext, item.getUser_ID(), item.getID(), item.getItemType_ID(), item.getName());
+                ItemsTable.createNewItem(mContext, item.getUser_ID(), item.getID(), item.getItemType_ID(), item.getName());
                 itemValues = new clsItemValues(mContext, item.getID());
             }
-            // as needed, update item fields
-
-            if (!item.getName().equals(itemValues.getItemName())) {
-                itemValues.putName(item.getName());
-            }
-
-            if (item.getItemType_ID() != itemValues.getItemTypeID()) {
-                itemValues.putItemTypeID(item.getItemType_ID());
-            }
-
-            if (item.getUser_ID() != itemValues.getUserID()) {
-                itemValues.putUserID(item.getUser_ID());
-            }
-
-            if (!item.getSoftwareKeyCode().equals(itemValues.getSoftwareKeyCode())) {
-                itemValues.putSoftwareKeyCode(item.getSoftwareKeyCode());
-            }
-
-            if (item.getSoftwareSubgroupLength() != itemValues.getSoftwareSubgroupLength()) {
-                itemValues.putSoftwareSubgroupLength(item.getSoftwareSubgroupLength());
-            }
-
-            if (!item.getComments().equals(itemValues.getComments())) {
-                itemValues.putComments(item.getComments());
-            }
-
-            if (!item.getCreditCardAccountNumber().equals(itemValues.getCreditCardAccountNumber())) {
-                itemValues.putCreditCardAccountNumber(item.getCreditCardAccountNumber());
-            }
-
-            if (!item.getCardCreditSecurityCode().equals(itemValues.getCardCreditSecurityCode())) {
-                itemValues.putCreditCardSecurityCode(item.getCardCreditSecurityCode());
-            }
-
-            if (!item.getCreditCardExpirationMonth().equals(itemValues.getCreditCardExpirationMonth())) {
-                itemValues.putCreditCardExpirationMonth(item.getCreditCardExpirationMonth());
-            }
-
-            if (!item.getCreditCardExpirationYear().equals(itemValues.getCreditCardExpirationYear())) {
-                itemValues.putCreditCardExpirationYear(item.getCreditCardExpirationYear());
-            }
-
-            if (!item.getGeneralAccountNumber().equals(itemValues.getGeneralAccountNumber())) {
-                itemValues.putGeneralAccountNumber(item.getGeneralAccountNumber());
-            }
-
-            if (!item.getPrimaryPhoneNumber().equals(itemValues.getPrimaryPhoneNumber())) {
-                itemValues.putPrimaryPhoneNumber(item.getPrimaryPhoneNumber());
-            }
-
-            if (!item.getAlternatePhoneNumber().equals(itemValues.getAlternatePhoneNumber())) {
-                itemValues.putAlternatePhoneNumber(item.getAlternatePhoneNumber());
-            }
-
-            if (!item.getWebsiteURL().equals(itemValues.getWebsiteURL())) {
-                itemValues.putWebsiteURL(item.getWebsiteURL());
-            }
-
-            if (!item.getWebsiteUserID().equals(itemValues.getWebsiteUserID())) {
-                itemValues.putWebsiteUserID(item.getWebsiteUserID());
-            }
-
-            if (!item.getWebsitePassword().equals(itemValues.getWebsitePassword())) {
-                itemValues.putWebsitePassword(item.getWebsitePassword());
-            }
-
+            // update item fields
+            itemValues.putName(item.getName());
+            itemValues.putItemTypeID(item.getItemType_ID());
+            itemValues.putUserID(item.getUser_ID());
+            itemValues.putSoftwareKeyCode(item.getSoftwareKeyCode());
+            itemValues.putSoftwareSubgroupLength(item.getSoftwareSubgroupLength());
+            itemValues.putComments(item.getComments());
+            itemValues.putCreditCardAccountNumber(item.getCreditCardAccountNumber());
+            itemValues.putCreditCardSecurityCode(item.getCardCreditSecurityCode());
+            itemValues.putCreditCardExpirationMonth(item.getCreditCardExpirationMonth());
+            itemValues.putCreditCardExpirationYear(item.getCreditCardExpirationYear());
+            itemValues.putGeneralAccountNumber(item.getGeneralAccountNumber());
+            itemValues.putPrimaryPhoneNumber(item.getPrimaryPhoneNumber());
+            itemValues.putAlternatePhoneNumber(item.getAlternatePhoneNumber());
+            itemValues.putWebsiteURL(item.getWebsiteURL());
+            itemValues.putWebsiteUserID(item.getWebsiteUserID());
+            itemValues.putWebsitePassword(item.getWebsitePassword());
             itemValues.update();
+
+            sortingList.add(new clsItemSort(item.getID(), item.getName()));
+        }
+
+        Collections.sort(sortingList, new Comparator<clsItemSort>() {
+            @Override
+            public int compare(clsItemSort item1, clsItemSort item2) {
+                return item1.getItemName().compareTo(item2.getItemName());
+            }
+        });
+
+        int sortKey = 0;
+        for (clsItemSort item : sortingList) {
+            ItemsTable.updateItemSortKey(mContext, item.getItemID(), sortKey);
+            sortKey ++;
         }
 
         MySettings.setLastItemAndUserIDs(lastItemID, lastUserID);

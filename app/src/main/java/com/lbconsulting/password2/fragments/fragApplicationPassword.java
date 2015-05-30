@@ -49,38 +49,35 @@ import de.greenrobot.event.EventBus;
 
 public class fragApplicationPassword extends Fragment implements View.OnClickListener {
 
-    // fragment state variables
-    private boolean mShowPasswordText = false;
-    // private int mLastActiveFragmentID;
-
-    private TextView tvProgressBarCaption;
-    private TextView tvFirstTimeMessage;
-    private EditText txtAppPassword;
-    private Button btnDisplay;
-    private Button btnOK;
-    private Button btnOkReadPasswordFile;
-
     // Startup states
     public static final int STATE_STEP_1_SELECT_FOLDER = 10;
     public static final int STATE_STEP_2_DOES_FILE_EXIST = 20;
-
     public static final int STATE_STEP_3A_GET_APP_PASSWORD = 31;
     //public static final int STATE_STEP_4A_READ_FILE = 41;
     public static final int STATE_STEP_5A_SELECT_USER = 51;
-
     public static final int STATE_STEP_3B_CREATE_NEW_USER = 32;
     public static final int STATE_STEP_4B_CREATE_APP_PASSWORD = 42;
     //private static final int STATE_STEP_5B_SAVE_FILE = 52;
 
-    public static final int STATE_PASSWORD_ONLY = 60;
-    public static final int STATE_VALIDATING_PASSWORD = 70;
+    public static final int STATE_VALIDATING_PASSWORD = 60;
+    public static final int STATE_PASSWORD_ONLY = 70;
 
-    public static fragApplicationPassword newInstance() {
-        return new fragApplicationPassword();
-    }
+    // fragment variables and views
+    private boolean mShowPasswordText = false;
+
+    private Button btnOK;
+    private Button btnDisplay;
+    private Button btnOkReadPasswordFile;
+    private TextView tvProgressBarCaption;
+    private TextView tvFirstTimeMessage;
+    private EditText txtAppPassword;
 
     public fragApplicationPassword() {
         // Required empty public constructor
+    }
+
+    public static fragApplicationPassword newInstance() {
+        return new fragApplicationPassword();
     }
 
     @Override
@@ -158,7 +155,7 @@ public class fragApplicationPassword extends Fragment implements View.OnClickLis
             case STATE_STEP_2_DOES_FILE_EXIST:
                 MyLog.i("fragApplicationPassword", "updateUI(): State = STATE_STEP_2_DOES_FILE_EXIST");
                 // Select user
-                new passwordsDataFileExists(getActivity()).execute();
+                new passwordsDataFileExists().execute();
                 // Continues in passwordsDataFileExists onPostExecute()
                 break;
 
@@ -296,10 +293,8 @@ public class fragApplicationPassword extends Fragment implements View.OnClickLis
 
         private DropboxAPI<AndroidAuthSession> mDBApi;
         private String mDropboxFullFilename;
-        private final Context mContext;
 
-        public passwordsDataFileExists(Context context) {
-            mContext = context;
+        public passwordsDataFileExists() {
         }
 
         @Override

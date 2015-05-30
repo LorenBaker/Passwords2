@@ -78,6 +78,7 @@ public class fragEdit_software extends Fragment {
             mIsNewPasswordItem = getArguments().getBoolean(ARG_IS_NEW_PASSWORD_ITEM);
             if (mIsNewPasswordItem) {
                 mIsDirty = true;
+                mIsItemNameDirty=true;
             }
         }
         setHasOptionsMenu(true);
@@ -296,9 +297,14 @@ public class fragEdit_software extends Fragment {
         mActiveItem.putSoftwareSubgroupLength(mSubgroupLength);
         mActiveItem.update();
 
+        if (mIsItemNameDirty) {
+            ItemsTable.sortItemsAsync(getActivity());
+        }
+
         // save changes to Dropbox
         EventBus.getDefault().post(new clsEvents.saveChangesToDropbox());
         mIsDirty = false;
+        mIsItemNameDirty = false;
     }
 
     @Override

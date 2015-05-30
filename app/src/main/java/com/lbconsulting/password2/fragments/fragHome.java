@@ -375,7 +375,7 @@ public class fragHome extends Fragment
 
     private void createNewCreditCard(long newItemID) {
         String newItemName = getActivity().getString(R.string.new_credit_card_name) ;
-        long itemID = ItemsTable.CreateNewItem(getActivity(), mActiveUserID,
+        long itemID = ItemsTable.createNewItem(getActivity(), mActiveUserID,
                 newItemID, clsItemTypes.CREDIT_CARDS, newItemName);
         if (itemID > 0 && itemID == newItemID) {
             MySettings.setActiveItemID(itemID);
@@ -387,7 +387,7 @@ public class fragHome extends Fragment
 
     private void createNewGeneralAccount(long newItemID) {
         String newItemName = getActivity().getString(R.string.new_general_account_name);
-        long itemID = ItemsTable.CreateNewItem(getActivity(), mActiveUserID,
+        long itemID = ItemsTable.createNewItem(getActivity(), mActiveUserID,
                 newItemID, clsItemTypes.GENERAL_ACCOUNTS, newItemName);
         if (itemID > 0 && itemID == newItemID) {
             MySettings.setActiveItemID(itemID);
@@ -399,7 +399,7 @@ public class fragHome extends Fragment
 
     private void createNewSoftware(long newItemID) {
         String newItemName = getActivity().getString(R.string.new_software_name);
-        long itemID = ItemsTable.CreateNewItem(getActivity(), mActiveUserID,
+        long itemID = ItemsTable.createNewItem(getActivity(), mActiveUserID,
                 newItemID, clsItemTypes.SOFTWARE, newItemName);
         if (itemID > 0 && itemID == newItemID) {
             MySettings.setActiveItemID(itemID);
@@ -411,7 +411,7 @@ public class fragHome extends Fragment
 
     private void createNewWebsite(long newItemID) {
         String newItemName = getActivity().getString(R.string.new_website_name);
-        long itemID = ItemsTable.CreateNewItem(getActivity(), mActiveUserID,
+        long itemID = ItemsTable.createNewItem(getActivity(), mActiveUserID,
                 newItemID, clsItemTypes.WEBSITES, newItemName);
         if (itemID > 0 && itemID == newItemID) {
             MySettings.setActiveItemID(itemID);

@@ -145,6 +145,8 @@ public class CryptLib {
                 e.printStackTrace();
             } catch (BadPaddingException e) {
                 e.printStackTrace();
+            }catch (Exception e ){
+                e.printStackTrace();
             }
         }
         System.out.println(_out);

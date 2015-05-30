@@ -29,8 +29,6 @@ import de.greenrobot.event.EventBus;
 public class fragSettings_user extends Fragment implements View.OnClickListener {
 
     // fragment state variables
-
-    // private ArrayList<clsUsers> mUsers;
     private clsUserValues mActiveUser;
 
     private Button btnCreateNewUser;
@@ -41,12 +39,12 @@ public class fragSettings_user extends Fragment implements View.OnClickListener 
     private int mStartupState;
 
 
-    public static fragSettings_user newInstance() {
-        return new fragSettings_user();
-    }
-
     public fragSettings_user() {
         // Required empty public constructor
+    }
+
+    public static fragSettings_user newInstance() {
+        return new fragSettings_user();
     }
 
     @Override
@@ -81,8 +79,8 @@ public class fragSettings_user extends Fragment implements View.OnClickListener 
         super.onActivityCreated(savedInstanceState);
         MyLog.i("fragSettings_user", "onActivityCreated()");
         mStartupState = MySettings.getStartupState();
-        if (getActivity().getActionBar() != null ) {
-            getActivity().getActionBar().setDisplayHomeAsUpEnabled( mStartupState == fragApplicationPassword.STATE_PASSWORD_ONLY);
+        if (getActivity().getActionBar() != null) {
+            getActivity().getActionBar().setDisplayHomeAsUpEnabled(mStartupState == fragApplicationPassword.STATE_PASSWORD_ONLY);
         }
         MySettings.setOnSaveInstanceState(false);
     }
@@ -147,7 +145,6 @@ public class fragSettings_user extends Fragment implements View.OnClickListener 
         switch (item.getItemId()) {
 
             // Do Fragment menu item stuff here
-
             case android.R.id.home:
                 EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_HOME, false));
                 return true;
@@ -230,9 +227,6 @@ public class fragSettings_user extends Fragment implements View.OnClickListener 
                 break;
 
             case R.id.btnEditUserName:
-                //Toast.makeText(getActivity(), "TO COME: btnEditUserName", Toast.LENGTH_SHORT).show();
-
-                //btnEditUserName
                 AlertDialog.Builder editUserDialog = new AlertDialog.Builder(getActivity());
 
                 editUserDialog.setTitle(getActivity().getString(R.string.editUserName_dialog_title));
@@ -280,18 +274,13 @@ public class fragSettings_user extends Fragment implements View.OnClickListener 
                 break;
 
             case R.id.btnDeleteUser:
-                //Toast.makeText(getActivity(), "TO COME: btnDeleteUser", Toast.LENGTH_SHORT).show();
-
                 mActiveUser = new clsUserValues(getActivity(), MySettings.getActiveUserID());
                 AlertDialog.Builder deleteUserDialog = new AlertDialog.Builder(getActivity());
 
                 deleteUserDialog.setTitle(getActivity().getString(R.string.deleteUser_dialog_title));
-                StringBuilder msg = new StringBuilder();
-                msg.append(getActivity().getString(R.string.deleteUser_dialog_message))
-                        .append(mActiveUser.getUserName())
-                        .append("\"?");
-
-                deleteUserDialog.setMessage(msg.toString());
+                String message = getActivity().getString(R.string.deleteUser_dialog_message)
+                        + mActiveUser.getUserName() + "\"?";
+                deleteUserDialog.setMessage(message);
 
                 deleteUserDialog.setPositiveButton(getActivity().getString(R.string.btnYes_text),
                         new DialogInterface.OnClickListener() {
@@ -333,60 +322,6 @@ public class fragSettings_user extends Fragment implements View.OnClickListener 
         }
 
     }
-
-    private void deleteUserAndAllRelatedPasswordItems(int userID) {
-        // Delete all Passwords items associated with the active user
-/*        ArrayList<Integer> itemIDsForDeletion = new ArrayList<>();
-        // Find all items associated with the active user
-        for (clsItem item : MainActivity.getPasswordsData().getPasswordItems()) {
-            if (item.getUserID() == userID) {
-                itemIDsForDeletion.add(item.getItemID());
-            }
-        }
-
-        for (Integer ID : itemIDsForDeletion) {
-            deletePasswordItem(ID);
-        }
-
-        // Delete the user
-        deleteUser(userID);*/
-    }
-
-    private void deletePasswordItem(Integer itemID) {
-/*        ArrayList<clsItem> passwordItems = MainActivity.getPasswordsData().getPasswordItems();
-        if (passwordItems != null) {
-            for (int i = passwordItems.size() - 1; i >= 0; i--) {
-                if (passwordItems.get(i).getItemID() == itemID) {
-                    passwordItems.remove(i);
-                    break;
-                }
-            }
-        }*/
-    }
-
-    private void deleteUser(int userID) {
-/*        ArrayList<clsUsers> users = MainActivity.getPasswordsData().getUsers();
-        if (users != null) {
-            for (int i = users.size() - 1; i >= 0; i--) {
-                if (users.get(i).getUserID() == userID) {
-                    users.remove(i);
-                    break;
-                }
-            }
-        }*/
-    }
-
-/*    private boolean isUnique(String newUserName) {
-        // TODO: Move to Main Activity ??
-        boolean result = true;
-        for (clsUsers user : mUsers) {
-            if (user.getUserName().equalsIgnoreCase(newUserName)) {
-                result = false;
-                break;
-            }
-        }
-        return result;
-    }*/
 
     private void selectActiveUser() {
         MySettings.setActiveUserID(mActiveUser.getUserID());
