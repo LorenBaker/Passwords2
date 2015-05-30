@@ -109,10 +109,10 @@ public class clsEvents {
         }
     }
 
-    public static class PopBackStack {
+/*    public static class PopBackStack {
         public PopBackStack() {
         }
-    }
+    }*/
 
     public static class showOkDialog {
 

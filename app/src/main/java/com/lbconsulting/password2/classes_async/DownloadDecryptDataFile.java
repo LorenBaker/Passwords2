@@ -28,6 +28,7 @@ import com.lbconsulting.password2.classes.clsUsers;
 import com.lbconsulting.password2.database.ItemsTable;
 import com.lbconsulting.password2.database.PasswordsContentProvider;
 import com.lbconsulting.password2.database.UsersTable;
+import com.lbconsulting.password2.fragments.fragApplicationPassword;
 
 import org.apache.commons.io.IOUtils;
 
@@ -226,6 +227,7 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
             MyLog.i("DownloadDecryptDataFile", "decryptFile: Decrypted file length = " + decryptedContents.length() + " bytes.");
             if (decryptedContents.length() == 0) {
                 mDownloadStatus = INVALID_PASSWORD;
+                MySettings.resetEncryptionTestText();
             }
 
         } catch (InvalidKeyException e) {
@@ -317,7 +319,7 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
             itemValues = new clsItemValues(mContext, item.getID());
             if (itemValues != null && !itemValues.hasData()) {
                 // insert new item into the ItemsTable
-                ItemsTable.CreateNewItem(mContext, item.getID(), item.getUser_ID(), item.getName());
+                ItemsTable.CreateNewItem(mContext, item.getUser_ID(), item.getID(), item.getItemType_ID(), item.getName());
                 itemValues = new clsItemValues(mContext, item.getID());
             }
             // as needed, update item fields
@@ -456,7 +458,12 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
         }
         if (!message.isEmpty()) {
             MyLog.e("DownloadDecryptDataFile", "onPostExecute: " + message);
+            int startupState = MySettings.getStartupState();
             EventBus.getDefault().post(new clsEvents.showOkDialog(title, message));
+            if (startupState != fragApplicationPassword.STATE_PASSWORD_ONLY) {
+                MySettings.setStartupState(fragApplicationPassword.STATE_STEP_3A_GET_APP_PASSWORD);
+                EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_APP_PASSWORD, false));
+            }
         }
 
         MySettings.setNetworkBusy(false);

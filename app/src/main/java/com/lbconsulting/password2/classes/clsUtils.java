@@ -151,7 +151,7 @@ public class clsUtils {
         }
     }
 
-    public static boolean appPasswordIsValid(Context context, String password) {
+    public static boolean appPasswordHasValidSyntax(Context context, String password) {
 
         // TODO: Add more tests for a valid password ??
         String title = "Invalid Password";

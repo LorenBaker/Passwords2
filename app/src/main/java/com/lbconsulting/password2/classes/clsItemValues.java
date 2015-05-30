@@ -5,7 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 
 import com.lbconsulting.password2.database.ItemsTable;
-import com.lbconsulting.password2.fragments.PasswordItemsListFragment;
+import com.lbconsulting.password2.fragments.fragHome;
 
 /**
  * This class gets and sets item data values.
@@ -355,7 +355,7 @@ public class clsItemValues {
         String formattedCreditCardNumber = "";
         clsUtils.creditCard card = null;
         switch (getItemTypeID()) {
-            case PasswordItemsListFragment.USER_CREDIT_CARD_ITEMS:
+            case fragHome.USER_CREDIT_CARD_ITEMS:
                 if (!getCreditCardAccountNumber().isEmpty()) {
                     card = clsUtils.getCreditCardType(getCreditCardAccountNumber());
                 }

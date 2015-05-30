@@ -3,7 +3,7 @@ package com.lbconsulting.password2.classes;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.lbconsulting.password2.fragments.AppPasswordFragment;
+import com.lbconsulting.password2.fragments.fragApplicationPassword;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
@@ -20,7 +20,7 @@ public class MySettings {
     public static final int MAX_NUMBER_OF_BACKUP_FILES = 5;
     public static final String ARG_IS_DIRTY = "arg_isDirty";
 
-    public static final int FRAG_ITEMS_LIST = 1;
+    public static final int FRAG_HOME = 1;
 
     public static final int FRAG_ITEM_DETAIL = 11;
 
@@ -30,11 +30,11 @@ public class MySettings {
     public static final int FRAG_EDIT_WEBSITE = 114;
 
     public static final int FRAG_SETTINGS = 12;
-    public static final int FRAG_USER_SETTINGS = 121;
+    public static final int FRAG_SETTINGS_USER = 121;
     public static final int FRAG_DROPBOX_LIST = 122;
-    public static final int FRAG_APP_PASSWORD_SETTINGS = 123;
+    public static final int FRAG_SETTINGS_APP_PASSWORD = 123;
     public static final int FRAG_APP_PASSWORD = 1231;
-    public static final int FRAG_NETWORKING_SETTINGS = 124;
+    public static final int FRAG_SETTINGS_NETWORKING = 124;
 
 
     public static final String[] CreditCardNames = {"American Express", "Diners Club", "Discover", "JCB", "MasterCard", "VISA"};
@@ -91,6 +91,9 @@ public class MySettings {
     public static final String SETTING_NETWORK_BUSY = "networkBusy";
     public static final String SETTING_SYNC_PERIODICITY = "syncPeriodicity";
 
+    public static final String SETTING_ENCRYPTION_TEST = "encryptionTest";
+    private static final String ENCRYPTION_TEST_TEXT = "This is a test, only a test.";
+
     //private static final String DEFAULT_DROPBOX_PATH = "No Folder Selected";
     // TODO: remove the Test Passwords Data reference
     private static final String DEFAULT_DROPBOX_PATH = "/Test Passwords Data";
@@ -106,7 +109,7 @@ public class MySettings {
         SharedPreferences passwordsSavedState =
                 mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
         // TODO: Set default isVerbose to false
-        return passwordsSavedState.getBoolean(SETTING_IS_VERBOSE, true);
+        return passwordsSavedState.getBoolean(SETTING_IS_VERBOSE, false);
     }
 
     public static void setIsVerbose(boolean isVerbose) {
@@ -114,6 +117,32 @@ public class MySettings {
                 mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
         SharedPreferences.Editor editor = passwordsSavedState.edit();
         editor.putBoolean(SETTING_IS_VERBOSE, isVerbose);
+        editor.apply();
+    }
+
+    public static Boolean isPasswordValid(String password) {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        String encryptedText = passwordsSavedState.getString(SETTING_ENCRYPTION_TEST, UNKNOWN);
+        String decryptedText = clsUtils.decryptString(encryptedText, password, true);
+
+        return decryptedText.equals(ENCRYPTION_TEST_TEXT);
+    }
+
+    public static void setEncryptionTestText(String password) {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        SharedPreferences.Editor editor = passwordsSavedState.edit();
+        String encryptedText = clsUtils.encryptString(ENCRYPTION_TEST_TEXT, password, true);
+        editor.putString(SETTING_ENCRYPTION_TEST, encryptedText);
+        editor.apply();
+    }
+
+    public static void resetEncryptionTestText() {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        SharedPreferences.Editor editor = passwordsSavedState.edit();
+        editor.putString(SETTING_ENCRYPTION_TEST, UNKNOWN);
         editor.apply();
     }
 
@@ -132,13 +161,13 @@ public class MySettings {
         editor.apply();
     }
 
-    public static boolean isOkToUseNetwork(){
+    public static boolean isOkToUseNetwork() {
         SharedPreferences passwordsSavedState =
                 mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
         return passwordsSavedState.getBoolean(SETTING_OK_TO_USE_NETWORK, true);
     }
 
-    public static void setIsOkToUseNetwork(boolean okToDownloadDataFile){
+    public static void setIsOkToUseNetwork(boolean okToDownloadDataFile) {
         SharedPreferences passwordsSavedState =
                 mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
         SharedPreferences.Editor editor = passwordsSavedState.edit();
@@ -146,13 +175,13 @@ public class MySettings {
         editor.apply();
     }
 
-    public static boolean getNetworkBusy(){
+    public static boolean getNetworkBusy() {
         SharedPreferences passwordsSavedState =
                 mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
         return passwordsSavedState.getBoolean(SETTING_NETWORK_BUSY, false);
     }
 
-    public static void setNetworkBusy(boolean networkBusy){
+    public static void setNetworkBusy(boolean networkBusy) {
         SharedPreferences passwordsSavedState =
                 mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
         SharedPreferences.Editor editor = passwordsSavedState.edit();
@@ -319,7 +348,7 @@ public class MySettings {
     public static int getActiveFragmentID() {
         SharedPreferences passwordsSavedState =
                 mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
-        return passwordsSavedState.getInt(SETTING_ACTIVE_FRAGMENT_ID, FRAG_ITEMS_LIST);
+        return passwordsSavedState.getInt(SETTING_ACTIVE_FRAGMENT_ID, FRAG_HOME);
     }
 
     public static void setActiveFragmentID(int activeFragmentID) {
@@ -501,7 +530,7 @@ public class MySettings {
     public static int getStartupState() {
         SharedPreferences passwordsSavedState =
                 mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
-        return passwordsSavedState.getInt(SETTING_STARTUP_STATE, AppPasswordFragment.STATE_STEP_1_SELECT_FOLDER);
+        return passwordsSavedState.getInt(SETTING_STARTUP_STATE, fragApplicationPassword.STATE_STEP_1_SELECT_FOLDER);
     }
 
     public static void setStartupState(int startupState) {

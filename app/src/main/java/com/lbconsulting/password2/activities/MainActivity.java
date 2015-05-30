@@ -25,18 +25,19 @@ import com.lbconsulting.password2.classes.NetworkReceiver;
 import com.lbconsulting.password2.classes.clsEvents;
 import com.lbconsulting.password2.classes.clsLabPasswords;
 import com.lbconsulting.password2.classes_async.DownloadDecryptDataFile;
-import com.lbconsulting.password2.fragments.AppPasswordFragment;
-import com.lbconsulting.password2.fragments.DropboxListFragment;
-import com.lbconsulting.password2.fragments.EditCreditCardFragment;
-import com.lbconsulting.password2.fragments.EditGeneralAccountFragment;
-import com.lbconsulting.password2.fragments.EditSoftwareFragment;
-import com.lbconsulting.password2.fragments.EditWebsiteFragment;
-import com.lbconsulting.password2.fragments.PasswordItemDetailFragment;
-import com.lbconsulting.password2.fragments.PasswordItemsListFragment;
-import com.lbconsulting.password2.fragments.SettingsFragment;
-import com.lbconsulting.password2.fragments.Settings_AppPasswordFragment;
-import com.lbconsulting.password2.fragments.Settings_NetworkingFragment;
-import com.lbconsulting.password2.fragments.Settings_UserFragment;
+import com.lbconsulting.password2.database.PasswordsDatabaseHelper;
+import com.lbconsulting.password2.fragments.fragApplicationPassword;
+import com.lbconsulting.password2.fragments.fragDropboxList;
+import com.lbconsulting.password2.fragments.fragEdit_creditCard;
+import com.lbconsulting.password2.fragments.fragEdit_generalAccount;
+import com.lbconsulting.password2.fragments.fragEdit_software;
+import com.lbconsulting.password2.fragments.fragEdit_website;
+import com.lbconsulting.password2.fragments.fragHome;
+import com.lbconsulting.password2.fragments.fragItemDetail;
+import com.lbconsulting.password2.fragments.fragSettings;
+import com.lbconsulting.password2.fragments.fragSettings_appPassword;
+import com.lbconsulting.password2.fragments.fragSettings_networking;
+import com.lbconsulting.password2.fragments.fragSettings_user;
 import com.lbconsulting.password2.services.PasswordsUpdateService;
 
 import de.greenrobot.event.EventBus;
@@ -116,42 +117,27 @@ public class MainActivity extends Activity {
         startService(intent);
     }
 
-    public void onEvent(clsEvents.PopBackStack event) {
-
-        int activeFragmentID = MySettings.getActiveFragmentID();
-        showParentFragment(activeFragmentID);
-/*        FragmentManager fm = getFragmentManager();
-        MyLog.i("MainActivity", "onEvent: BackStackEntryCount=" + fm.getBackStackEntryCount());
-        if (fm.getBackStackEntryCount() < 2 && MySettings.getActiveFragmentID() != MySettings.FRAG_ITEMS_LIST) {
-            MySettings.setActiveFragmentID(MySettings.FRAG_ITEMS_LIST);
-            showFragment(MySettings.FRAG_ITEMS_LIST, false);
-        } else {
-            fm.popBackStack();
-        }*/
-
-    }
 
     @Override
     public void onBackPressed() {
+        // TODO: Update onBackPressed code. Block user from leaving fragApplicationPassword
         int activeFragmentID = MySettings.getActiveFragmentID();
         switch (activeFragmentID) {
-            case MySettings.FRAG_ITEMS_LIST: // 1
+            case MySettings.FRAG_HOME: // 1
                 super.onBackPressed();
                 break;
 
             default:
                 int startupState = MySettings.getStartupState();
                 switch (startupState) {
-                    case AppPasswordFragment.STATE_STEP_3B_CREATE_NEW_USER:
-                        showFragment(MySettings.FRAG_USER_SETTINGS, false);
-                        break;
-
-                    case AppPasswordFragment.STATE_STEP_5A_SELECT_USER:
-                        showFragment(MySettings.FRAG_SETTINGS, false);
+                    case fragApplicationPassword.STATE_PASSWORD_ONLY:
+                        showParentFragment(activeFragmentID);
                         break;
 
                     default:
-                        showParentFragment(activeFragmentID);
+                        super.onBackPressed();
+                        // exit the app
+                        // this disables all onBackPressed when starting up the app
                 }
 
         }
@@ -162,7 +148,7 @@ public class MainActivity extends Activity {
 
             case MySettings.FRAG_ITEM_DETAIL: //11
             case MySettings.FRAG_SETTINGS: //12
-                showFragment(MySettings.FRAG_ITEMS_LIST, false);
+                showFragment(MySettings.FRAG_HOME, false);
                 break;
 
             case MySettings.FRAG_EDIT_CREDIT_CARD: //111
@@ -173,15 +159,15 @@ public class MainActivity extends Activity {
                 break;
 
 
-            case MySettings.FRAG_USER_SETTINGS: //121
+            case MySettings.FRAG_SETTINGS_USER: //121
             case MySettings.FRAG_DROPBOX_LIST: //122
-            case MySettings.FRAG_APP_PASSWORD_SETTINGS: //123
-            case MySettings.FRAG_NETWORKING_SETTINGS: //124
+            case MySettings.FRAG_SETTINGS_APP_PASSWORD: //123
+            case MySettings.FRAG_SETTINGS_NETWORKING: //124
                 showFragment(MySettings.FRAG_SETTINGS, false);
                 break;
 
             case MySettings.FRAG_APP_PASSWORD: //1231
-                showFragment(MySettings.FRAG_APP_PASSWORD_SETTINGS, false);
+                showFragment(MySettings.FRAG_SETTINGS_APP_PASSWORD, false);
                 break;
 
         }
@@ -248,7 +234,11 @@ public class MainActivity extends Activity {
             }
         }
 
-        if (MySettings.getStartupState() == AppPasswordFragment.STATE_STEP_1_SELECT_FOLDER
+        if (MySettings.getStartupState() != fragApplicationPassword.STATE_PASSWORD_ONLY) {
+            MySettings.setStartupState(fragApplicationPassword.STATE_STEP_1_SELECT_FOLDER);
+        }
+
+        if (MySettings.getStartupState() == fragApplicationPassword.STATE_STEP_1_SELECT_FOLDER
                 || MySettings.getAppPassword().equals(MySettings.NOT_AVAILABLE)) {
             showFragment(MySettings.FRAG_APP_PASSWORD, false);
         } else {
@@ -287,6 +277,16 @@ public class MainActivity extends Activity {
         if (networkReceiver != null) {
             this.unregisterReceiver(networkReceiver);
         }
+
+        if (MySettings.getStartupState() != fragApplicationPassword.STATE_PASSWORD_ONLY) {
+            // quitting the app in the startup phase
+            // upon restarting, the app starts at step 1
+            // delete the SQLite database if it has been created.
+
+            boolean databaseDeleted= PasswordsDatabaseHelper.deleteDatabase();
+            MyLog.i("MainActivity", "onDestroy. Database deleted = " + databaseDeleted);
+
+        }
     }
 
 
@@ -297,14 +297,14 @@ public class MainActivity extends Activity {
         } else {
             // Single pane display
             switch (fragmentID) {
-                case MySettings.FRAG_ITEMS_LIST:
-                    clearBackStack();
+                case MySettings.FRAG_HOME:
+                    // clearBackStack();
                     fm.beginTransaction()
                             .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                             .replace(R.id.fragment_container,
-                                    PasswordItemsListFragment.newInstance(), "FRAG_ITEMS_LIST")
+                                    fragHome.newInstance(), "FRAG_HOME")
                             .commit();
-                    MyLog.i("MainActivity", "showFragments: FRAG_ITEMS_LIST");
+                    MyLog.i("MainActivity", "showFragments: FRAG_HOME");
                     break;
 
                 case MySettings.FRAG_ITEM_DETAIL:
@@ -313,8 +313,8 @@ public class MainActivity extends Activity {
                         fm.beginTransaction()
                                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                                 .replace(R.id.fragment_container,
-                                        PasswordItemDetailFragment.newInstance(), "FRAG_ITEM_DETAIL")
-                                .addToBackStack("FRAG_ITEM_DETAIL")
+                                        fragItemDetail.newInstance(), "FRAG_ITEM_DETAIL")
+                                        //.addToBackStack("FRAG_ITEM_DETAIL")
                                 .commit();
                         MyLog.i("MainActivity", "showFragments: FRAG_ITEM_DETAIL");
                     }
@@ -326,8 +326,8 @@ public class MainActivity extends Activity {
                         fm.beginTransaction()
                                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                                 .replace(R.id.fragment_container,
-                                        EditCreditCardFragment.newInstance(isNewItem), "FRAG_EDIT_CREDIT_CARD")
-                                .addToBackStack("FRAG_EDIT_CREDIT_CARD")
+                                        fragEdit_creditCard.newInstance(isNewItem), "FRAG_EDIT_CREDIT_CARD")
+                                        //.addToBackStack("FRAG_EDIT_CREDIT_CARD")
                                 .commit();
                         MyLog.i("MainActivity", "showFragments: FRAG_EDIT_CREDIT_CARD");
                     }
@@ -339,8 +339,8 @@ public class MainActivity extends Activity {
                         fm.beginTransaction()
                                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                                 .replace(R.id.fragment_container,
-                                        EditGeneralAccountFragment.newInstance(isNewItem), "FRAG_EDIT_GENERAL_ACCOUNT")
-                                .addToBackStack("FRAG_EDIT_GENERAL_ACCOUNT")
+                                        fragEdit_generalAccount.newInstance(isNewItem), "FRAG_EDIT_GENERAL_ACCOUNT")
+                                        //.addToBackStack("FRAG_EDIT_GENERAL_ACCOUNT")
                                 .commit();
                         MyLog.i("MainActivity", "showFragments: FRAG_EDIT_GENERAL_ACCOUNT");
                     }
@@ -352,8 +352,8 @@ public class MainActivity extends Activity {
                         fm.beginTransaction()
                                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                                 .replace(R.id.fragment_container,
-                                        EditSoftwareFragment.newInstance(isNewItem), "FRAG_EDIT_SOFTWARE")
-                                .addToBackStack("FRAG_EDIT_SOFTWARE")
+                                        fragEdit_software.newInstance(isNewItem), "FRAG_EDIT_SOFTWARE")
+                                        //.addToBackStack("FRAG_EDIT_SOFTWARE")
                                 .commit();
                         MyLog.i("MainActivity", "showFragments: FRAG_EDIT_SOFTWARE");
                     }
@@ -365,8 +365,8 @@ public class MainActivity extends Activity {
                         fm.beginTransaction()
                                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                                 .replace(R.id.fragment_container,
-                                        EditWebsiteFragment.newInstance(isNewItem), "FRAG_EDIT_WEBSITE")
-                                .addToBackStack("FRAG_EDIT_WEBSITE")
+                                        fragEdit_website.newInstance(isNewItem), "FRAG_EDIT_WEBSITE")
+                                        //.addToBackStack("FRAG_EDIT_WEBSITE")
                                 .commit();
                         MyLog.i("MainActivity", "showFragments: FRAG_EDIT_WEBSITE");
                     }
@@ -378,60 +378,60 @@ public class MainActivity extends Activity {
                     fm.beginTransaction()
                             .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                             .replace(R.id.fragment_container,
-                                    SettingsFragment.newInstance(), "FRAG_SETTINGS")
-                            .addToBackStack("FRAG_SETTINGS")
+                                    fragSettings.newInstance(), "FRAG_SETTINGS")
+                                    //.addToBackStack("FRAG_SETTINGS")
                             .commit();
                     MyLog.i("MainActivity", "showFragments: FRAG_SETTINGS");
                     //}
                     break;
 
-                case MySettings.FRAG_USER_SETTINGS:
+                case MySettings.FRAG_SETTINGS_USER:
                     // don't replace fragment if restarting from onSaveInstanceState
                     if (!MySettings.getOnSaveInstanceState()) {
                         fm.beginTransaction()
                                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                                 .replace(R.id.fragment_container,
-                                        Settings_UserFragment.newInstance(), "FRAG_USER_SETTINGS")
-                                .addToBackStack("FRAG_USER_SETTINGS")
+                                        fragSettings_user.newInstance(), "FRAG_SETTINGS_USER")
+                                        //.addToBackStack("FRAG_SETTINGS_USER")
                                 .commit();
-                        MyLog.i("MainActivity", "showFragments: FRAG_USER_SETTINGS");
+                        MyLog.i("MainActivity", "showFragments: FRAG_SETTINGS_USER");
                     }
                     break;
 
-                case MySettings.FRAG_APP_PASSWORD_SETTINGS:
+                case MySettings.FRAG_SETTINGS_APP_PASSWORD:
                     // don't replace fragment if restarting from onSaveInstanceState
                     if (!MySettings.getOnSaveInstanceState()) {
                         fm.beginTransaction()
                                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                                 .replace(R.id.fragment_container,
-                                        Settings_AppPasswordFragment.newInstance(), "FRAG_APP_PASSWORD_SETTINGS")
-                                .addToBackStack("FRAG_APP_PASSWORD_SETTINGS")
+                                        fragSettings_appPassword.newInstance(), "FRAG_SETTINGS_APP_PASSWORD")
+                                        //.addToBackStack("FRAG_SETTINGS_APP_PASSWORD")
                                 .commit();
-                        MyLog.i("MainActivity", "showFragments: FRAG_APP_PASSWORD_SETTINGS");
+                        MyLog.i("MainActivity", "showFragments: FRAG_SETTINGS_APP_PASSWORD");
                     }
                     break;
 
                 case MySettings.FRAG_APP_PASSWORD:
-                    clearBackStack();
+                    //clearBackStack();
                     fm.beginTransaction()
                             .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                             .replace(R.id.fragment_container,
-                                    AppPasswordFragment.newInstance(isNewItem), "FRAG_APP_PASSWORD")
-                            .addToBackStack("FRAG_APP_PASSWORD")
+                                    fragApplicationPassword.newInstance(), "FRAG_APP_PASSWORD")
+                                    //.addToBackStack("FRAG_APP_PASSWORD")
                             .commit();
                     MyLog.i("MainActivity", "showFragments: FRAG_APP_PASSWORD");
                     break;
 
-                case MySettings.FRAG_NETWORKING_SETTINGS:
+                case MySettings.FRAG_SETTINGS_NETWORKING:
                     // don't replace fragment if restarting from onSaveInstanceState
                     if (!MySettings.getOnSaveInstanceState()) {
                         fm.beginTransaction()
                                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                                 .replace(R.id.fragment_container,
-                                        Settings_NetworkingFragment.newInstance(), "FRAG_NETWORKING_SETTINGS")
-                                .addToBackStack("FRAG_NETWORKING_SETTINGS")
+                                        fragSettings_networking.newInstance(), "FRAG_SETTINGS_NETWORKING")
+                                        //.addToBackStack("FRAG_SETTINGS_NETWORKING")
                                 .commit();
-                        MyLog.i("MainActivity", "showFragments: FRAG_NETWORKING_SETTINGS");
+                        MyLog.i("MainActivity", "showFragments: FRAG_SETTINGS_NETWORKING");
                     }
                     break;
 
@@ -441,8 +441,8 @@ public class MainActivity extends Activity {
                         fm.beginTransaction()
                                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                                 .replace(R.id.fragment_container,
-                                        DropboxListFragment.newInstance(), "FRAG_DROPBOX_LIST")
-                                .addToBackStack("FRAG_DROPBOX_LIST")
+                                        fragDropboxList.newInstance(), "FRAG_DROPBOX_LIST")
+                                        //.addToBackStack("FRAG_DROPBOX_LIST")
                                 .commit();
                         MyLog.i("MainActivity", "showFragments: FRAG_DROPBOX_LIST");
                     }
@@ -451,12 +451,12 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void clearBackStack() {
+/*    private void clearBackStack() {
         FragmentManager fm = getFragmentManager();
         while (fm.getBackStackEntryCount() != 0) {
             fm.popBackStackImmediate();
         }
-    }
+    }*/
 
     private void updatePasswordsData() {
         // This method asynchronously reads and decrypts the Dropbox data file, and
@@ -470,14 +470,20 @@ public class MainActivity extends Activity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main_activity, menu);
 
-        if (mShowActionBarProgress) {
-            menu.findItem(R.id.action_progress_bar).setVisible(true);
-        } else {
-            menu.findItem(R.id.action_progress_bar).setVisible(false);
+        if (MySettings.getStartupState() != fragApplicationPassword.STATE_PASSWORD_ONLY) {
+            showAllMenuItems(menu, false);
         }
+
+        menu.findItem(R.id.action_progress_bar).setVisible(mShowActionBarProgress);
 
 
         return true;
+    }
+
+    private void showAllMenuItems(Menu menu, boolean visible) {
+        for (int i = 0; i < menu.size(); i++) {
+            menu.getItem(i).setVisible(visible);
+        }
     }
 
     @Override

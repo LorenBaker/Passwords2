@@ -10,6 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="textCapWords"
+        android:selectAllOnFocus="true"
         android:nextFocusDown="@+id/txtCreditCardPart1"
         style="@style/txtPasswordStyle"
         android:hint="Item Name" />

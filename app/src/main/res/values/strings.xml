@@ -74,6 +74,10 @@
     <string name="tvProgressBarCaption_text">Syncing with Dropbox \n . . . Please wait</string>
     <string name="select_user_dialog_title">Select User</string>
     <string name="actionBarTitle_gettingStarted">Getting Started</string>
+    <string name="new_credit_card_name">New Credit Card</string>
+    <string name="new_general_account_name">New General Account</string>
+    <string name="new_software_name">New Software</string>
+    <string name="new_website_name">New Website</string>
 
 
     <string-array name="longevityItems_list">

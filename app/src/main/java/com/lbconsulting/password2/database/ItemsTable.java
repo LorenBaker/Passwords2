@@ -7,9 +7,10 @@ import android.content.CursorLoader;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.view.View;
 
 import com.lbconsulting.password2.classes.MyLog;
-import com.lbconsulting.password2.fragments.PasswordItemsListFragment;
+import com.lbconsulting.password2.fragments.fragHome;
 
 /**
  * SQLite table to hold Password Items data
@@ -29,6 +30,7 @@ public class ItemsTable {
     public static final int ITEM_UPDATE_ERROR_ITEM_NAME_EXISTS = -19;
 
     public static final int ITEM_NOT_DELETED = -20;
+    public static final int ILLEGAL_ITEM_TYPE_ID = -21;
 
     // Password Items data table
     // Version 1
@@ -112,14 +114,18 @@ public class ItemsTable {
     // Create Methods
     // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public static long CreateNewItem(Context context, long itemID, long userID, String itemName) {
+    public static long CreateNewItem(Context context, long userID, long itemID, int itemTypeID, String itemName) {
+
+        if (!UsersTable.userExists(context, userID)) {
+            return USER_DOES_NOT_EXIST;
+        }
 
         if (itemID < 1) {
             return ILLEGAL_ITEM_ID;
         }
 
-        if (!UsersTable.userExists(context, userID)) {
-            return USER_DOES_NOT_EXIST;
+        if (itemTypeID < 1) {
+            return ILLEGAL_ITEM_TYPE_ID;
         }
 
         if (itemName == null) {
@@ -153,8 +159,9 @@ public class ItemsTable {
             ContentResolver cr = context.getContentResolver();
             Uri uri = CONTENT_URI;
             ContentValues values = new ContentValues();
-            values.put(COL_ITEM_ID, itemID);
             values.put(COL_USER_ID, userID);
+            values.put(COL_ITEM_ID, itemID);
+            values.put(COL_ITEM_TYPE_ID, itemTypeID);
             values.put(COL_ITEM_NAME, itemName);
             Uri newUserUri = cr.insert(uri, values);
             if (newUserUri != null) {
@@ -194,7 +201,7 @@ public class ItemsTable {
 
     private static Cursor getItem(Context context, long userID, String itemName) {
         Cursor cursor = null;
-        if (!itemName.isEmpty() && userID > 0) {
+        if (context!=null && !itemName.isEmpty() && userID > 0) {
             Uri uri = CONTENT_URI;
             String[] projection = PROJECTION_ALL;
             String selection = COL_USER_ID + " = ? AND " + COL_ITEM_NAME + " = ?";
@@ -223,7 +230,7 @@ public class ItemsTable {
             String selection = null;
             String selectionArgs[] = null;
 
-            if (itemType == PasswordItemsListFragment.ALL_USER_ITEMS) {
+            if (itemType == fragHome.ALL_USER_ITEMS) {
                 if (search.isEmpty()) {
                     selection = COL_USER_ID + " = ?";
                     selectionArgs = new String[]{String.valueOf(userID)};
