@@ -241,7 +241,7 @@ public class fragEdit_generalAccount extends Fragment implements TextWatcher {
         mActiveItem.update();
 
         if (mIsItemNameDirty) {
-            ItemsTable.sortItemsAsync(getActivity());
+            ItemsTable.sortItemsAsync(getActivity(), mActiveItem.getUserID());
         }
         // save the changes
         EventBus.getDefault().post(new clsEvents.saveChangesToDropbox());

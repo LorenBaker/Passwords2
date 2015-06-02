@@ -12,6 +12,43 @@ public class clsEvents {
         }
     }
 
+    public static class onFileRevChange {
+        String mFileRev;
+
+        public onFileRevChange(String fileRev) {
+            mFileRev = fileRev;
+        }
+
+        public String getFileRev() {
+            return mFileRev;
+        }
+    }
+
+/*    public static class onNetworkStatusChange {
+         boolean mIsWifiConnected;
+         boolean mIsMobileConnected;
+         boolean mIsOkToUseNetwork;
+
+        public onNetworkStatusChange(boolean isWifiConnected,
+                                     boolean isMobileConnected,
+                                     boolean isOkToUseNetwork) {
+            mIsWifiConnected = isWifiConnected;
+            mIsMobileConnected = isMobileConnected;
+            mIsOkToUseNetwork = isOkToUseNetwork;
+        }
+
+        public boolean isIsMobileConnected() {
+            return mIsMobileConnected;
+        }
+
+        public boolean isIsOkToUseNetwork() {
+            return mIsOkToUseNetwork;
+        }
+
+        public boolean isIsWifiConnected() {
+            return mIsWifiConnected;
+        }
+    }*/
 
     public static class folderHashMapUpdated {
         public folderHashMapUpdated() {

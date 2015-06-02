@@ -89,15 +89,15 @@ public class MySettings {
     public static final String SETTING_DROPBOX_FILE_REV = "dropboxFileRev";
 
     public static final String SETTING_OK_TO_USE_NETWORK = "okToUseNetwork";
+    public static final String SETTING_IS_MOBILE_CONNECTED = "isMobileConnected";
+    public static final String SETTING_IS_WIFI_CONNECTED = "isWifiConnected";
     public static final String SETTING_NETWORK_BUSY = "networkBusy";
     public static final String SETTING_SYNC_PERIODICITY = "syncPeriodicity";
 
     public static final String SETTING_ENCRYPTION_TEST = "encryptionTest";
     private static final String ENCRYPTION_TEST_TEXT = "This is a test, only a test.";
 
-    //private static final String DEFAULT_DROPBOX_PATH = "No Folder Selected";
-    // TODO: remove the Test Passwords Data reference
-    private static final String DEFAULT_DROPBOX_PATH = "/Test Passwords Data";
+    private static final String DEFAULT_DROPBOX_PATH = "No Folder Selected";
     private final static String mKey = "0a24189320af961a04451bc916fc283a";
     private static Context mContext;
 
@@ -109,7 +109,6 @@ public class MySettings {
     public static boolean isVerbose() {
         SharedPreferences passwordsSavedState =
                 mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
-        // TODO: Set default isVerbose to false
         return passwordsSavedState.getBoolean(SETTING_IS_VERBOSE, false);
     }
 
@@ -162,19 +161,6 @@ public class MySettings {
         editor.apply();
     }
 
-    public static boolean isOkToUseNetwork() {
-        SharedPreferences passwordsSavedState =
-                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
-        return passwordsSavedState.getBoolean(SETTING_OK_TO_USE_NETWORK, true);
-    }
-
-    public static void setIsOkToUseNetwork(boolean okToDownloadDataFile) {
-        SharedPreferences passwordsSavedState =
-                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
-        SharedPreferences.Editor editor = passwordsSavedState.edit();
-        editor.putBoolean(SETTING_OK_TO_USE_NETWORK, okToDownloadDataFile);
-        editor.apply();
-    }
 
     public static boolean getNetworkBusy() {
         SharedPreferences passwordsSavedState =
@@ -443,7 +429,7 @@ public class MySettings {
         return passwordsSavedState.getString(SETTING_DROPBOX_FILE_REV, UNKNOWN);
     }
 
-    public static void setDropboxFileRev(String dropboxFileRev) {
+    public static void setFileRev(String dropboxFileRev) {
         SharedPreferences passwordsSavedState =
                 mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
         SharedPreferences.Editor editor = passwordsSavedState.edit();
@@ -542,7 +528,6 @@ public class MySettings {
         editor.apply();
     }
 
-    // TODO: verify that getAppPasswordKey is used
     public static String getAppPasswordKey() {
         String key = "";
         String savedPassword = getSavedAppPassword();

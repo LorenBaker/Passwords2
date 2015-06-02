@@ -27,7 +27,7 @@ public class clsItem {
 
     }
 
-    public clsItem(int passwordItemID, int userID) {
+    public clsItem(long passwordItemID, long userID) {
         ID = passwordItemID;
         User_ID = userID;
     }
@@ -36,7 +36,7 @@ public class clsItem {
         return ID;
     }
 
-    public void setID(int ID) {
+    public void setID(long ID) {
         this.ID = ID;
     }
 
@@ -64,7 +64,7 @@ public class clsItem {
         return User_ID;
     }
 
-    public void setUser_ID(int user_ID) {
+    public void setUser_ID(long user_ID) {
         User_ID = user_ID;
     }
 

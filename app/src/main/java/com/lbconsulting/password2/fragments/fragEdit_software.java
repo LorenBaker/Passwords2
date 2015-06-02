@@ -78,7 +78,7 @@ public class fragEdit_software extends Fragment {
             mIsNewPasswordItem = getArguments().getBoolean(ARG_IS_NEW_PASSWORD_ITEM);
             if (mIsNewPasswordItem) {
                 mIsDirty = true;
-                mIsItemNameDirty=true;
+                mIsItemNameDirty = true;
             }
         }
         setHasOptionsMenu(true);
@@ -266,7 +266,7 @@ public class fragEdit_software extends Fragment {
         mTextChangedListenersEnabled = false;
 
         // don't update if the user has made edits
-        if (!mIsDirty||mIsNewPasswordItem) {
+        if (!mIsDirty || mIsNewPasswordItem) {
             mActiveItem = new clsItemValues(getActivity(), mActiveItemID);
 
             txtItemName.setText(mActiveItem.getItemName());
@@ -298,7 +298,7 @@ public class fragEdit_software extends Fragment {
         mActiveItem.update();
 
         if (mIsItemNameDirty) {
-            ItemsTable.sortItemsAsync(getActivity());
+            ItemsTable.sortItemsAsync(getActivity(), mActiveItem.getUserID());
         }
 
         // save changes to Dropbox

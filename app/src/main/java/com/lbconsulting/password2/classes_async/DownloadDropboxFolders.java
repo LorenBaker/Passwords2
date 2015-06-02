@@ -34,10 +34,6 @@ public class DownloadDropboxFolders extends AsyncTask<Void, Long, Boolean> {
     private final DropboxAPI<?> mDBApi;
     private final String mDropboxFolderPath;
     private final HashMap<String, clsDropboxFolder> mFolderHashMap;
-    // TODO: Create verbose messages
-    //private String mErrorMsg;
-
-   // private folderFinishedListener mCallback;
 
     public interface folderFinishedListener {
         void onFolderDownloadComplete(Boolean result);

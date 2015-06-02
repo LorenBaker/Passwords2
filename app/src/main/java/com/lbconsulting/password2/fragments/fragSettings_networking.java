@@ -19,8 +19,9 @@ import com.lbconsulting.password2.R;
 import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
+import com.lbconsulting.password2.classes.clsNetworkStatus;
 import com.lbconsulting.password2.classes.clsUtils;
-import com.lbconsulting.password2.services.PasswordsUpdateService;
+import com.lbconsulting.password2.services.UpdateService;
 
 import de.greenrobot.event.EventBus;
 
@@ -236,10 +237,10 @@ public class fragSettings_networking extends Fragment implements View.OnClickLis
                         + mUpdatePeriodicity_list[position].toLowerCase());
 
                 // restart Passwords update service so the new periodicity can take effect.
-                Intent stopIntent = new Intent(getActivity(), PasswordsUpdateService.class);
+                Intent stopIntent = new Intent(getActivity(), UpdateService.class);
                 getActivity().stopService(stopIntent);
 
-                Intent startIntent = new Intent(getActivity(), PasswordsUpdateService.class);
+                Intent startIntent = new Intent(getActivity(), UpdateService.class);
                 getActivity().startService(startIntent);
             }
 
@@ -268,9 +269,6 @@ public class fragSettings_networking extends Fragment implements View.OnClickLis
                 MySettings.setNetworkPreference(position);
                 btnNetworkPreferences.setText(getActivity().getString(R.string.btnNetworkPreferences_text)
                         + mSyncPreferenceList[position]);
-
-                // Update setIsOkToUseNetwork
-                clsUtils.setIsOkToUseNetwork(getActivity());
             }
 
         });

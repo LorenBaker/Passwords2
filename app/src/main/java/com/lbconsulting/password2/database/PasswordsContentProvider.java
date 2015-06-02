@@ -31,6 +31,9 @@ public class PasswordsContentProvider extends ContentProvider {
     private static final int ITEMS_MULTI_ROWS = 20;
     private static final int ITEMS_SINGLE_ROW = 21;
 
+    private static final int NETWORK_LOG_MULTI_ROWS = 30;
+    private static final int NETWORK_LOG_SINGLE_ROW = 31;
+
     private static boolean mSuppressChangeNotification = false;
 
     public static void setSuppressChangeNotification(boolean suppressChanges) {
@@ -47,6 +50,9 @@ public class PasswordsContentProvider extends ContentProvider {
 
         sURIMatcher.addURI(AUTHORITY, ItemsTable.CONTENT_PATH, ITEMS_MULTI_ROWS);
         sURIMatcher.addURI(AUTHORITY, ItemsTable.CONTENT_PATH + "/#", ITEMS_SINGLE_ROW);
+
+        sURIMatcher.addURI(AUTHORITY, NetworkLogTable.CONTENT_PATH, NETWORK_LOG_MULTI_ROWS);
+        sURIMatcher.addURI(AUTHORITY, NetworkLogTable.CONTENT_PATH + "/#", NETWORK_LOG_SINGLE_ROW);
     }
 
     @Override
@@ -91,6 +97,17 @@ public class PasswordsContentProvider extends ContentProvider {
                 queryBuilder.setTables(ItemsTable.TABLE_ITEMS);
                 checkItemColumnNames(projection);
                 queryBuilder.appendWhere(ItemsTable.COL_ITEM_ID + "=" + uri.getLastPathSegment());
+                break;
+
+            case NETWORK_LOG_MULTI_ROWS:
+                queryBuilder.setTables(NetworkLogTable.TABLE_NETWORK_LOG);
+                checkNetworkLogColumnNames(projection);
+                break;
+
+            case NETWORK_LOG_SINGLE_ROW:
+                queryBuilder.setTables(NetworkLogTable.TABLE_NETWORK_LOG);
+                checkNetworkLogColumnNames(projection);
+                queryBuilder.appendWhere(NetworkLogTable.COL_LOG_ID + "=" + uri.getLastPathSegment());
                 break;
 
             default:
@@ -171,6 +188,23 @@ public class PasswordsContentProvider extends ContentProvider {
                 throw new IllegalArgumentException(
                         "Method insert: Cannot insert a new row with a single row URI. Illegal URI: " + uri);
 
+            case NETWORK_LOG_MULTI_ROWS:
+                newRowId = db.insertOrThrow(NetworkLogTable.TABLE_NETWORK_LOG, nullColumnHack, values);
+                if (newRowId > 0) {
+                    // Construct and return the URI of the newly inserted row.
+                    Uri newRowUri = ContentUris.withAppendedId(NetworkLogTable.CONTENT_URI, newRowId);
+
+                    if (!mSuppressChangeNotification) {
+                        // Notify and observers of the change in the database.
+                        getContext().getContentResolver().notifyChange(NetworkLogTable.CONTENT_URI, null);
+                    }
+                    return newRowUri;
+                }
+
+            case NETWORK_LOG_SINGLE_ROW:
+                throw new IllegalArgumentException(
+                        "Method insert: Cannot insert a new row with a single row URI. Illegal URI: " + uri);
+
             default:
                 throw new IllegalArgumentException("Method insert: Unknown URI: " + uri);
         }
@@ -224,6 +258,26 @@ public class PasswordsContentProvider extends ContentProvider {
                         + (!selection.isEmpty() ? " AND (" + selection + ")" : "");
                 // Perform the deletion
                 deleteCount = db.delete(ItemsTable.TABLE_ITEMS, selection, selectionArgs);
+                break;
+
+            case NETWORK_LOG_MULTI_ROWS:
+                // To return the number of deleted items you must specify a where clause.
+                // To delete all rows and return a value pass in "1".
+                if (selection == null) {
+                    selection = "1";
+                }
+
+                // Perform the deletion
+                deleteCount = db.delete(NetworkLogTable.TABLE_NETWORK_LOG, selection, selectionArgs);
+                break;
+
+            case NETWORK_LOG_SINGLE_ROW:
+                // Limit deletion to a single row
+                rowID = uri.getLastPathSegment();
+                selection = NetworkLogTable.COL_LOG_ID + "=" + rowID
+                        + (!selection.isEmpty() ? " AND (" + selection + ")" : "");
+                // Perform the deletion
+                deleteCount = db.delete(NetworkLogTable.TABLE_NETWORK_LOG, selection, selectionArgs);
                 break;
 
             default:
@@ -284,6 +338,24 @@ public class PasswordsContentProvider extends ContentProvider {
                 updateCount = db.update(ItemsTable.TABLE_ITEMS, values, selection, selectionArgs);
                 break;
 
+            case NETWORK_LOG_MULTI_ROWS:
+                updateCount = db.update(NetworkLogTable.TABLE_NETWORK_LOG, values, selection, selectionArgs);
+                break;
+
+            case NETWORK_LOG_SINGLE_ROW:
+                // Limit update to a single row
+                rowID = uri.getLastPathSegment();
+                if (selection == null) {
+                    selection = NetworkLogTable.COL_LOG_ID + "=" + rowID;
+                } else {
+                    selection = NetworkLogTable.COL_LOG_ID + "=" + rowID
+                            + (!selection.isEmpty() ? " AND (" + selection + ")" : "");
+                }
+
+                // Perform the update
+                updateCount = db.update(NetworkLogTable.TABLE_NETWORK_LOG, values, selection, selectionArgs);
+                break;
+
             default:
                 throw new IllegalArgumentException("Method update: Unknown URI: " + uri);
         }
@@ -307,6 +379,11 @@ public class PasswordsContentProvider extends ContentProvider {
                 return ItemsTable.CONTENT_TYPE;
             case ITEMS_SINGLE_ROW:
                 return ItemsTable.CONTENT_ITEM_TYPE;
+
+            case NETWORK_LOG_MULTI_ROWS:
+                return NetworkLogTable.CONTENT_TYPE;
+            case NETWORK_LOG_SINGLE_ROW:
+                return NetworkLogTable.CONTENT_ITEM_TYPE;
 
             default:
                 throw new IllegalArgumentException("Method getType. Unknown URI: " + uri);
@@ -332,6 +409,20 @@ public class PasswordsContentProvider extends ContentProvider {
         if (projection != null) {
             HashSet<String> requestedColumns = new HashSet<>(Arrays.asList(projection));
             HashSet<String> availableColumns = new HashSet<>(Arrays.asList(ItemsTable.PROJECTION_ALL));
+
+            // Check if all columns which are requested are available
+            if (!availableColumns.containsAll(requestedColumns)) {
+                throw new IllegalArgumentException(
+                        "Method checkItemColumnNames: Unknown column name!");
+            }
+        }
+    }
+
+    private void checkNetworkLogColumnNames(String[] projection) {
+        // Check if the caller has requested a column that does not exist
+        if (projection != null) {
+            HashSet<String> requestedColumns = new HashSet<>(Arrays.asList(projection));
+            HashSet<String> availableColumns = new HashSet<>(Arrays.asList(NetworkLogTable.PROJECTION_ALL));
 
             // Check if all columns which are requested are available
             if (!availableColumns.containsAll(requestedColumns)) {

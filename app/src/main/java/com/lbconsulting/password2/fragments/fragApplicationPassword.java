@@ -24,7 +24,7 @@ import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
 import com.lbconsulting.password2.classes.clsUtils;
 import com.lbconsulting.password2.classes_async.DownloadDecryptDataFile;
-import com.lbconsulting.password2.services.PasswordsUpdateService;
+import com.lbconsulting.password2.services.UpdateService;
 
 import de.greenrobot.event.EventBus;
 
@@ -245,7 +245,7 @@ public class fragApplicationPassword extends Fragment implements View.OnClickLis
     }
 
     private void startPasswordsUpdateService() {
-        Intent intent = new Intent(getActivity(), PasswordsUpdateService.class);
+        Intent intent = new Intent(getActivity(), UpdateService.class);
         getActivity().startService(intent);
     }
 

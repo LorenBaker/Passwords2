@@ -7,8 +7,6 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,10 +19,10 @@ import com.dropbox.client2.session.AppKeyPair;
 import com.lbconsulting.password2.R;
 import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
-import com.lbconsulting.password2.classes.NetworkReceiver;
 import com.lbconsulting.password2.classes.clsEvents;
 import com.lbconsulting.password2.classes.clsLabPasswords;
 import com.lbconsulting.password2.classes_async.DownloadDecryptDataFile;
+import com.lbconsulting.password2.classes_async.SaveChangesToDropbox;
 import com.lbconsulting.password2.database.PasswordsDatabaseHelper;
 import com.lbconsulting.password2.fragments.fragApplicationPassword;
 import com.lbconsulting.password2.fragments.fragDropboxList;
@@ -38,7 +36,7 @@ import com.lbconsulting.password2.fragments.fragSettings;
 import com.lbconsulting.password2.fragments.fragSettings_appPassword;
 import com.lbconsulting.password2.fragments.fragSettings_networking;
 import com.lbconsulting.password2.fragments.fragSettings_user;
-import com.lbconsulting.password2.services.PasswordsUpdateService;
+import com.lbconsulting.password2.services.UpdateService;
 
 import de.greenrobot.event.EventBus;
 
@@ -46,8 +44,8 @@ import de.greenrobot.event.EventBus;
 public class MainActivity extends Activity {
     // TODO: Verify that all cursors are closed
 
-    private static final String APP_KEY = "kz0qsqlw52f41cy";
-    private static final String APP_SECRET = "owdln6x88inn9vo";
+    public static final String APP_KEY = "kz0qsqlw52f41cy";
+    public static final String APP_SECRET = "owdln6x88inn9vo";
     private static DropboxAPI<AndroidAuthSession> mDBApi;
 
     public static DropboxAPI<AndroidAuthSession> getDropboxAPI() {
@@ -64,9 +62,6 @@ public class MainActivity extends Activity {
     private FrameLayout mFragment_container;
     private FrameLayout mDetail_container;
 
-    // The BroadcastReceiver that tracks network connectivity changes.
-    private NetworkReceiver networkReceiver = new NetworkReceiver();
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,14 +73,6 @@ public class MainActivity extends Activity {
 
         EventBus.getDefault().register(this);
         MySettings.setContext(this);
-
-        // Registers BroadcastReceiver to track network connection changes.
-        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
-        networkReceiver = new NetworkReceiver();
-        this.registerReceiver(networkReceiver, filter);
-
-        // TODO: remove the setActiveUserID line
-        // MySettings.setActiveUserID(1);
 
         AppKeyPair appKeys = new AppKeyPair(APP_KEY, APP_SECRET);
         AndroidAuthSession session = new AndroidAuthSession(appKeys);
@@ -113,8 +100,8 @@ public class MainActivity extends Activity {
     //region onEvent
 
     public void onEvent(clsEvents.test event) {
-        Intent intent = new Intent(this, PasswordsUpdateService.class);
-        startService(intent);
+      //  new SaveChangesToDropbox(this).execute();
+        Toast.makeText(this, "Nothing to test!", Toast.LENGTH_SHORT).show();
     }
 
 
@@ -180,12 +167,15 @@ public class MainActivity extends Activity {
         updatePasswordsData();
     }
 
+    public void onEvent(clsEvents.onFileRevChange event){
+        MySettings.setFileRev(event.getFileRev());
+    }
     public void onEvent(clsEvents.onPasswordsDatabaseUpdated event) {
         EventBus.getDefault().post(new clsEvents.updateUI());
     }
 
     public void onEvent(clsEvents.saveChangesToDropbox event) {
-        // TODO: Implement saveChangesToDropbox
+        new SaveChangesToDropbox(this).execute();
     }
 
     public void onEvent(clsEvents.showProgressInActionBar event) {
@@ -234,6 +224,13 @@ public class MainActivity extends Activity {
             }
         }
 
+        // set network status
+/*        clsNetworkStatus status = clsUtils.getNetworkStatus(this,
+                MySettings.getNetworkPreference(), MySettings.isVerbose());
+        MySettings.setNetworkStatus(status);
+        MyLog.i("MainActivity", "onResume: set network status.");*/
+
+        // show the appropriate fragment
         int startupState = MySettings.getStartupState();
         if ( startupState!= fragApplicationPassword.STATE_PASSWORD_ONLY
                 && startupState != fragApplicationPassword.STATE_VALIDATING_PASSWORD) {
@@ -251,7 +248,7 @@ public class MainActivity extends Activity {
     }
 
     private void startPasswordsUpdateService() {
-        Intent intent = new Intent(this, PasswordsUpdateService.class);
+        Intent intent = new Intent(this, UpdateService.class);
         startService(intent);
     }
 
@@ -265,8 +262,8 @@ public class MainActivity extends Activity {
         super.onPause();
         MyLog.i("MainActivity", "onPause");
 
-        // stop the PasswordsUpdateService
-        Intent intent = new Intent(this, PasswordsUpdateService.class);
+        // stop the UpdateService
+        Intent intent = new Intent(this, UpdateService.class);
         stopService(intent);
 
     }
@@ -277,9 +274,9 @@ public class MainActivity extends Activity {
         MyLog.i("MainActivity", "onDestroy");
         EventBus.getDefault().unregister(this);
         // Unregisters BroadcastReceiver when app is destroyed.
-        if (networkReceiver != null) {
+/*        if (networkReceiver != null) {
             this.unregisterReceiver(networkReceiver);
-        }
+        }*/
 
         if (MySettings.getStartupState() != fragApplicationPassword.STATE_PASSWORD_ONLY) {
             // quitting the app in the startup phase
@@ -498,7 +495,8 @@ public class MainActivity extends Activity {
 
         if (id == R.id.action_save_to_dropbox) {
             // save file and show results dialog
-            Toast.makeText(this, "TO COME: action_save_to_dropbox", Toast.LENGTH_SHORT).show();
+           // Toast.makeText(this, "TO COME: action_save_to_dropbox", Toast.LENGTH_SHORT).show();
+            new SaveChangesToDropbox(this).execute();
             return true;
 
         } else if (id == R.id.action_refresh_from_dropbox) {

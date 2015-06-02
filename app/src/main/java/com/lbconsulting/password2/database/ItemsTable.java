@@ -239,6 +239,25 @@ public class ItemsTable {
         return cursor;
     }
 
+    public static Cursor getAllItemsCursor(Context context, String sortOrder) {
+        Cursor cursor = null;
+        if (context != null ) {
+            Uri uri = CONTENT_URI;
+            String[] projection = PROJECTION_ALL;
+            String selection = null;
+            String selectionArgs[] = null;
+            ContentResolver cr = context.getContentResolver();
+            try {
+                cursor = cr.query(uri, projection, selection, selectionArgs, sortOrder);
+            } catch (Exception e) {
+                MyLog.e("ItemsTable", "getAllItemsCursor: Exception; " + e.getMessage());
+            }
+        } else {
+            MyLog.e("ItemsTable", "getAllItemsCursor: Unable to get items. The userID < 1");
+        }
+        return cursor;
+    }
+
 
     public static CursorLoader getUserItemsCursorLoader(Context context,
                                                         long userID, int itemType, String search,
@@ -417,16 +436,15 @@ public class ItemsTable {
         updateItem(context, itemID, cv);
     }
 
-    public static void sortItemsAsync(Context context){
-        new sortTableItemsAsync(context).execute();
+    public static void sortItemsAsync(Context context, long userID){
+        new sortTableItemsAsync(context, userID).execute();
     }
 
-    private static void sortItems(Context context) {
+    private static void sortItems(Context context, long userID) {
 
         // get all the items and create a sorting list
         ArrayList<clsItemSort> sortingList = new ArrayList<>();
-        // TODO: Can we get a way with sorting just the user's items?
-        Cursor allItemsCursor = getAllNamesAndIDsCursor(context);
+        Cursor allItemsCursor = getAllItemsCursor(context, userID);
         String plainTextName;
         String encryptedTextName;
         clsItemSort item;
@@ -509,10 +527,12 @@ public class ItemsTable {
 
     private static class sortTableItemsAsync extends AsyncTask<Void, Void, Void> {
         Context mContext;
+        long mUserID;
 
-        public sortTableItemsAsync(Context context) {
+        public sortTableItemsAsync(Context context, long userID) {
             // We set the context this way so we don't accidentally leak activities
             mContext = context.getApplicationContext();
+            mUserID=userID;
         }
 
         @Override
@@ -525,7 +545,7 @@ public class ItemsTable {
         @Override
         protected Void doInBackground(Void... params) {
             MyLog.i("sortTableItemsAsync", "doInBackground");
-            sortItems(mContext);
+            sortItems(mContext, mUserID);
             return null;
         }
 

@@ -25,7 +25,7 @@ import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
 import com.lbconsulting.password2.classes.clsUserValues;
 import com.lbconsulting.password2.database.UsersTable;
-import com.lbconsulting.password2.services.PasswordsUpdateService;
+import com.lbconsulting.password2.services.UpdateService;
 
 import java.util.ArrayList;
 
@@ -390,7 +390,7 @@ public class fragSettings extends Fragment implements View.OnClickListener {
     }
 
     private void startPasswordsUpdateService() {
-        Intent intent = new Intent(getActivity(), PasswordsUpdateService.class);
+        Intent intent = new Intent(getActivity(), UpdateService.class);
         getActivity().startService(intent);
     }
 }

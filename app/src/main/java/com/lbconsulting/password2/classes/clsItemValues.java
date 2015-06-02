@@ -16,6 +16,13 @@ public class clsItemValues {
     private Cursor mItemsCursor;
     private ContentValues cv;
 
+    public clsItemValues(Context context, Cursor itemCursor) {
+        mContext = context;
+        mItemsCursor = itemCursor;
+        cv = new ContentValues();
+        cv.put(ItemsTable.COL_IS_IN_TABLE, 1);
+    }
+
     public clsItemValues(Context context, long itemID) {
         mContext = context;
         mItemsCursor = ItemsTable.getItem(context, itemID);

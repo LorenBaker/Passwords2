@@ -70,7 +70,7 @@ public class fragEdit_website extends Fragment implements TextWatcher {
             mIsNewPasswordItem = getArguments().getBoolean(ARG_IS_NEW_PASSWORD_ITEM);
             if (mIsNewPasswordItem) {
                 mIsDirty = true;
-                mIsItemNameDirty=true;
+                mIsItemNameDirty = true;
             }
         }
         setHasOptionsMenu(true);
@@ -209,7 +209,7 @@ public class fragEdit_website extends Fragment implements TextWatcher {
         mActiveItem.update();
 
         if (mIsItemNameDirty) {
-            ItemsTable.sortItemsAsync(getActivity());
+            ItemsTable.sortItemsAsync(getActivity(), mActiveItem.getUserID());
         }
 
         // save changes to Dropbox

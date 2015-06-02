@@ -30,6 +30,7 @@ public class PasswordsDatabaseHelper extends SQLiteOpenHelper {
 
         UsersTable.onCreate(database);
         ItemsTable.onCreate(database);
+        NetworkLogTable.onCreate(database);
     }
 
     @Override

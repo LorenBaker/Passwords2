@@ -5,13 +5,13 @@ package com.lbconsulting.password2.classes;
  */
 public class clsUsers {
 
-    private int UserID;
+    private long UserID;
     private String UserName;
-    public int getUserID() {
+    public long getUserID() {
         return UserID;
     }
 
-    public void setUserID(int userID) {
+    public void setUserID(long userID) {
         UserID = userID;
     }
 

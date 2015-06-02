@@ -24,9 +24,12 @@ import com.lbconsulting.password2.classes.clsItem;
 import com.lbconsulting.password2.classes.clsItemSort;
 import com.lbconsulting.password2.classes.clsItemValues;
 import com.lbconsulting.password2.classes.clsLabPasswords;
+import com.lbconsulting.password2.classes.clsNetworkStatus;
 import com.lbconsulting.password2.classes.clsUserValues;
 import com.lbconsulting.password2.classes.clsUsers;
+import com.lbconsulting.password2.classes.clsUtils;
 import com.lbconsulting.password2.database.ItemsTable;
+import com.lbconsulting.password2.database.NetworkLogTable;
 import com.lbconsulting.password2.database.PasswordsContentProvider;
 import com.lbconsulting.password2.database.UsersTable;
 import com.lbconsulting.password2.fragments.fragApplicationPassword;
@@ -70,7 +73,7 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
     private final DropboxAPI<?> mDBApi;
     private final String mDropboxFullFilename;
     private final boolean mIsVerbose;
-    private final boolean mIsOkToDownloadDataFile;
+    private clsNetworkStatus mNetworkStatus;
     private int mDownloadStatus = FILE_DOWNLOAD_START;
     private String mErrorMsg;
 
@@ -82,7 +85,7 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
         mDropboxFullFilename = dropboxFullFilename;
         mIsVerbose = isVerbose;
         mDownloadStatus = FILE_DOWNLOAD_START;
-        mIsOkToDownloadDataFile = MySettings.isOkToUseNetwork();
+
     }
 
     @Override
@@ -91,12 +94,13 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
         EventBus.getDefault().post(new clsEvents.showProgressInActionBar(true));
         MySettings.setNetworkBusy(true);
         String filename = mDropboxFullFilename.substring(mDropboxFullFilename.lastIndexOf("/") + 1);
+        mNetworkStatus = clsUtils.getNetworkStatus(mContext, MySettings.getNetworkPreference());
         MyLog.i("DownloadDecryptDataFile", "onPreExecute: STARTING download of " + filename);
     }
 
     @Override
     protected Integer doInBackground(Void... params) {
-        if (mIsOkToDownloadDataFile) {
+        if (mNetworkStatus.isOkToUseNetwork()) {
             String encryptedFileContent = readFile();
             if (!encryptedFileContent.isEmpty()) {
                 String decryptedFileContent = decryptFile(encryptedFileContent);
@@ -120,7 +124,7 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
                 MyLog.i("DownloadDecryptDataFile", "readFile: File exists; " + existingEntry.bytes + " bytes; rev = " + existingEntry.rev);
             } else {
                 mDownloadStatus = FILE_NOT_FOUND;
-                MySettings.setDropboxFileRev(MySettings.UNKNOWN);
+                MySettings.setFileRev(MySettings.UNKNOWN);
                 return "";
             }
             if (existingEntry.bytes == 0) {
@@ -138,7 +142,17 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
             // The file exists ... download the latest version to a stream
             DropboxAPI.DropboxInputStream inputStream = mDBApi.getFileStream(mDropboxFullFilename, null);
             // save the file rev to be used to check for changes in the Passwords data file
-            MySettings.setDropboxFileRev(existingEntry.rev);
+            MySettings.setFileRev(existingEntry.rev);
+
+            // log the download
+            int networkUsed = -1;
+            if (mNetworkStatus.isWifiConnected()) {
+                networkUsed = NetworkLogTable.WI_FI;
+            } else if (mNetworkStatus.isMobileConnected()) {
+                networkUsed = NetworkLogTable.MOBILE;
+            }
+            NetworkLogTable.createNewLog(mContext, NetworkLogTable.DOWNLOAD, networkUsed, existingEntry);
+
             return IOUtils.toString(inputStream);
 
         } catch (DropboxUnlinkedException e) {
@@ -360,7 +374,7 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
         int sortKey = 0;
         for (clsItemSort item : sortingList) {
             ItemsTable.updateItemSortKey(mContext, item.getItemID(), sortKey);
-            sortKey ++;
+            sortKey++;
         }
 
         MySettings.setLastItemAndUserIDs(lastItemID, lastUserID);

@@ -91,11 +91,11 @@ public class clsUtils {
         return plainTextString;
     }
 
-    public static void setIsOkToUseNetwork(Context context) {
-        boolean isVerbose = MySettings.isVerbose();
+    public static clsNetworkStatus getNetworkStatus(Context context, int userNetworkingPreference) {
 
         boolean isWifiConnected = false;
         boolean isMobileConnected = false;
+        boolean isOkToUseNetwork;
         NetworkInfo networkInfo = null;
 
         ConnectivityManager connMgr = (ConnectivityManager)
@@ -108,52 +108,33 @@ public class clsUtils {
             isWifiConnected = networkInfo.getType() == ConnectivityManager.TYPE_WIFI;
             isMobileConnected = networkInfo.getType() == ConnectivityManager.TYPE_MOBILE;
         }
-        // get the user's networking preference
-        int userNetworkingPreference = MySettings.getNetworkPreference();
 
+        // assume there is no network connection (mobile or Wi-Fi),
+        isOkToUseNetwork = false;
         // Check for wi-fi network availability
-        if (userNetworkingPreference == MySettings.NETWORK_WIFI_ONLY
-                && networkInfo != null
-                && isWifiConnected) {
+        if (userNetworkingPreference == MySettings.NETWORK_WIFI_ONLY && isWifiConnected) {
             // The device is connected to wi-fi ... so,
             // Allow the download of data.
-
-            MySettings.setIsOkToUseNetwork(true);
-            if (isVerbose) {
-                Toast.makeText(context, context.getString(R.string.network_okToUseNetwork)
-                        + context.getString(R.string.network_wifi_connected), Toast.LENGTH_SHORT).show();
-            }
+            isOkToUseNetwork = true;
 
             // Check for any network connection
-        } else if (userNetworkingPreference == MySettings.NETWORK_ANY
-                && networkInfo != null) {
+        } else if (userNetworkingPreference == MySettings.NETWORK_ANY && (isWifiConnected||isMobileConnected)) {
             // The device is connected to a network ... so,
             // Allow the download of data.
-            MySettings.setIsOkToUseNetwork(true);
-            if (isVerbose) {
-                if (isWifiConnected) {
-                    Toast.makeText(context, context.getString(R.string.network_okToUseNetwork)
-                            + context.getString(R.string.network_wifi_connected), Toast.LENGTH_SHORT).show();
-                } else if (isMobileConnected) {
-                    Toast.makeText(context, context.getString(R.string.network_okToUseNetwork)
-                            + context.getString(R.string.network_mobile_connected), Toast.LENGTH_SHORT).show();
-                }
-            }
-
-        } else {
-            // Otherwise, the app can't download content ...
-            // either because there is no network connection (mobile or Wi-Fi),
-            // or because the pref setting is WIFI Only, and there is no Wi-Fi connection.
-            MySettings.setIsOkToUseNetwork(false);
-            if (isVerbose) {
-                Toast.makeText(context, R.string.network_lost_connection, Toast.LENGTH_SHORT).show();
-            }
+            isOkToUseNetwork = true;
         }
+
+        clsNetworkStatus result = new clsNetworkStatus(isMobileConnected, isWifiConnected, isOkToUseNetwork);
+        MyLog.i("clsUtils", "getNetworkStatus:"
+                + " userNetworkingPreference = " + userNetworkingPreference
+                + "; isMobileConnected = " + isMobileConnected
+                + "; isWifiConnected = " + isWifiConnected
+                + "; isOkToUseNetwork = " + isOkToUseNetwork);
+        return result;
     }
 
     public static boolean appPasswordHasValidSyntax(Context context, String password) {
 
-        // TODO: Add more tests for a valid password ??
         String title = "Invalid Password";
         String message = context.getString(R.string.invalid_password_message1);
         if (password.isEmpty()) {
