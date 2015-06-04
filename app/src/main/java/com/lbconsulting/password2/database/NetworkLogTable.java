@@ -62,7 +62,7 @@ public class NetworkLogTable {
             + "vnd.lbconsulting." + TABLE_NETWORK_LOG;
     public static final Uri CONTENT_URI = Uri.parse("content://" + PasswordsContentProvider.AUTHORITY + "/" + CONTENT_PATH);
 
-    public static final String SORT_ORDER_DATE = COL_DATE_TIME + " ASC";
+    public static final String SORT_ORDER_DATE = COL_DATE_TIME + " DESC";
 
 
     // Database creation SQL statements

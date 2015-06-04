@@ -4,7 +4,6 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.lbconsulting.password2.R;
 
@@ -51,6 +50,45 @@ public class clsUtils {
         }
 
         return encryptedString;
+    }
+
+    public static ArrayList<String> encryptStrings(ArrayList<String> plainTextStrings, String key, boolean makeSHA256Key) {
+        String encryptedString = "";
+        String mKey = "";
+        ArrayList<String> result = new ArrayList<>();
+        if (plainTextStrings.size() == 0 || key.isEmpty()) {
+            return result;
+        }
+
+        try {
+            if (makeSHA256Key) {
+                mKey = CryptLib.SHA256(key, 32);
+            } else {
+                mKey = key;
+            }
+
+            CryptLib mCrypt = new CryptLib();
+            String iv = CryptLib.generateRandomIV(16);
+
+            for (String plainText : plainTextStrings) {
+                if (plainText.isEmpty()) {
+                    encryptedString = "";
+                } else {
+                    encryptedString = mCrypt.encrypt(plainText, mKey, iv);
+                    encryptedString = iv + encryptedString;
+                }
+                result.add(encryptedString);
+            }
+
+
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException |
+                InvalidKeyException | InvalidAlgorithmParameterException |
+                UnsupportedEncodingException | BadPaddingException |
+                IllegalBlockSizeException e) {
+            MyLog.e("clsUtils", "encryptStrings: Encryption Error: " + e.getMessage());
+        }
+
+        return result;
     }
 
     public static String decryptString(String encryptedString, String key, boolean makeSHA256Key) {
@@ -118,7 +156,7 @@ public class clsUtils {
             isOkToUseNetwork = true;
 
             // Check for any network connection
-        } else if (userNetworkingPreference == MySettings.NETWORK_ANY && (isWifiConnected||isMobileConnected)) {
+        } else if (userNetworkingPreference == MySettings.NETWORK_ANY && (isWifiConnected || isMobileConnected)) {
             // The device is connected to a network ... so,
             // Allow the download of data.
             isOkToUseNetwork = true;

@@ -20,7 +20,6 @@ import com.lbconsulting.password2.R;
 import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
-import com.lbconsulting.password2.classes.clsLabPasswords;
 import com.lbconsulting.password2.classes_async.DownloadDecryptDataFile;
 import com.lbconsulting.password2.classes_async.SaveChangesToDropbox;
 import com.lbconsulting.password2.database.PasswordsDatabaseHelper;
@@ -32,6 +31,7 @@ import com.lbconsulting.password2.fragments.fragEdit_software;
 import com.lbconsulting.password2.fragments.fragEdit_website;
 import com.lbconsulting.password2.fragments.fragHome;
 import com.lbconsulting.password2.fragments.fragItemDetail;
+import com.lbconsulting.password2.fragments.fragNetworkLog;
 import com.lbconsulting.password2.fragments.fragSettings;
 import com.lbconsulting.password2.fragments.fragSettings_appPassword;
 import com.lbconsulting.password2.fragments.fragSettings_networking;
@@ -56,8 +56,6 @@ public class MainActivity extends Activity {
     private android.app.ActionBar mActionBar;
     private boolean mShowActionBarProgress;
 
-
-    private clsLabPasswords mLabPasswords;
     private boolean mTwoPane;
     private FrameLayout mFragment_container;
     private FrameLayout mDetail_container;
@@ -91,20 +89,54 @@ public class MainActivity extends Activity {
         mDetail_container =
                 (FrameLayout) findViewById(R.id.detail_container);
 
-        mTwoPane = false;
-        if (mDetail_container != null) {
-            mTwoPane = true;
-        }
+        mTwoPane = mDetail_container != null;
     }
 
     //region onEvent
 
     public void onEvent(clsEvents.test event) {
-      //  new SaveChangesToDropbox(this).execute();
+        // TODO: Remove text event 
+        //  new SaveChangesToDropbox(this).execute();
         Toast.makeText(this, "Nothing to test!", Toast.LENGTH_SHORT).show();
     }
 
+    public void onEvent(clsEvents.onDropboxDataFileChange event) {
+        updatePasswordsData();
+    }
 
+    public void onEvent(clsEvents.onFileRevChange event) {
+        MySettings.setFileRev(event.getFileRev());
+    }
+
+    public void onEvent(clsEvents.onPasswordsDatabaseUpdated event) {
+        EventBus.getDefault().post(new clsEvents.updateUI());
+    }
+
+    public void onEvent(clsEvents.saveChangesToDropbox event) {
+        new SaveChangesToDropbox(this, false).execute();
+    }
+
+    public void onEvent(clsEvents.setActionBarTitle event) {
+        setActionBarTitle(event.getTitle());
+    }
+
+    public void onEvent(clsEvents.showFragment event) {
+        MySettings.setActiveFragmentID(event.getFragmentID());
+        //mArgIsNewItem = event.getIsNewPasswordItem();
+        showFragment(event.getFragmentID(), event.getIsNewPasswordItem());
+    }
+
+    public void onEvent(clsEvents.showOkDialog event) {
+        showOkDialog(this, event.getTitle(), event.getMessage());
+    }
+
+    public void onEvent(clsEvents.showProgressInActionBar event) {
+        mShowActionBarProgress = event.isVisible();
+        invalidateOptionsMenu();
+    }
+    //endregion
+
+    //region onBackPressed
     @Override
     public void onBackPressed() {
         // TODO: Update onBackPressed code. Block user from leaving fragApplicationPassword
@@ -135,6 +167,7 @@ public class MainActivity extends Activity {
 
             case MySettings.FRAG_ITEM_DETAIL: //11
             case MySettings.FRAG_SETTINGS: //12
+            case MySettings.FRAG_NETWORK_LOG: //13
                 showFragment(MySettings.FRAG_HOME, false);
                 break;
 
@@ -158,44 +191,6 @@ public class MainActivity extends Activity {
                 break;
 
         }
-    }
-
-    //private int count=0;
-    public void onEvent(clsEvents.onDropboxDataFileChange event) {
-       /*count++;
-        MyLog.i("MainActivity", "onDropboxDataFileChange. Count = " + count);*/
-        updatePasswordsData();
-    }
-
-    public void onEvent(clsEvents.onFileRevChange event){
-        MySettings.setFileRev(event.getFileRev());
-    }
-    public void onEvent(clsEvents.onPasswordsDatabaseUpdated event) {
-        EventBus.getDefault().post(new clsEvents.updateUI());
-    }
-
-    public void onEvent(clsEvents.saveChangesToDropbox event) {
-        new SaveChangesToDropbox(this).execute();
-    }
-
-    public void onEvent(clsEvents.showProgressInActionBar event) {
-        mShowActionBarProgress = event.isVisible();
-        invalidateOptionsMenu();
-    }
-
-    public void onEvent(clsEvents.showFragment event) {
-        MySettings.setActiveFragmentID(event.getFragmentID());
-        //mArgIsNewItem = event.getIsNewPasswordItem();
-        showFragment(event.getFragmentID(), event.getIsNewPasswordItem());
-    }
-
-
-    public void onEvent(clsEvents.showOkDialog event) {
-        showOkDialog(this, event.getTitle(), event.getMessage());
-    }
-
-    public void onEvent(clsEvents.setActionBarTitle event) {
-        setActionBarTitle(event.getTitle());
     }
     //endregion
 
@@ -224,20 +219,14 @@ public class MainActivity extends Activity {
             }
         }
 
-        // set network status
-/*        clsNetworkStatus status = clsUtils.getNetworkStatus(this,
-                MySettings.getNetworkPreference(), MySettings.isVerbose());
-        MySettings.setNetworkStatus(status);
-        MyLog.i("MainActivity", "onResume: set network status.");*/
-
         // show the appropriate fragment
         int startupState = MySettings.getStartupState();
-        if ( startupState!= fragApplicationPassword.STATE_PASSWORD_ONLY
+        if (startupState != fragApplicationPassword.STATE_PASSWORD_ONLY
                 && startupState != fragApplicationPassword.STATE_VALIDATING_PASSWORD) {
             MySettings.setStartupState(fragApplicationPassword.STATE_STEP_1_SELECT_FOLDER);
         }
 
-        if (startupState== fragApplicationPassword.STATE_STEP_1_SELECT_FOLDER
+        if (startupState == fragApplicationPassword.STATE_STEP_1_SELECT_FOLDER
                 || startupState == fragApplicationPassword.STATE_VALIDATING_PASSWORD
                 || MySettings.getAppPassword().equals(MySettings.NOT_AVAILABLE)) {
             showFragment(MySettings.FRAG_APP_PASSWORD, false);
@@ -254,6 +243,7 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
+        MyLog.i("MainActivity", "onSaveInstanceState");
         super.onSaveInstanceState(outState);
     }
 
@@ -273,19 +263,13 @@ public class MainActivity extends Activity {
         super.onDestroy();
         MyLog.i("MainActivity", "onDestroy");
         EventBus.getDefault().unregister(this);
-        // Unregisters BroadcastReceiver when app is destroyed.
-/*        if (networkReceiver != null) {
-            this.unregisterReceiver(networkReceiver);
-        }*/
 
         if (MySettings.getStartupState() != fragApplicationPassword.STATE_PASSWORD_ONLY) {
             // quitting the app in the startup phase
             // upon restarting, the app starts at step 1
             // delete the SQLite database if it has been created.
-
-            boolean databaseDeleted= PasswordsDatabaseHelper.deleteDatabase();
+            boolean databaseDeleted = PasswordsDatabaseHelper.deleteDatabase();
             MyLog.i("MainActivity", "onDestroy. Database deleted = " + databaseDeleted);
-
         }
     }
 
@@ -298,7 +282,6 @@ public class MainActivity extends Activity {
             // Single pane display
             switch (fragmentID) {
                 case MySettings.FRAG_HOME:
-                    // clearBackStack();
                     fm.beginTransaction()
                             .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                             .replace(R.id.fragment_container,
@@ -314,7 +297,6 @@ public class MainActivity extends Activity {
                                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                                 .replace(R.id.fragment_container,
                                         fragItemDetail.newInstance(), "FRAG_ITEM_DETAIL")
-                                        //.addToBackStack("FRAG_ITEM_DETAIL")
                                 .commit();
                         MyLog.i("MainActivity", "showFragments: FRAG_ITEM_DETAIL");
                     }
@@ -327,7 +309,6 @@ public class MainActivity extends Activity {
                                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                                 .replace(R.id.fragment_container,
                                         fragEdit_creditCard.newInstance(isNewItem), "FRAG_EDIT_CREDIT_CARD")
-                                        //.addToBackStack("FRAG_EDIT_CREDIT_CARD")
                                 .commit();
                         MyLog.i("MainActivity", "showFragments: FRAG_EDIT_CREDIT_CARD");
                     }
@@ -340,7 +321,6 @@ public class MainActivity extends Activity {
                                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                                 .replace(R.id.fragment_container,
                                         fragEdit_generalAccount.newInstance(isNewItem), "FRAG_EDIT_GENERAL_ACCOUNT")
-                                        //.addToBackStack("FRAG_EDIT_GENERAL_ACCOUNT")
                                 .commit();
                         MyLog.i("MainActivity", "showFragments: FRAG_EDIT_GENERAL_ACCOUNT");
                     }
@@ -353,7 +333,6 @@ public class MainActivity extends Activity {
                                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                                 .replace(R.id.fragment_container,
                                         fragEdit_software.newInstance(isNewItem), "FRAG_EDIT_SOFTWARE")
-                                        //.addToBackStack("FRAG_EDIT_SOFTWARE")
                                 .commit();
                         MyLog.i("MainActivity", "showFragments: FRAG_EDIT_SOFTWARE");
                     }
@@ -366,7 +345,6 @@ public class MainActivity extends Activity {
                                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                                 .replace(R.id.fragment_container,
                                         fragEdit_website.newInstance(isNewItem), "FRAG_EDIT_WEBSITE")
-                                        //.addToBackStack("FRAG_EDIT_WEBSITE")
                                 .commit();
                         MyLog.i("MainActivity", "showFragments: FRAG_EDIT_WEBSITE");
                     }
@@ -379,7 +357,6 @@ public class MainActivity extends Activity {
                             .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                             .replace(R.id.fragment_container,
                                     fragSettings.newInstance(), "FRAG_SETTINGS")
-                                    //.addToBackStack("FRAG_SETTINGS")
                             .commit();
                     MyLog.i("MainActivity", "showFragments: FRAG_SETTINGS");
                     //}
@@ -392,7 +369,6 @@ public class MainActivity extends Activity {
                                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                                 .replace(R.id.fragment_container,
                                         fragSettings_user.newInstance(), "FRAG_SETTINGS_USER")
-                                        //.addToBackStack("FRAG_SETTINGS_USER")
                                 .commit();
                         MyLog.i("MainActivity", "showFragments: FRAG_SETTINGS_USER");
                     }
@@ -405,7 +381,6 @@ public class MainActivity extends Activity {
                                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                                 .replace(R.id.fragment_container,
                                         fragSettings_appPassword.newInstance(), "FRAG_SETTINGS_APP_PASSWORD")
-                                        //.addToBackStack("FRAG_SETTINGS_APP_PASSWORD")
                                 .commit();
                         MyLog.i("MainActivity", "showFragments: FRAG_SETTINGS_APP_PASSWORD");
                     }
@@ -417,7 +392,6 @@ public class MainActivity extends Activity {
                             .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                             .replace(R.id.fragment_container,
                                     fragApplicationPassword.newInstance(), "FRAG_APP_PASSWORD")
-                                    //.addToBackStack("FRAG_APP_PASSWORD")
                             .commit();
                     MyLog.i("MainActivity", "showFragments: FRAG_APP_PASSWORD");
                     break;
@@ -429,7 +403,6 @@ public class MainActivity extends Activity {
                                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                                 .replace(R.id.fragment_container,
                                         fragSettings_networking.newInstance(), "FRAG_SETTINGS_NETWORKING")
-                                        //.addToBackStack("FRAG_SETTINGS_NETWORKING")
                                 .commit();
                         MyLog.i("MainActivity", "showFragments: FRAG_SETTINGS_NETWORKING");
                     }
@@ -442,27 +415,30 @@ public class MainActivity extends Activity {
                                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                                 .replace(R.id.fragment_container,
                                         fragDropboxList.newInstance(), "FRAG_DROPBOX_LIST")
-                                        //.addToBackStack("FRAG_DROPBOX_LIST")
                                 .commit();
                         MyLog.i("MainActivity", "showFragments: FRAG_DROPBOX_LIST");
+                    }
+                    break;
+
+                case MySettings.FRAG_NETWORK_LOG:
+                    // don't replace fragment if restarting from onSaveInstanceState
+                    if (!MySettings.getOnSaveInstanceState()) {
+                        fm.beginTransaction()
+                                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                                .replace(R.id.fragment_container,
+                                        fragNetworkLog.newInstance(), "FRAG_DROPBOX_LIST")
+                                .commit();
+                        MyLog.i("MainActivity", "showFragments: FRAG_NETWORK_LOG");
                     }
                     break;
             }
         }
     }
 
-/*    private void clearBackStack() {
-        FragmentManager fm = getFragmentManager();
-        while (fm.getBackStackEntryCount() != 0) {
-            fm.popBackStackImmediate();
-        }
-    }*/
-
     private void updatePasswordsData() {
         // This method asynchronously reads and decrypts the Dropbox data file, and
         // then updates the SQLite database
-        String dropboxFullFilename = MySettings.getDropboxFilename();
-        new DownloadDecryptDataFile(this, mDBApi, dropboxFullFilename, MySettings.isVerbose()).execute();
+        new DownloadDecryptDataFile(this, mDBApi, MySettings.getDropboxFilename(), MySettings.isVerbose()).execute();
     }
 
     @Override
@@ -472,12 +448,22 @@ public class MainActivity extends Activity {
 
         if (MySettings.getStartupState() != fragApplicationPassword.STATE_PASSWORD_ONLY) {
             showAllMenuItems(menu, false);
+        } else if (MySettings.getActiveFragmentID() != MySettings.FRAG_HOME) {
+            showAllMenuItems(menu, false);
+            showHelpAndAboutMenus(menu);
         }
 
         menu.findItem(R.id.action_progress_bar).setVisible(mShowActionBarProgress);
 
 
         return true;
+    }
+
+    private void showHelpAndAboutMenus(Menu menu) {
+        int HelpMenu = 5;
+        int AboutMenu = 6;
+        menu.getItem(HelpMenu).setVisible(true);
+        menu.getItem(AboutMenu).setVisible(true);
     }
 
     private void showAllMenuItems(Menu menu, boolean visible) {
@@ -495,8 +481,8 @@ public class MainActivity extends Activity {
 
         if (id == R.id.action_save_to_dropbox) {
             // save file and show results dialog
-           // Toast.makeText(this, "TO COME: action_save_to_dropbox", Toast.LENGTH_SHORT).show();
-            new SaveChangesToDropbox(this).execute();
+            // Toast.makeText(this, "TO COME: action_save_to_dropbox", Toast.LENGTH_SHORT).show();
+            new SaveChangesToDropbox(this, true).execute();
             return true;
 
         } else if (id == R.id.action_refresh_from_dropbox) {
@@ -506,6 +492,11 @@ public class MainActivity extends Activity {
         } else if (id == R.id.action_settings) {
             MySettings.setActiveFragmentID(MySettings.FRAG_SETTINGS);
             showFragment(MySettings.FRAG_SETTINGS, false);
+            return true;
+
+        } else if (id == R.id.action_show_network_log) {
+            MySettings.setActiveFragmentID(MySettings.FRAG_NETWORK_LOG);
+            showFragment(MySettings.FRAG_NETWORK_LOG, false);
             return true;
 
         } else if (id == R.id.action_help) {

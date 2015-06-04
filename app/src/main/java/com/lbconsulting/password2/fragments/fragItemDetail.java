@@ -73,7 +73,7 @@ public class fragItemDetail extends Fragment implements View.OnClickListener {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         MyLog.i("fragItemDetail", "onCreateView()");
-        View rootView = inflater.inflate(R.layout.frag_password_item_detail, container, false);
+        View rootView = inflater.inflate(R.layout.frag_item_detail, container, false);
 
         btnCallAlternate = (Button) rootView.findViewById(R.id.btnCallAlternate);
         btnCallPrimary = (Button) rootView.findViewById(R.id.btnCallPrimary);
@@ -258,7 +258,7 @@ public class fragItemDetail extends Fragment implements View.OnClickListener {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_frag_password_item_detail_list, menu);
+        inflater.inflate(R.menu.menu_frag_item_detail, menu);
         super.onCreateOptionsMenu(menu, inflater);
     }
 

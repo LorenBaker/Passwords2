@@ -249,7 +249,7 @@ public class fragEdit_website extends Fragment implements TextWatcher {
                 return true;
 
             case R.id.action_clear:
-                Toast.makeText(getActivity(), "TO COME: action_clear", Toast.LENGTH_SHORT).show();
+               // Toast.makeText(getActivity(), "TO COME: action_clear", Toast.LENGTH_SHORT).show();
                 txtWebsiteURL.setText("");
                 txtUserID.setText("");
                 txtPassword.setText("");

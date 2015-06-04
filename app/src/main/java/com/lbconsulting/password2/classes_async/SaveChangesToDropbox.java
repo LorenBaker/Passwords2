@@ -9,6 +9,7 @@ import com.google.gson.Gson;
 import com.lbconsulting.password2.activities.MainActivity;
 import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
+import com.lbconsulting.password2.classes.clsEvents;
 import com.lbconsulting.password2.classes.clsItem;
 import com.lbconsulting.password2.classes.clsItemValues;
 import com.lbconsulting.password2.classes.clsLabPasswords;
@@ -19,6 +20,8 @@ import com.lbconsulting.password2.services.UploadService;
 
 import java.util.ArrayList;
 
+import de.greenrobot.event.EventBus;
+
 /**
  * This asyncTask:
  * 1.   Creates a clsLabPassword object from the database
@@ -28,11 +31,13 @@ import java.util.ArrayList;
  */
 public class SaveChangesToDropbox extends AsyncTask<Void, Void, String> {
 
-    Context mContext;
+    private Context mContext;
+    private boolean mShowResultsDialog;
 
-    public SaveChangesToDropbox(Context context) {
+    public SaveChangesToDropbox(Context context, boolean showResultsDialog) {
         // We set the context this way so we don't accidentally leak activities
         mContext = context.getApplicationContext();
+        mShowResultsDialog=showResultsDialog;
     }
 
     @Override
@@ -153,6 +158,14 @@ public class SaveChangesToDropbox extends AsyncTask<Void, Void, String> {
                 uploadServiceIntent.putExtra(UploadService.ARG_ACCESS_TOKEN, MySettings.getDropboxAccessToken());
                 uploadServiceIntent.putExtra(UploadService.ARG_NETWORKING_PREFERENCE, MySettings.getNetworkPreference());
                 mContext.startService(uploadServiceIntent);
+
+                if(mShowResultsDialog) {
+                    String title ="Uploading file";
+                    String msg = "A refreshed Passwords data file was sent to the background upload service.\n\n"
+                            +"More information can be found in the Network Log";
+                    EventBus.getDefault().post(new clsEvents.showOkDialog(title, msg));
+                }
+
             } else {
                 MyLog.e("SaveChangesToDropbox", "onPostExecute: Unable to initiate Upload service. The App password is NOT_AVAILABLE.");
             }

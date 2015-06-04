@@ -249,13 +249,7 @@ public class fragApplicationPassword extends Fragment implements View.OnClickLis
         getActivity().startService(intent);
     }
 
-    private void hideKeyBoard(EditText txt) {
-        InputMethodManager imm = (InputMethodManager) getActivity()
-                .getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(txt.getWindowToken(), 0);
-    }
-
-    private void showProgressBarViews() {
+     private void showProgressBarViews() {
         tvProgressBarCaption.setVisibility(View.VISIBLE);
         tvFirstTimeMessage.setVisibility(View.GONE);
         txtAppPassword.setVisibility(View.GONE);
@@ -272,6 +266,8 @@ public class fragApplicationPassword extends Fragment implements View.OnClickLis
         btnDisplay.setVisibility(View.VISIBLE);
         btnOK.setVisibility(View.VISIBLE);
         btnOkReadPasswordFile.setVisibility(View.GONE);
+
+        showKeyBoard(txtAppPassword);
     }
 
     private void showStep3A_StartUpViews() {
@@ -287,6 +283,24 @@ public class fragApplicationPassword extends Fragment implements View.OnClickLis
         btnDisplay.setVisibility(View.VISIBLE);
         btnOK.setVisibility(View.GONE);
         btnOkReadPasswordFile.setVisibility(View.VISIBLE);
+    }
+
+    private void showKeyBoard(final EditText txt) {
+        final InputMethodManager imm = (InputMethodManager) getActivity()
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
+        txt.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                txt.requestFocus();
+                imm.showSoftInput(txt, 0);
+            }
+        }, 100);
+    }
+
+    private void hideKeyBoard(EditText txt) {
+        InputMethodManager imm = (InputMethodManager) getActivity()
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(txt.getWindowToken(), 0);
     }
 
     private class passwordsDataFileExists extends AsyncTask<Void, Void, Boolean> {

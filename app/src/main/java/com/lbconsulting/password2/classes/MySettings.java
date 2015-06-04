@@ -37,6 +37,8 @@ public class MySettings {
     public static final int FRAG_APP_PASSWORD = 1231;
     public static final int FRAG_SETTINGS_NETWORKING = 124;
 
+    public static final int FRAG_NETWORK_LOG = 13;
+
 
     public static final String[] CreditCardNames = {"American Express", "Diners Club", "Discover", "JCB", "MasterCard", "VISA"};
     public static final String UNKNOWN = "UNKNOWN";
@@ -94,6 +96,19 @@ public class MySettings {
     public static final String SETTING_NETWORK_BUSY = "networkBusy";
     public static final String SETTING_SYNC_PERIODICITY = "syncPeriodicity";
 
+
+    public static final String SETTING_LV_INDEX_ALL_USER_ITEMS = "listViewIndexAllUserItems";
+    public static final String SETTING_LV_INDEX_CREDIT_CARDS = "listViewIndexCreditCards";
+    public static final String SETTING_LV_INDEX_GENERAL_ACCOUNTS = "listViewIndexGeneralAccounts";
+    public static final String SETTING_LV_INDEX_WEBSITES = "listViewIndexWebsites";
+    public static final String SETTING_LV_INDEX_SOFTWARE = "listViewIndexSoftware";
+
+    public static final String SETTING_LV_TOP_ALL_USER_ITEMS = "listViewTopAllUserItems";
+    public static final String SETTING_LV_TOP_CREDIT_CARDS = "listViewTopCreditCards";
+    public static final String SETTING_LV_TOP_GENERAL_ACCOUNTS = "listViewTopGeneralAccounts";
+    public static final String SETTING_LV_TOP_WEBSITES = "listViewTopWebsites";
+    public static final String SETTING_LV_TOP_SOFTWARE = "listViewTopSoftware";
+
     public static final String SETTING_ENCRYPTION_TEST = "encryptionTest";
     private static final String ENCRYPTION_TEST_TEXT = "This is a test, only a test.";
 
@@ -145,6 +160,94 @@ public class MySettings {
         editor.putString(SETTING_ENCRYPTION_TEST, UNKNOWN);
         editor.apply();
     }
+
+
+    //region List View positions
+    public static clsListViewPosition getLvPosition_AllUserItems() {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        int index = passwordsSavedState.getInt(SETTING_LV_INDEX_ALL_USER_ITEMS, 0);
+        int top = passwordsSavedState.getInt(SETTING_LV_TOP_ALL_USER_ITEMS, 0);
+        return new clsListViewPosition(index, top);
+    }
+
+    public static void setLvPosition_AllUserItems(clsListViewPosition position) {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        SharedPreferences.Editor editor = passwordsSavedState.edit();
+        editor.putInt(SETTING_LV_INDEX_ALL_USER_ITEMS, position.getIndex());
+        editor.putInt(SETTING_LV_TOP_ALL_USER_ITEMS, position.getTop());
+        editor.apply();
+    }
+
+    public static clsListViewPosition getLvPosition_CreditCards() {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        int index = passwordsSavedState.getInt(SETTING_LV_INDEX_CREDIT_CARDS, 0);
+        int top = passwordsSavedState.getInt(SETTING_LV_TOP_CREDIT_CARDS, 0);
+        return new clsListViewPosition(index, top);
+    }
+
+    public static void setLvPosition_CreditCards(clsListViewPosition position) {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        SharedPreferences.Editor editor = passwordsSavedState.edit();
+        editor.putInt(SETTING_LV_INDEX_CREDIT_CARDS, position.getIndex());
+        editor.putInt(SETTING_LV_TOP_CREDIT_CARDS, position.getTop());
+        editor.apply();
+    }
+
+    public static clsListViewPosition getLvPosition_GeneralAccounts() {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        int index = passwordsSavedState.getInt(SETTING_LV_INDEX_GENERAL_ACCOUNTS, 0);
+        int top = passwordsSavedState.getInt(SETTING_LV_TOP_GENERAL_ACCOUNTS, 0);
+        return new clsListViewPosition(index, top);
+    }
+
+    public static void setLvPosition_GeneralAccounts(clsListViewPosition position) {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        SharedPreferences.Editor editor = passwordsSavedState.edit();
+        editor.putInt(SETTING_LV_INDEX_GENERAL_ACCOUNTS, position.getIndex());
+        editor.putInt(SETTING_LV_TOP_GENERAL_ACCOUNTS, position.getTop());
+        editor.apply();
+    }
+
+    public static clsListViewPosition getLvPosition_Websites() {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        int index = passwordsSavedState.getInt(SETTING_LV_INDEX_WEBSITES, 0);
+        int top = passwordsSavedState.getInt(SETTING_LV_TOP_WEBSITES, 0);
+        return new clsListViewPosition(index, top);
+    }
+
+    public static void setLvPosition_Websites(clsListViewPosition position) {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        SharedPreferences.Editor editor = passwordsSavedState.edit();
+        editor.putInt(SETTING_LV_INDEX_WEBSITES, position.getIndex());
+        editor.putInt(SETTING_LV_TOP_WEBSITES, position.getTop());
+        editor.apply();
+    }
+
+    public static clsListViewPosition getLvPosition_Software() {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        int index = passwordsSavedState.getInt(SETTING_LV_INDEX_SOFTWARE, 0);
+        int top = passwordsSavedState.getInt(SETTING_LV_TOP_SOFTWARE, 0);
+        return new clsListViewPosition(index, top);
+    }
+
+    public static void setLvPosition_Software(clsListViewPosition position) {
+        SharedPreferences passwordsSavedState =
+                mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
+        SharedPreferences.Editor editor = passwordsSavedState.edit();
+        editor.putInt(SETTING_LV_INDEX_SOFTWARE, position.getIndex());
+        editor.putInt(SETTING_LV_TOP_SOFTWARE, position.getTop());
+        editor.apply();
+    }
+    //endregion
 
     //region Networking Preferences
     public static int getNetworkPreference() {

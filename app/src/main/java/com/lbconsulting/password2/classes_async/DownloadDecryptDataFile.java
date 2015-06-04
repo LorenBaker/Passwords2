@@ -1,6 +1,7 @@
 package com.lbconsulting.password2.classes_async;
 
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.widget.Toast;
@@ -22,7 +23,6 @@ import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
 import com.lbconsulting.password2.classes.clsItem;
 import com.lbconsulting.password2.classes.clsItemSort;
-import com.lbconsulting.password2.classes.clsItemValues;
 import com.lbconsulting.password2.classes.clsLabPasswords;
 import com.lbconsulting.password2.classes.clsNetworkStatus;
 import com.lbconsulting.password2.classes.clsUserValues;
@@ -59,23 +59,24 @@ import de.greenrobot.event.EventBus;
 
 public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
 
-    public final int FILE_DOWNLOAD_START = 0;
-    public final int FILE_NOT_FOUND = -1;
-    public final int FILE_FOUND_BUT_EMPTY = -2;
-    public final int FILE_DELETED = -3;
-    public final int APP_PASSWORD_KEY_IS_EMPTY = -4;
-    public final int INVALID_PASSWORD = -5;
-    public final int UNABLE_TO_PARSE_JASON = -6;
-    public final int NOT_OK_TO_DOWNLOAD_FILE = -7;
-    public final int FILE_DOWNLOAD_SUCCESS = 101;
-    public final int DATABASE_UPDATED_SUCCESS = 102;
+    private final int FILE_DOWNLOAD_START = 0;
+    private final int FILE_NOT_FOUND = -1;
+    private final int FILE_FOUND_BUT_EMPTY = -2;
+    private final int FILE_DELETED = -3;
+    private final int APP_PASSWORD_KEY_IS_EMPTY = -4;
+    private final int INVALID_PASSWORD = -5;
+    private final int UNABLE_TO_PARSE_JASON = -6;
+    private final int NOT_OK_TO_DOWNLOAD_FILE = -7;
+    private final int FILE_DOWNLOAD_SUCCESS = 101;
+    private final int DATABASE_UPDATED_SUCCESS = 102;
+
     private final Context mContext;
     private final DropboxAPI<?> mDBApi;
     private final String mDropboxFullFilename;
     private final boolean mIsVerbose;
     private clsNetworkStatus mNetworkStatus;
     private int mDownloadStatus = FILE_DOWNLOAD_START;
-    private String mErrorMsg;
+    private long mStartingTime;
 
     public DownloadDecryptDataFile(Context context, DropboxAPI<?> api, String dropboxFullFilename, boolean isVerbose) {
         // We set the context this way so we don't accidentally leak activities
@@ -85,12 +86,12 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
         mDropboxFullFilename = dropboxFullFilename;
         mIsVerbose = isVerbose;
         mDownloadStatus = FILE_DOWNLOAD_START;
-
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
+        mStartingTime = System.currentTimeMillis();
         EventBus.getDefault().post(new clsEvents.showProgressInActionBar(true));
         MySettings.setNetworkBusy(true);
         String filename = mDropboxFullFilename.substring(mDropboxFullFilename.lastIndexOf("/") + 1);
@@ -118,6 +119,7 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
     }
 
     private String readFile() {
+        String errorMsg;
         try {
             Entry existingEntry = mDBApi.metadata(mDropboxFullFilename, 1, null, false, null);
             if (existingEntry != null && existingEntry.bytes > 0 && !existingEntry.isDeleted) {
@@ -160,8 +162,8 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
             MyLog.e("DownloadDecryptDataFile", "readFile: DropboxUnlinkedException - The AuthSession wasn't properly authenticated or user unlinked.");
         } catch (DropboxPartialFileException e) {
             // We canceled the operation
-            mErrorMsg = "Download canceled";
-            MyLog.i("DownloadDecryptDataFile", "readFile: " + mErrorMsg);
+            errorMsg = "Download canceled";
+            MyLog.i("DownloadDecryptDataFile", "readFile: " + errorMsg);
         } catch (DropboxServerException e) {
             // Server-side exception.  These are examples of what could happen,
             // but we don't do anything special with them here.
@@ -199,24 +201,26 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
 
             }
             // This gets the Dropbox error, translated into the user's language
-            mErrorMsg = e.body.userError;
-            if (mErrorMsg == null) {
-                mErrorMsg = e.body.error;
+            errorMsg = e.body.userError;
+            if (errorMsg == null) {
+                errorMsg = e.body.error;
             }
+            MyLog.i("DownloadDecryptDataFile", "readFile: " + errorMsg);
+
         } catch (DropboxIOException e) {
             // Happens all the time, probably want to retry automatically.
-            mErrorMsg = "Network error.  Try again.";
-            MyLog.i("DownloadDecryptDataFile", "readFile: " + mErrorMsg);
+            errorMsg = "Network error.  Try again.";
+            MyLog.i("DownloadDecryptDataFile", "readFile: " + errorMsg);
 
         } catch (DropboxParseException e) {
             // Probably due to Dropbox server restarting, should retry
-            mErrorMsg = "Dropbox error.  Try again.";
-            MyLog.i("DownloadDecryptDataFile", "readFile: " + mErrorMsg);
+            errorMsg = "Dropbox error.  Try again.";
+            MyLog.i("DownloadDecryptDataFile", "readFile: " + errorMsg);
 
         } catch (DropboxException e) {
             // Unknown error
-            mErrorMsg = "Unknown error.  Try again.";
-            MyLog.i("DownloadDecryptDataFile", "readFile: " + mErrorMsg);
+            errorMsg = "Unknown error.  Try again.";
+            MyLog.i("DownloadDecryptDataFile", "readFile: " + errorMsg);
 
         } catch (IOException e) {
             MyLog.i("DownloadDecryptDataFile", "readFile: IOException: " + e.getMessage());
@@ -297,6 +301,23 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
     }
 
     private void updateSQLiteDatabase(clsLabPasswords passwordsData) {
+
+         final int ITEM_NAME = 0;
+         final int SOFTWARE_KEY_CODE = 1;
+         final int COMMENTS = 2;
+         final int CREDIT_CARD_ACCOUNT_NUMBER = 3;
+         final int CREDIT_CARD_SECURITY_CODE = 4;
+         final int CREDIT_CARD_EXPIRATION_MONTH = 5;
+         final int CREDIT_CARD_EXPIRATION_YEAR = 6;
+         final int GENERAL_ACCOUNT_NUMBER = 7;
+         final int PRIMARY_PHONE_NUMBER = 8;
+         final int ALTERNATE_PHONE_NUMBER = 9;
+         final int WEBSITE_URL = 10;
+         final int WEBSITE_USER_ID = 11;
+         final int WEBSITE_PASSWORD = 12;
+
+        MyLog.i("DownloadDecryptDataFile", "Found " + passwordsData.getUsers().size() + " users; "
+                + passwordsData.getPasswordItems().size() + " items.");
         MyLog.i("DownloadDecryptDataFile", "updateSQLiteDatabase: START");
         PasswordsContentProvider.setSuppressChangeNotification(true);
 
@@ -314,7 +335,7 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
             }
 
             userValues = new clsUserValues(mContext, user.getUserID());
-            if (userValues != null && !userValues.hasData()) {
+            if (!userValues.hasData()) {
                 // insert new user into the UsersTable
                 UsersTable.createNewUser(mContext, user.getUserID(), user.getUserName());
                 userValues = new clsUserValues(mContext, user.getUserID());
@@ -328,60 +349,85 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
 
 
         long lastItemID = 0;
-        clsItemValues itemValues;
-        ArrayList<clsItemSort> sortingList = new ArrayList<>();
+        ArrayList<clsItemSort> sortingList = null;
+        ArrayList<String> plainTextArray;
 
         for (clsItem item : passwordsData.getPasswordItems()) {
             if (item.getID() > lastItemID) {
                 lastItemID = item.getID();
             }
+            sortingList = new ArrayList<>();
+            plainTextArray = new ArrayList<>();
 
-            itemValues = new clsItemValues(mContext, item.getID());
-            if (itemValues != null && !itemValues.hasData()) {
-                // insert new item into the ItemsTable
-                ItemsTable.createNewItem(mContext, item.getUser_ID(), item.getID(), item.getItemType_ID(), item.getName());
-                itemValues = new clsItemValues(mContext, item.getID());
+            plainTextArray.add(item.getName());
+            plainTextArray.add(item.getSoftwareKeyCode());
+            plainTextArray.add(item.getComments());
+            plainTextArray.add(item.getCreditCardAccountNumber());
+            plainTextArray.add(item.getCardCreditSecurityCode());
+            plainTextArray.add(item.getCreditCardExpirationMonth());
+            plainTextArray.add(item.getCreditCardExpirationYear());
+            plainTextArray.add(item.getGeneralAccountNumber());
+            plainTextArray.add(item.getPrimaryPhoneNumber());
+            plainTextArray.add(item.getAlternatePhoneNumber());
+            plainTextArray.add(item.getWebsiteURL());
+            plainTextArray.add(item.getWebsiteUserID());
+            plainTextArray.add(item.getWebsitePassword());
+
+            ArrayList<String> encryptedArray = clsUtils.encryptStrings(plainTextArray, MySettings.DB_KEY, false);
+            long itemID = item.getID();
+
+            if (!ItemsTable.itemIdExists(mContext, itemID)) {
+                // the item is not in the database ... so add it
+                long newItemID = ItemsTable.createNewItem(mContext, item.getUser_ID(), itemID, item.getItemType_ID(), encryptedArray.get(ITEM_NAME));
+                if (newItemID != itemID) {
+                    MyLog.e("DownloadDecryptDataFile", "updateSQLiteDatabase: ERROR creating item with ID = " + itemID);
+                    // continue to the next item
+                    continue;
+                }
             }
-            // update item fields
-            itemValues.putName(item.getName());
-            itemValues.putItemTypeID(item.getItemType_ID());
-            itemValues.putUserID(item.getUser_ID());
-            itemValues.putSoftwareKeyCode(item.getSoftwareKeyCode());
-            itemValues.putSoftwareSubgroupLength(item.getSoftwareSubgroupLength());
-            itemValues.putComments(item.getComments());
-            itemValues.putCreditCardAccountNumber(item.getCreditCardAccountNumber());
-            itemValues.putCreditCardSecurityCode(item.getCardCreditSecurityCode());
-            itemValues.putCreditCardExpirationMonth(item.getCreditCardExpirationMonth());
-            itemValues.putCreditCardExpirationYear(item.getCreditCardExpirationYear());
-            itemValues.putGeneralAccountNumber(item.getGeneralAccountNumber());
-            itemValues.putPrimaryPhoneNumber(item.getPrimaryPhoneNumber());
-            itemValues.putAlternatePhoneNumber(item.getAlternatePhoneNumber());
-            itemValues.putWebsiteURL(item.getWebsiteURL());
-            itemValues.putWebsiteUserID(item.getWebsiteUserID());
-            itemValues.putWebsitePassword(item.getWebsitePassword());
-            itemValues.update();
+
+            ContentValues cv = new ContentValues();
+            cv.put(ItemsTable.COL_IS_IN_TABLE, 1);
+            cv.put(ItemsTable.COL_ITEM_NAME, encryptedArray.get(ITEM_NAME));
+            cv.put(ItemsTable.COL_ITEM_TYPE_ID, item.getItemType_ID());
+            cv.put(ItemsTable.COL_USER_ID, item.getUser_ID());
+            cv.put(ItemsTable.COL_SOFTWARE_KEY_CODE, encryptedArray.get(SOFTWARE_KEY_CODE));
+            cv.put(ItemsTable.COL_SOFTWARE_SUBGROUP_LENGTH, item.getSoftwareSubgroupLength());
+            cv.put(ItemsTable.COL_COMMENTS, encryptedArray.get(COMMENTS));
+            cv.put(ItemsTable.COL_CREDIT_CARD_ACCOUNT_NUMBER, encryptedArray.get(CREDIT_CARD_ACCOUNT_NUMBER));
+            cv.put(ItemsTable.COL_CREDIT_CARD_SECURITY_CODE, encryptedArray.get(CREDIT_CARD_SECURITY_CODE));
+            cv.put(ItemsTable.COL_CREDIT_CARD_EXPIRATION_MONTH, encryptedArray.get(CREDIT_CARD_EXPIRATION_MONTH));
+            cv.put(ItemsTable.COL_CREDIT_CARD_EXPIRATION_YEAR, encryptedArray.get(CREDIT_CARD_EXPIRATION_YEAR));
+            cv.put(ItemsTable.COL_GENERAL_ACCOUNT_NUMBER, encryptedArray.get(GENERAL_ACCOUNT_NUMBER));
+            cv.put(ItemsTable.COL_PRIMARY_PHONE_NUMBER, encryptedArray.get(PRIMARY_PHONE_NUMBER));
+            cv.put(ItemsTable.COL_ALTERNATE_PHONE_NUMBER, encryptedArray.get(ALTERNATE_PHONE_NUMBER));
+            cv.put(ItemsTable.COL_WEBSITE_URL, encryptedArray.get(WEBSITE_URL));
+            cv.put(ItemsTable.COL_WEBSITE_USER_ID, encryptedArray.get(WEBSITE_USER_ID));
+            cv.put(ItemsTable.COL_WEBSITE_PASSWORD, encryptedArray.get(WEBSITE_PASSWORD));
+            ItemsTable.updateItems(mContext, itemID, cv);
 
             sortingList.add(new clsItemSort(item.getID(), item.getName()));
         }
 
-        Collections.sort(sortingList, new Comparator<clsItemSort>() {
-            @Override
-            public int compare(clsItemSort item1, clsItemSort item2) {
-                return item1.getItemName().compareTo(item2.getItemName());
+        if (sortingList != null && sortingList.size() > 0) {
+            Collections.sort(sortingList, new Comparator<clsItemSort>() {
+                @Override
+                public int compare(clsItemSort item1, clsItemSort item2) {
+                    return item1.getItemName().compareTo(item2.getItemName());
+                }
+            });
+
+            int sortKey = 0;
+            for (clsItemSort item : sortingList) {
+                ItemsTable.updateItemSortKey(mContext, item.getItemID(), sortKey);
+                sortKey++;
             }
-        });
-
-        int sortKey = 0;
-        for (clsItemSort item : sortingList) {
-            ItemsTable.updateItemSortKey(mContext, item.getItemID(), sortKey);
-            sortKey++;
         }
-
         MySettings.setLastItemAndUserIDs(lastItemID, lastUserID);
 
         // remove any users or items that are no longer in the database
         int usersDeleted = UsersTable.deleteUsersNotInTable(mContext);
-        MyLog.i("DownloadDecryptDataFile", "updateSQLiteDatabase: deleted " + usersDeleted + " records from the database.");
+        MyLog.i("DownloadDecryptDataFile", "updateSQLiteDatabase: deleted " + usersDeleted + " users from the database.");
         int itemsDeleted = ItemsTable.deleteItemsNotInTable(mContext);
         MyLog.i("DownloadDecryptDataFile", "updateSQLiteDatabase: deleted " + itemsDeleted + " items from the items table.");
 
@@ -394,6 +440,12 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
         EventBus.getDefault().post(new clsEvents.showProgressInActionBar(false));
         String title = mContext.getString(R.string.downloadError_okDialogTitle);
         String message = "";
+
+        long timeDelta = System.currentTimeMillis() - mStartingTime;
+        float timeDeltaSeconds = (float) timeDelta;
+        timeDeltaSeconds = timeDeltaSeconds / 1000;
+        String strTimeDeltaSeconds = String.format("%.02f", timeDeltaSeconds);
+        MyLog.i("DownloadDecryptDataFile", "onPostExecute: Execution time = " + strTimeDeltaSeconds + " seconds.");
         switch (result) {
             case DATABASE_UPDATED_SUCCESS:
                 MyLog.i("DownloadDecryptDataFile", "onPostExecute: DATABASE_UPDATED_SUCCESS");
@@ -455,14 +507,14 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
         MySettings.setNetworkBusy(false);
     }
 
-    private void showToast(String msg) {
+/*    private void showToast(String msg) {
         Toast error = Toast.makeText(mContext, msg, Toast.LENGTH_LONG);
         error.show();
     }
 
     public interface DownloadFinishedListener {
         void onFileDownloadFinished(Boolean result);
-    }
+    }*/
 
 
 }

@@ -30,9 +30,9 @@ import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
 import com.lbconsulting.password2.classes.clsItemTypes;
+import com.lbconsulting.password2.classes.clsListViewPosition;
 import com.lbconsulting.password2.classes.clsUserValues;
 import com.lbconsulting.password2.database.ItemsTable;
-import com.lbconsulting.password2.database.UsersTable;
 
 import de.greenrobot.event.EventBus;
 
@@ -45,8 +45,8 @@ public class fragHome extends Fragment
 
 
     public static final int USER_CREDIT_CARD_ITEMS = 1;
-    public static final int USER_GENERAL_ACCOUNT_ITEMS = 2;
-    public static final int USER_SOFTWARE_ITEMS = 3;
+    private static final int USER_GENERAL_ACCOUNT_ITEMS = 2;
+    private static final int USER_SOFTWARE_ITEMS = 3;
     public static final int USER_WEBSITE_ITEMS = 4;
     public static final int ALL_USER_ITEMS = 5;
 
@@ -82,6 +82,12 @@ public class fragHome extends Fragment
     private ItemsCursorAdapter mUserGeneralAccountItemsItemsAdapter;
     private ItemsCursorAdapter mUserWebsiteItemsItemsAdapter;
     private ItemsCursorAdapter mUserSoftwareItemsItemsAdapter;
+
+    private boolean mFirstTimeLoading_CreditCards = true;
+    private boolean mFirstTimeLoading_GeneralAccounts = true;
+    private boolean mFirstTimeLoading_Websites = true;
+    private boolean mFirstTimeLoading_Software = true;
+    private boolean mFirstTimeLoading_AllUserItems = true;
 
 
     public fragHome() {
@@ -154,7 +160,7 @@ public class fragHome extends Fragment
                              Bundle savedInstanceState) {
 
         MyLog.i("fragHome", "onCreateView()");
-        View rootView = inflater.inflate(R.layout.frag_password_items_list, container, false);
+        View rootView = inflater.inflate(R.layout.frag_home, container, false);
 
 
         txtSearch = (EditText) rootView.findViewById(R.id.txtSearch);
@@ -260,25 +266,24 @@ public class fragHome extends Fragment
 
     private void setUserNameInActionBar() {
         clsUserValues activeUser = new clsUserValues(getActivity(), MySettings.getActiveUserID());
-        if (activeUser != null) {
-            String userName = activeUser.getUserName();
-            String actionBarTitle = "";
-            if (userName.isEmpty()) {
-                actionBarTitle = "Passwords";
+
+        String userName = activeUser.getUserName();
+        String actionBarTitle;
+        if (userName.isEmpty()) {
+            actionBarTitle = "Passwords";
+        } else {
+            if (userName.endsWith("s")) {
+                actionBarTitle = userName + "' Passwords";
             } else {
-                if (userName.endsWith("s")) {
-                    actionBarTitle = userName + "' Passwords";
-                } else {
-                    actionBarTitle = userName + "'s Passwords";
-                }
+                actionBarTitle = userName + "'s Passwords";
             }
-            EventBus.getDefault().post(new clsEvents.setActionBarTitle(actionBarTitle));
         }
+        EventBus.getDefault().post(new clsEvents.setActionBarTitle(actionBarTitle));
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_frag_password_items_list, menu);
+        inflater.inflate(R.menu.menu_frag_home, menu);
         super.onCreateOptionsMenu(menu, inflater);
 
         if (mActiveListView == clsItemTypes.ALL_ITEMS) {
@@ -299,11 +304,6 @@ public class fragHome extends Fragment
             return true;
         } else {
             switch (item.getItemId()) {
-
-                // TODO: Remove action_test
-                case R.id.action_test:
-                    EventBus.getDefault().post(new clsEvents.test());
-                    return true;
 
                 case R.id.action_new:
                     final long newItemID = MySettings.getNextItemID();
@@ -374,7 +374,7 @@ public class fragHome extends Fragment
     }
 
     private void createNewCreditCard(long newItemID) {
-        String newItemName = getActivity().getString(R.string.new_credit_card_name) ;
+        String newItemName = getActivity().getString(R.string.new_credit_card_name);
         long itemID = ItemsTable.createNewItem(getActivity(), mActiveUserID,
                 newItemID, clsItemTypes.CREDIT_CARDS, newItemName);
         if (itemID > 0 && itemID == newItemID) {
@@ -456,6 +456,11 @@ public class fragHome extends Fragment
         MyLog.i("fragHome", "onResume()");
         MySettings.setActiveFragmentID(MySettings.FRAG_HOME);
         setupDisplay(mActiveListView);
+        mFirstTimeLoading_CreditCards = true;
+        mFirstTimeLoading_GeneralAccounts = true;
+        mFirstTimeLoading_Websites = true;
+        mFirstTimeLoading_Software = true;
+        mFirstTimeLoading_AllUserItems = true;
     }
 
     @Override
@@ -464,6 +469,13 @@ public class fragHome extends Fragment
         MyLog.i("fragHome", "onPause()");
         MySettings.setActiveListViewID(mActiveListView);
         MySettings.setSearchText(txtSearch.getText().toString());
+
+        MySettings.setLvPosition_AllUserItems(getPosition(lvAllUserItems));
+        MySettings.setLvPosition_CreditCards(getPosition(lvCreditCards));
+        MySettings.setLvPosition_GeneralAccounts(getPosition(lvGeneralAccounts));
+        MySettings.setLvPosition_Websites(getPosition(lvWebsites));
+        MySettings.setLvPosition_Software(getPosition(lvSoftware));
+
         hideKeyBoard(txtSearch);
     }
 
@@ -506,114 +518,6 @@ public class fragHome extends Fragment
         String title = "No User Selected";
         String message = "Please go to menu \"Settings\" to select or create a User.";
         EventBus.getDefault().post(new clsEvents.showOkDialog(title, message));
-    }
-
-
-    private void showItemError(long longErrorCode) {
-        int errorCode = (int) longErrorCode;
-        String title = "";
-        String errorMessage = "";
-
-        switch (errorCode) {
-            // ****** user errors
-
-            case UsersTable.USER_NOT_CREATED:
-                title = "Error Creating User";
-                errorMessage = "User not created.";
-                break;
-            case UsersTable.ILLEGAL_USER_ID:
-                title = "Error Creating User";
-                errorMessage = "Illegal user ID.";
-                break;
-            case UsersTable.PROPOSED_USER_IS_NULL:
-                title = "Error Creating User";
-                errorMessage = "User name is null.";
-                break;
-            case UsersTable.PROPOSED_USER_IS_EMPTY:
-                title = "Error Creating User";
-                errorMessage = "User name is empty.";
-                break;
-            case UsersTable.USER_ID_ALREADY_EXISTS:
-                title = "Error Creating User";
-                errorMessage = "User ID already exists.";
-                break;
-            case UsersTable.USER_NAME_ALREADY_EXISTS:
-                title = "Error Creating User";
-                errorMessage = "User name already exists.";
-                break;
-
-            case UsersTable.UPDATE_ERROR_USER_NOT_FOUND:
-                title = "Error Updating User";
-                errorMessage = "User not found.";
-                break;
-            case UsersTable.UPDATE_ERROR_USER_NAME_EXISTS:
-                title = "Error Updating User";
-                errorMessage = "User name already exists.";
-                break;
-
-            case UsersTable.USER_NOT_DELETED:
-                title = "Error Updating User";
-                errorMessage = "User not deleted.";
-                break;
-
-
-            // ****** item errors
-            case ItemsTable.ITEM_NOT_CREATED:
-                title = "Error Creating Item";
-                errorMessage = "Item not created.";
-                break;
-
-            case ItemsTable.ILLEGAL_ITEM_ID:
-                title = "Error Creating Item";
-                errorMessage = "Illegal item ID.";
-                break;
-
-            case ItemsTable.USER_DOES_NOT_EXIST:
-                title = "Error Creating Item";
-                errorMessage = "User does not exist.";
-                break;
-
-            case ItemsTable.PROPOSED_ITEM_IS_NULL:
-                title = "Error Creating Item";
-                errorMessage = "Item name is null.";
-                break;
-
-            case ItemsTable.PROPOSED_ITEM_IS_EMPTY:
-                title = "Error Creating Item";
-                errorMessage = "Item name is empty.";
-                break;
-
-            case ItemsTable.ITEM_ID_ALREADY_EXISTS:
-                title = "Error Creating Item";
-                errorMessage = "Item ID already exists.";
-                break;
-
-            case ItemsTable.ITEM_ALREADY_EXISTS:
-                title = "Error Creating Item";
-                errorMessage = "Item already exists.";
-                break;
-
-            case ItemsTable.ITEM_NOT_UPDATED:
-                title = "Error Updating Item";
-                errorMessage = "Item not updated.";
-                break;
-
-            case ItemsTable.ITEM_UPDATE_ERROR_ITEM_NOT_FOUND:
-                title = "Error Updating Item";
-                errorMessage = "Item not found.";
-                break;
-
-            case ItemsTable.ITEM_UPDATE_ERROR_ITEM_NAME_EXISTS:
-                title = "Error Updating Item";
-                errorMessage = "Item name already exists.";
-                break;
-
-            case ItemsTable.ITEM_NOT_DELETED:
-                title = "Error deleting Item";
-                errorMessage = "Item not deleted.";
-                break;
-        }
-        EventBus.getDefault().post(new clsEvents.showOkDialog(title, errorMessage));
     }
 
     private void setupDisplay(int displayType) {
@@ -794,11 +698,7 @@ public class fragHome extends Fragment
                 break;
 
             case ALL_USER_ITEMS:
-                if (mListsStartClosed) {
-                    mFirstTimeDisplayed = true;
-                } else {
-                    mFirstTimeDisplayed = false;
-                }
+                mFirstTimeDisplayed = mListsStartClosed;
                 txtSearch.setVisibility(View.VISIBLE);
                 lvAllUserItems.setVisibility(View.VISIBLE);
                 btnCreditCards.setVisibility(View.GONE);
@@ -813,6 +713,15 @@ public class fragHome extends Fragment
                 showKeyBoard(txtSearch);
                 break;
         }
+    }
+
+    private clsListViewPosition getPosition(ListView lv) {
+        // get index and top position
+        int index = lv.getFirstVisiblePosition();
+        View v = lv.getChildAt(0);
+        int top = (v == null) ? 0 : (v.getTop() - lv.getPaddingTop());
+
+        return new clsListViewPosition(index, top);
     }
 
 
@@ -869,26 +778,51 @@ public class fragHome extends Fragment
             case USER_CREDIT_CARD_ITEMS:
                 MyLog.i("fragHome", "onLoadFinished USER_CREDIT_CARD_ITEMS");
                 mUserCreditCardItemsItemsAdapter.swapCursor(newCursor);
+                if (mFirstTimeLoading_CreditCards) {
+                    clsListViewPosition creditCardsPosition = MySettings.getLvPosition_CreditCards();
+                    lvCreditCards.setSelectionFromTop(creditCardsPosition.getIndex(), creditCardsPosition.getTop());
+                    mFirstTimeLoading_CreditCards = false;
+                }
                 break;
 
             case USER_GENERAL_ACCOUNT_ITEMS:
                 MyLog.i("fragHome", "onLoadFinished USER_GENERAL_ACCOUNT_ITEMS");
                 mUserGeneralAccountItemsItemsAdapter.swapCursor(newCursor);
+                if (mFirstTimeLoading_GeneralAccounts) {
+                    clsListViewPosition generalAccountsPosition = MySettings.getLvPosition_GeneralAccounts();
+                    lvGeneralAccounts.setSelectionFromTop(generalAccountsPosition.getIndex(), generalAccountsPosition.getTop());
+                    mFirstTimeLoading_GeneralAccounts = false;
+                }
                 break;
 
             case USER_WEBSITE_ITEMS:
                 MyLog.i("fragHome", "onLoadFinished USER_WEBSITE_ITEMS");
                 mUserWebsiteItemsItemsAdapter.swapCursor(newCursor);
+                if (mFirstTimeLoading_Websites) {
+                    clsListViewPosition websitesPosition = MySettings.getLvPosition_Websites();
+                    lvWebsites.setSelectionFromTop(websitesPosition.getIndex(), websitesPosition.getTop());
+                    mFirstTimeLoading_Websites = false;
+                }
                 break;
 
             case USER_SOFTWARE_ITEMS:
                 MyLog.i("fragHome", "onLoadFinished USER_SOFTWARE_ITEMS");
                 mUserSoftwareItemsItemsAdapter.swapCursor(newCursor);
+                if (mFirstTimeLoading_Software) {
+                    clsListViewPosition softwarePosition = MySettings.getLvPosition_Software();
+                    lvSoftware.setSelectionFromTop(softwarePosition.getIndex(), softwarePosition.getTop());
+                    mFirstTimeLoading_Software = false;
+                }
                 break;
 
             case ALL_USER_ITEMS:
                 MyLog.i("fragHome", "onLoadFinished ALL_USER_ITEMS");
                 mAllUserItemsAdapter.swapCursor(newCursor);
+                if (mFirstTimeLoading_AllUserItems) {
+                    clsListViewPosition allUserItemsPosition = MySettings.getLvPosition_AllUserItems();
+                    lvAllUserItems.setSelectionFromTop(allUserItemsPosition.getIndex(), allUserItemsPosition.getTop());
+                    mFirstTimeLoading_AllUserItems = false;
+                }
                 break;
         }
     }

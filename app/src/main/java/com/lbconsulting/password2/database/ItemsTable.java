@@ -152,16 +152,12 @@ public class ItemsTable {
         }
 
         // verify that the provided itemID does not exist in the table
-        Cursor existingItem = getItem(context, itemID);
-        if (existingItem != null && existingItem.getCount() > 0) {
+        //Cursor existingItem = getItem(context, itemID);
+        if (itemIdExists(context, itemID)) {
             // There is already and item with this ID in the table
-            existingItem.close();
             return ITEM_ID_ALREADY_EXISTS;
         }
 
-        if (existingItem != null) {
-            existingItem.close();
-        }
 
         // verify that the User does not already have the proposed itemName the table
         if (itemNameExists(context, userID, plainTextItemName)) {
@@ -218,6 +214,26 @@ public class ItemsTable {
         return cursor;
     }
 
+    public static Cursor getItemWithIdProjection(Context context, long itemID) {
+        Cursor cursor = null;
+        if (itemID > 0) {
+            Uri uri = Uri.withAppendedPath(CONTENT_URI, String.valueOf(itemID));
+            String[] projection = new String[]{COL_ITEM_ID};
+            String selection = null;
+            String selectionArgs[] = null;
+            String sortOrder = null;
+            ContentResolver cr = context.getContentResolver();
+            try {
+                cursor = cr.query(uri, projection, selection, selectionArgs, sortOrder);
+            } catch (Exception e) {
+                MyLog.e("ItemsTable", "getItemWithIdProjection: Exception; " + e.getMessage());
+            }
+        } else {
+            MyLog.e("ItemsTable", "getItemWithIdProjection: Unable to get item. The itemID < 1");
+        }
+        return cursor;
+    }
+
 
     private static Cursor getAllItemsCursor(Context context, long userID) {
         Cursor cursor = null;
@@ -241,7 +257,7 @@ public class ItemsTable {
 
     public static Cursor getAllItemsCursor(Context context, String sortOrder) {
         Cursor cursor = null;
-        if (context != null ) {
+        if (context != null) {
             Uri uri = CONTENT_URI;
             String[] projection = PROJECTION_ALL;
             String selection = null;
@@ -293,6 +309,19 @@ public class ItemsTable {
             MyLog.e("ItemsTable", "getUserItemsCursorLoader: Unable to get items cursor. userID not greater than 0.");
         }
         return cursorLoader;
+    }
+
+    public static boolean itemIdExists(Context context, long itemID) {
+        boolean result = false;
+
+        Cursor cursor = getItemWithIdProjection(context, itemID);
+        if (cursor != null && cursor.getCount() > 0) {
+            result = true;
+        }
+        if (cursor != null) {
+            cursor.close();
+        }
+        return result;
     }
 
     public static boolean itemNameExists(Context context, long userID, String plainTextItemName) {
@@ -414,6 +443,23 @@ public class ItemsTable {
         return numberOfUpdatedRecords;
     }
 
+    public static int updateItems(Context context, long itemID, ContentValues newFieldValues) {
+        int numberOfUpdatedRecords = ITEM_NOT_UPDATED;
+
+        if (itemID < 1) {
+            return ILLEGAL_ITEM_ID;
+        }
+
+        // Update the item's fields
+        ContentResolver cr = context.getContentResolver();
+        Uri uri = Uri.withAppendedPath(CONTENT_URI, String.valueOf(itemID));
+        String selection = null;
+        String[] selectionArgs = null;
+        numberOfUpdatedRecords = cr.update(uri, newFieldValues, selection, selectionArgs);
+
+        return numberOfUpdatedRecords;
+    }
+
     public static int setAllItemsInTable(Context context, boolean isInTable) {
         // Update the user's fields
         ContentResolver cr = context.getContentResolver();
@@ -436,7 +482,7 @@ public class ItemsTable {
         updateItem(context, itemID, cv);
     }
 
-    public static void sortItemsAsync(Context context, long userID){
+    public static void sortItemsAsync(Context context, long userID) {
         new sortTableItemsAsync(context, userID).execute();
     }
 
@@ -532,7 +578,7 @@ public class ItemsTable {
         public sortTableItemsAsync(Context context, long userID) {
             // We set the context this way so we don't accidentally leak activities
             mContext = context.getApplicationContext();
-            mUserID=userID;
+            mUserID = userID;
         }
 
         @Override
