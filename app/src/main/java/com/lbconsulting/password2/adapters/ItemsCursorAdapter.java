@@ -19,7 +19,7 @@ import com.lbconsulting.password2.database.ItemsTable;
  */
 public class ItemsCursorAdapter extends CursorAdapter {
 
-    Context mContext;
+    private Context mContext;
 
     public ItemsCursorAdapter(Context context, Cursor c, int flags, String itemsName) {
         super(context, c, flags);
@@ -30,8 +30,7 @@ public class ItemsCursorAdapter extends CursorAdapter {
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
         LayoutInflater inflater = LayoutInflater.from(context);
-        View view = inflater.inflate(R.layout.row_lv_password_item, parent, false);
-        return view;
+        return inflater.inflate(R.layout.row_lv_password_item, parent, false);
     }
 
     @Override
@@ -40,8 +39,8 @@ public class ItemsCursorAdapter extends CursorAdapter {
             return;
         }
         TextView tvItemName = (TextView) view.findViewById(R.id.tvItemName);
-        String encryptedItemName = cursor.getString(cursor.getColumnIndex(ItemsTable.COL_ITEM_NAME));
-        String decryptedItemName = clsUtils.decryptString(encryptedItemName, MySettings.DB_KEY, false);
-        tvItemName.setText(decryptedItemName);
+        String itemName = cursor.getString(cursor.getColumnIndex(ItemsTable.COL_ITEM_NAME));
+        //String decryptedItemName = clsUtils.decryptString(encryptedItemName, MySettings.DB_KEY, false);
+        tvItemName.setText(itemName);
     }
 }

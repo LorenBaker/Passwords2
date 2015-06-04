@@ -240,9 +240,9 @@ public class fragEdit_generalAccount extends Fragment implements TextWatcher {
         mActiveItem.putAlternatePhoneNumber(unformattedAlternatePhoneNumber);
         mActiveItem.update();
 
-        if (mIsItemNameDirty) {
+/*        if (mIsItemNameDirty) {
             ItemsTable.sortItemsAsync(getActivity(), mActiveItem.getUserID());
-        }
+        }*/
         // save the changes
         EventBus.getDefault().post(new clsEvents.saveChangesToDropbox());
         mIsDirty = false;

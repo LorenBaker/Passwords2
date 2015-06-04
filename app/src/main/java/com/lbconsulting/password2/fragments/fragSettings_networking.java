@@ -19,8 +19,6 @@ import com.lbconsulting.password2.R;
 import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
-import com.lbconsulting.password2.classes.clsNetworkStatus;
-import com.lbconsulting.password2.classes.clsUtils;
 import com.lbconsulting.password2.services.UpdateService;
 
 import de.greenrobot.event.EventBus;

@@ -42,7 +42,7 @@
         <provider
             android:name="com.lbconsulting.password2.database.PasswordsContentProvider"
             android:authorities="com.lbconsulting.passwords2.contentprovider"
-            android:exported="false"></provider>
+            android:exported="false"/>
 
         <service
             android:name=".services.UpdateService"

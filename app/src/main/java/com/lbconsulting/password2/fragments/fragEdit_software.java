@@ -297,9 +297,11 @@ public class fragEdit_software extends Fragment {
         mActiveItem.putSoftwareSubgroupLength(mSubgroupLength);
         mActiveItem.update();
 
+/*
         if (mIsItemNameDirty) {
             ItemsTable.sortItemsAsync(getActivity(), mActiveItem.getUserID());
         }
+*/
 
         // save changes to Dropbox
         EventBus.getDefault().post(new clsEvents.saveChangesToDropbox());

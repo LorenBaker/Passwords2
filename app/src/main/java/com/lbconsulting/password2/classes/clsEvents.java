@@ -2,10 +2,10 @@ package com.lbconsulting.password2.classes;
 
 
 public class clsEvents {
-    public static class test {
+/*    public static class test {
         public test() {
         }
-    }
+    }*/
 
     public static class updateUI {
         public updateUI() {
@@ -23,32 +23,6 @@ public class clsEvents {
             return mFileRev;
         }
     }
-
-/*    public static class onNetworkStatusChange {
-         boolean mIsWifiConnected;
-         boolean mIsMobileConnected;
-         boolean mIsOkToUseNetwork;
-
-        public onNetworkStatusChange(boolean isWifiConnected,
-                                     boolean isMobileConnected,
-                                     boolean isOkToUseNetwork) {
-            mIsWifiConnected = isWifiConnected;
-            mIsMobileConnected = isMobileConnected;
-            mIsOkToUseNetwork = isOkToUseNetwork;
-        }
-
-        public boolean isIsMobileConnected() {
-            return mIsMobileConnected;
-        }
-
-        public boolean isIsOkToUseNetwork() {
-            return mIsOkToUseNetwork;
-        }
-
-        public boolean isIsWifiConnected() {
-            return mIsWifiConnected;
-        }
-    }*/
 
     public static class folderHashMapUpdated {
         public folderHashMapUpdated() {
@@ -107,62 +81,34 @@ public class clsEvents {
         }
     }
 
-    //****************************************************************************
-
-    public static class readLabPasswordDataComplete {
-        public readLabPasswordDataComplete() {
-        }
-    }
-
-    public static class downLoadResults {
-        private int mResults;
-
-        public downLoadResults(int results) {
-            mResults = results;
-        }
-
-        public int getDownLoadResults() {
-            return mResults;
-        }
-    }
-
-    public static class openAndReadLabPasswordDataAsync {
-        public openAndReadLabPasswordDataAsync() {
-        }
-    }
-
-    public static class readLabPasswordDataAsync {
-        public readLabPasswordDataAsync() {
-        }
-    }
-
-    public static class openAndSaveLabPasswordDataAsync {
-        public openAndSaveLabPasswordDataAsync() {
-        }
-    }
-
     public static class saveChangesToDropbox {
         public saveChangesToDropbox() {
         }
     }
 
-/*    public static class PopBackStack {
-        public PopBackStack() {
-        }
-    }*/
-
     public static class showOkDialog {
-
         String mTitle;
         String mMessage;
 
-        public showOkDialog(String title, String message) {
+        public showOkDialog( String title, String message) {
             mTitle = title;
             mMessage = message;
         }
 
         public String getTitle() {
             return mTitle;
+        }
+
+        public String getMessage() {
+            return mMessage;
+        }
+    }
+
+    public static class showToast {
+        String mMessage;
+
+        public showToast( String message) {
+            mMessage = message;
         }
 
         public String getMessage() {

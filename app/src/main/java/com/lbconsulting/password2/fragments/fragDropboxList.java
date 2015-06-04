@@ -29,6 +29,8 @@ import com.lbconsulting.password2.classes.clsDropboxFolder;
 import com.lbconsulting.password2.classes.clsEvents;
 import com.lbconsulting.password2.classes_async.CreateNewDropboxFolder;
 import com.lbconsulting.password2.classes_async.DownloadDropboxFolders;
+import com.lbconsulting.password2.database.ItemsTable;
+import com.lbconsulting.password2.database.UsersTable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,7 +45,7 @@ import de.greenrobot.event.EventBus;
  */
 public class fragDropboxList extends Fragment
         implements View.OnClickListener, AdapterView.OnItemClickListener {
-
+// TODO: What happens when a new Dropbox folder is selected.
 
     private TextView tvFolderName;
     private ProgressBar pbDropboxList;
@@ -69,7 +71,7 @@ public class fragDropboxList extends Fragment
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         MyLog.i("fragDropboxList", "onCreate");
-        setHasOptionsMenu(MySettings.getStartupState()==fragApplicationPassword.STATE_PASSWORD_ONLY);
+        setHasOptionsMenu(MySettings.getStartupState() == fragApplicationPassword.STATE_PASSWORD_ONLY);
 
     }
 
@@ -80,7 +82,7 @@ public class fragDropboxList extends Fragment
 
         mStartupState = MySettings.getStartupState();
         if (getActivity().getActionBar() != null) {
-            getActivity().getActionBar().setDisplayHomeAsUpEnabled(mStartupState==fragApplicationPassword.STATE_PASSWORD_ONLY);
+            getActivity().getActionBar().setDisplayHomeAsUpEnabled(mStartupState == fragApplicationPassword.STATE_PASSWORD_ONLY);
         }
         EventBus.getDefault().register(this);
         mDBApi = MainActivity.getDropboxAPI();
@@ -275,7 +277,7 @@ public class fragDropboxList extends Fragment
                                 // TODO: Can you make a new Dropbox folder if you're off line?
                                 new CreateNewDropboxFolder(getActivity(), mDBApi, mSelectedFolderPath, newFolderName).execute();
                                 dialog.dismiss();
-                            EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_SETTINGS, false));
+                                EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_SETTINGS, false));
                             }
                         });
 
@@ -300,17 +302,21 @@ public class fragDropboxList extends Fragment
     }
 
     private void selectFolder(String newFolderPath) {
+        // save the new folder's path
         MySettings.setDropboxFolderName(newFolderPath);
 
-        if (MySettings.getStartupState() == fragApplicationPassword.STATE_STEP_1_SELECT_FOLDER) {
-            // set the next step in the initial startup process
-            MySettings.setStartupState(fragApplicationPassword.STATE_STEP_2_DOES_FILE_EXIST);
-            // return to FRAG_APP_PASSWORD
-            EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_APP_PASSWORD, false));
+        if (MySettings.getStartupState() != fragApplicationPassword.STATE_STEP_1_SELECT_FOLDER) {
+            // remove all users and items from the database
+            UsersTable.deleteAllUsers(getActivity());
+            ItemsTable.deleteAllItems(getActivity());
 
-        } else {
-            EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_SETTINGS, false));
+            MySettings.setActiveUserID(-1);
         }
+
+        // set the next step in the initial startup process
+        MySettings.setStartupState(fragApplicationPassword.STATE_STEP_2_DOES_FILE_EXIST);
+        // return to FRAG_APP_PASSWORD
+        EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_APP_PASSWORD, false));
     }
 
 

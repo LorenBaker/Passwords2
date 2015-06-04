@@ -7,7 +7,7 @@ package com.lbconsulting.password2.classes;
 
 public class MyLog {
 
-    public static final String TAG = "Passwords";
+    private  static final String TAG = "Passwords";
 
     public static void d(String className, String msg) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {

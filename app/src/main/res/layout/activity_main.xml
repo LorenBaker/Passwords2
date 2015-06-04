@@ -1,14 +1,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp"
+    android:paddingLeft="@dimen/activity_horizontal_padding"
+    android:paddingRight="@dimen/activity_horizontal_padding"
+    android:paddingTop="@dimen/activity_vertical_padding"
+    android:paddingBottom="@dimen/activity_vertical_padding"
     android:baselineAligned="false"
     android:divider="?android:attr/dividerHorizontal"
     android:orientation="horizontal"
     android:showDividers="middle"
-    tools:context=".PasswordItemListActivity"
     android:background="@drawable/rec_opal_no_stroke">
 
     <FrameLayout
@@ -16,14 +16,5 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="visible" />
-
-<!--    <Button
-        android:id="@+id/btnLinkToDropbox"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:text="Link to Dropbox"
-        android:layout_gravity="center"
-        android:gravity="center" />-->
-
 
 </LinearLayout>

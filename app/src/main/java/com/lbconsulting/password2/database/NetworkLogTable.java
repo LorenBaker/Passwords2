@@ -37,18 +37,18 @@ public class NetworkLogTable {
 
     // Class DropboxAPI.Entry fields
     public static final String COL_BYTES = "bytes"; // Size of file
-    public static final String COL_CLIENT_M_TIME = "clientMtime"; // For a file, this is the modification time set by the client when the file was added to
-    public static final String COL_HASH = "hash"; // If a directory, the hash is its "current version".
-    public static final String COL_ICON = "icon"; // Name of the icon to display for this entry.
-    public static final String COL_IS_DELETED = "isDeleted"; // Whether this entry has been deleted but not removed from the metadata yet.
-    public static final String COL_IS_DIR = "isDir"; // True if this entry is a directory, or false if it's a file.
-    public static final String COL_IS_READ_ONLY = "isReadOnly"; // Is this file read-only?
-    public static final String COL_MIME_TYPE = "mimeType"; // The file's MIME type.
-    public static final String COL_MODIFIED = "modified"; // Last modified date, in "EEE, dd MMM yyyy kk:mm:ss ZZZZZ" form; (see RESTUtility#parseDate(String) for parsing this value.
-    public static final String COL_PATH = "path"; // Path to the file from the root.
-    public static final String COL_REV = "rev"; //Full unique ID for this file's revision.
-    public static final String COL_ROOT = "root"; //Name of the root, usually either "dropbox" or "app_folder".
-    public static final String COL_THUMB_EXISTS = "thumbExists"; // Whether a thumbnail for this is available.
+    private  static final String COL_CLIENT_M_TIME = "clientMtime"; // For a file, this is the modification time set by the client when the file was added to
+    private  static final String COL_HASH = "hash"; // If a directory, the hash is its "current version".
+    private  static final String COL_ICON = "icon"; // Name of the icon to display for this entry.
+    private  static final String COL_IS_DELETED = "isDeleted"; // Whether this entry has been deleted but not removed from the metadata yet.
+    private  static final String COL_IS_DIR = "isDir"; // True if this entry is a directory, or false if it's a file.
+    private  static final String COL_IS_READ_ONLY = "isReadOnly"; // Is this file read-only?
+    private  static final String COL_MIME_TYPE = "mimeType"; // The file's MIME type.
+    private  static final String COL_MODIFIED = "modified"; // Last modified date, in "EEE, dd MMM yyyy kk:mm:ss ZZZZZ" form; (see RESTUtility#parseDate(String) for parsing this value.
+    private  static final String COL_PATH = "path"; // Path to the file from the root.
+    public   static final String COL_REV = "rev"; //Full unique ID for this file's revision.
+    private  static final String COL_ROOT = "root"; //Name of the root, usually either "dropbox" or "app_folder".
+    private  static final String COL_THUMB_EXISTS = "thumbExists"; // Whether a thumbnail for this is available.
 
     public static final String[] PROJECTION_ALL = {COL_LOG_ID, COL_DATE_TIME, COL_ACTION_STYLE, COL_NETWORK,
             COL_BYTES, COL_CLIENT_M_TIME, COL_HASH, COL_ICON, COL_IS_DELETED, COL_IS_DIR,
@@ -311,8 +311,6 @@ public class NetworkLogTable {
 
     private static ArrayList<Long> getStartingAndEndingDates(String month_year) {
 
-        ArrayList<Long> dates = new ArrayList<>();
-
         // month_year has the following format: mm-yyyy
         String[] monthAndYear = month_year.split("-");
         int month = Integer.parseInt(monthAndYear[0]);
@@ -361,7 +359,7 @@ public class NetworkLogTable {
         startingDate.set(year, month, 1);
         long longStartingDate = startingDate.getTimeInMillis();
 
-        int numberOfDeletedRecords = 0;
+        int numberOfDeletedRecords;
 
         ContentResolver cr = context.getContentResolver();
         Uri uri = CONTENT_URI;

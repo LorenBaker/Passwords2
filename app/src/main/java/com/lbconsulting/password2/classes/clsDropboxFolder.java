@@ -16,11 +16,6 @@ public class clsDropboxFolder {
     private ArrayList<clsDropboxFolder> mChildren = new ArrayList<>();
 
     public clsDropboxFolder(String folderPath, int icon) {
-
-        if(folderPath.equals("")){
-            String temp = "";
-        }
-
         mFolderPath = folderPath;
         mIcon = icon;
     }

@@ -20,7 +20,6 @@ import com.lbconsulting.password2.adapters.NetworkLogCursorAdapter;
 import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
-import com.lbconsulting.password2.database.ItemsTable;
 import com.lbconsulting.password2.database.NetworkLogTable;
 
 import de.greenrobot.event.EventBus;
@@ -32,7 +31,7 @@ public class fragNetworkLog extends Fragment
         implements LoaderManager.LoaderCallbacks<Cursor> {
 
 
-    public static final int NETWORK_LOG = 20;
+    private  static final int NETWORK_LOG = 20;
 
     private ListView lvNetworkLog;
 

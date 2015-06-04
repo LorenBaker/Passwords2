@@ -1,9 +1,11 @@
 package com.lbconsulting.password2.fragments;
 
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -25,7 +27,6 @@ import com.lbconsulting.password2.R;
 import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
-import com.lbconsulting.password2.classes.clsItemTypes;
 import com.lbconsulting.password2.classes.clsItemValues;
 import com.lbconsulting.password2.database.ItemsTable;
 
@@ -55,11 +56,11 @@ public class fragItemDetail extends Fragment implements View.OnClickListener {
     private TextView tvWebsiteDetail;
 
 
-    public static fragItemDetail newInstance() {
-        return new fragItemDetail();
+    public fragItemDetail() {
     }
 
-    public fragItemDetail() {
+    public static fragItemDetail newInstance() {
+        return new fragItemDetail();
     }
 
     @Override
@@ -156,19 +157,19 @@ public class fragItemDetail extends Fragment implements View.OnClickListener {
 
         btnCopyAccountNumber.setEnabled(true);
         switch (mActiveItem.getItemTypeID()) {
-            case clsItemTypes.CREDIT_CARDS:
+            case MySettings.CREDIT_CARDS:
                 if (mActiveItem.getCreditCardAccountNumber().isEmpty()) {
                     btnCopyAccountNumber.setEnabled(false);
                 }
                 break;
 
-            case clsItemTypes.GENERAL_ACCOUNTS:
+            case MySettings.GENERAL_ACCOUNTS:
                 if (mActiveItem.getGeneralAccountNumber().isEmpty()) {
                     btnCopyAccountNumber.setEnabled(false);
                 }
                 break;
 
-            case clsItemTypes.SOFTWARE:
+            case MySettings.SOFTWARE:
                 if (mActiveItem.getSoftwareKeyCode().isEmpty()) {
                     btnCopyAccountNumber.setEnabled(false);
                 }
@@ -267,11 +268,38 @@ public class fragItemDetail extends Fragment implements View.OnClickListener {
         switch (item.getItemId()) {
 
             case R.id.action_discard:
-                String deletedItemName = mActiveItem.getItemName();
-                ItemsTable.deleteItem(getActivity(), mActiveItemID);
-                Toast.makeText(getActivity(), "Item\"" + deletedItemName + "\" deleted." , Toast.LENGTH_SHORT).show();
-                EventBus.getDefault().post(new clsEvents.saveChangesToDropbox());
-                EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_HOME, false));
+                final String itemName = mActiveItem.getItemName();
+
+                String title = "Delete item?";
+                final String message = "Do you want to permanently delete item \"" + itemName + "\"?";
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+                // set dialog title and message
+                alertDialogBuilder
+                        .setTitle(title)
+                        .setMessage(message)
+                        .setCancelable(true)
+                        .setPositiveButton(getActivity().getString(R.string.btnYes_text), new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        int numberOfItemsDeleted = ItemsTable.deleteItem(getActivity(), mActiveItemID);
+                                        if (numberOfItemsDeleted > 0) {
+                                            EventBus.getDefault().post(new clsEvents.saveChangesToDropbox());
+                                            Toast.makeText(getActivity(), "Item \"" + itemName + "\" deleted.", Toast.LENGTH_SHORT).show();
+                                        }
+                                        EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_HOME, false));
+                                    }
+                                }
+                        )
+
+                        .setNegativeButton(getActivity().getString(R.string.btnNo_text), new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.cancel();
+                                    }
+                                }
+                        );
+
+                // create alert dialog
+                AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.show();
                 return true;
 
 
@@ -313,17 +341,17 @@ public class fragItemDetail extends Fragment implements View.OnClickListener {
 
             case R.id.btnCopyAccountNumber:
                 switch (mActiveItem.getItemTypeID()) {
-                    case clsItemTypes.CREDIT_CARDS:
+                    case MySettings.CREDIT_CARDS:
                         label = "Credit Card Number";
                         textForClip = mActiveItem.getCreditCardAccountNumber();
                         break;
 
-                    case clsItemTypes.GENERAL_ACCOUNTS:
+                    case MySettings.GENERAL_ACCOUNTS:
                         label = "Account Number";
                         textForClip = mActiveItem.getGeneralAccountNumber();
                         break;
 
-                    case clsItemTypes.SOFTWARE:
+                    case MySettings.SOFTWARE:
                         label = "Software Key Code";
                         textForClip = mActiveItem.getSoftwareKeyCode();
                         break;
@@ -362,17 +390,17 @@ public class fragItemDetail extends Fragment implements View.OnClickListener {
 
             case R.id.btnEditItem:
                 switch (mActiveItem.getItemTypeID()) {
-                    case clsItemTypes.CREDIT_CARDS:
+                    case MySettings.CREDIT_CARDS:
                         EventBus.getDefault().post(new clsEvents
                                 .showFragment(MySettings.FRAG_EDIT_CREDIT_CARD, false));
                         break;
 
-                    case clsItemTypes.GENERAL_ACCOUNTS:
+                    case MySettings.GENERAL_ACCOUNTS:
                         EventBus.getDefault().post(new clsEvents
                                 .showFragment(MySettings.FRAG_EDIT_GENERAL_ACCOUNT, false));
                         break;
 
-                    case clsItemTypes.SOFTWARE:
+                    case MySettings.SOFTWARE:
                         EventBus.getDefault().post(new clsEvents
                                 .showFragment(MySettings.FRAG_EDIT_SOFTWARE, false));
                         break;

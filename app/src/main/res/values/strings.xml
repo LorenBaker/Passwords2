@@ -36,7 +36,7 @@
     <string name="btnWebsites_text">Websites</string>
     <string name="btnYes_text">Yes</string>
     <string name="deleteUser_dialog_message">Do you want to permanently delete user\u0020\"</string>
-    <string name="deleteUser_dialog_title">Confirm Deleting User</string>
+    <string name="deleteUser_dialog_title">Delete user?</string>
     <string name="downloadError_fileDeleted">Passwords data file has been deleted.</string>
     <string name="downloadError_fileDownloadStarted">File download started. No other status available.</string>
     <string name="downloadError_fileDownloadSuccess">File downloaded successfully, but the database was not updated?</string>
@@ -111,5 +111,12 @@
         <item>Lists Start Closed</item>
     </string-array>
 
+    <!--ITEM_TYPES = {"Credit Cards", "General Accounts", "Software", "Websites"};-->
+    <string-array name="item_types">
+        <item>Credit Cards</item>
+        <item>General Accounts</item>
+        <item>Software</item>
+        <item>Websites</item>
+    </string-array>
 
 </resources>

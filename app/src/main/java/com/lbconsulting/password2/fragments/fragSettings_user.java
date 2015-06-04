@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.lbconsulting.password2.R;
 import com.lbconsulting.password2.classes.MyLog;
@@ -276,17 +277,20 @@ public class fragSettings_user extends Fragment implements View.OnClickListener 
             case R.id.btnDeleteUser:
                 mActiveUser = new clsUserValues(getActivity(), MySettings.getActiveUserID());
                 AlertDialog.Builder deleteUserDialog = new AlertDialog.Builder(getActivity());
-
+                final String userName = mActiveUser.getUserName();
                 deleteUserDialog.setTitle(getActivity().getString(R.string.deleteUser_dialog_title));
-                String message = getActivity().getString(R.string.deleteUser_dialog_message)
-                        + mActiveUser.getUserName() + "\"?";
+                String message = getActivity().getString(R.string.deleteUser_dialog_message) + userName + "\"?";
                 deleteUserDialog.setMessage(message);
 
                 deleteUserDialog.setPositiveButton(getActivity().getString(R.string.btnYes_text),
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                UsersTable.deleteUser(getActivity(), mActiveUser.getUserID());
+                                int numberOfRecordsDeleted = UsersTable.deleteUser(getActivity(), mActiveUser.getUserID());
+                                if (numberOfRecordsDeleted > 0) {
+                                    Toast.makeText(getActivity(), "User \"" + userName + "\" deleted.", Toast.LENGTH_SHORT).show();
+                                }
+                                // Select the active user.
                                 Cursor cursor = UsersTable.getAllUsersCursor(getActivity(), UsersTable.SORT_ORDER_USER_NAME);
                                 if (cursor != null && cursor.getCount() > 0) {
                                     // set the Active user to the first user

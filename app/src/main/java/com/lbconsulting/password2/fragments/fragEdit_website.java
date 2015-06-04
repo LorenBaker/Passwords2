@@ -14,7 +14,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.lbconsulting.password2.R;
 import com.lbconsulting.password2.classes.MyLog;
@@ -208,9 +207,9 @@ public class fragEdit_website extends Fragment implements TextWatcher {
         mActiveItem.putWebsitePassword(txtPassword.getText().toString().trim());
         mActiveItem.update();
 
-        if (mIsItemNameDirty) {
+/*        if (mIsItemNameDirty) {
             ItemsTable.sortItemsAsync(getActivity(), mActiveItem.getUserID());
-        }
+        }*/
 
         // save changes to Dropbox
         EventBus.getDefault().post(new clsEvents.saveChangesToDropbox());

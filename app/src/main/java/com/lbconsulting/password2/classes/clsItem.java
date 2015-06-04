@@ -23,9 +23,9 @@ public class clsItem {
     private String WebsiteUserID;
     private String WebsitePassword;
 
-    public clsItem() {
+/*    public clsItem() {
 
-    }
+    }*/
 
     public clsItem(long passwordItemID, long userID) {
         ID = passwordItemID;
@@ -36,9 +36,11 @@ public class clsItem {
         return ID;
     }
 
+/*
     public void setID(long ID) {
         this.ID = ID;
     }
+*/
 
     public String getName() {
         String result = "";
@@ -64,9 +66,11 @@ public class clsItem {
         return User_ID;
     }
 
+/*
     public void setUser_ID(long user_ID) {
         User_ID = user_ID;
     }
+*/
 
     public String getSoftwareKeyCode() {
         String result = "";
@@ -225,72 +229,4 @@ public class clsItem {
     public String toString() {
         return Name;
     }
-
-/*    public String getItemDetail() {
-        StringBuilder sb = new StringBuilder();
-        String formattedCreditCardNumber = "";
-        clsUtils.creditCard card = null;
-        switch (ItemType_ID) {
-            case clsItemTypes.CREDIT_CARDS:
-                if (CreditCardAccountNumber != null) {
-                    card = clsUtils.getCreditCardType(CreditCardAccountNumber);
-                }
-                String cardType = "UNKNOWN";
-                String formattedCardNumber = "";
-                if (card != null) {
-                    cardType = card.getCardType();
-                    formattedCardNumber = card.getFormattedCardNumber();
-                }
-
-                sb.append(cardType).append(":\n").append(formattedCardNumber);
-                if (CreditCardExpirationMonth != null && CreditCardExpirationYear != null) {
-                    sb.append(System.getProperty("line.separator")).append("Expires: ").append(CreditCardExpirationMonth)
-                            .append("/").append(CreditCardExpirationYear);
-                }
-                if (CreditCardSecurityCode != null) {
-                    sb.append(System.getProperty("line.separator")).append("Security Code: ").append(CreditCardSecurityCode);
-                }
-                if (PrimaryPhoneNumber != null) {
-                    String formattedPrimaryPhoneNumber = clsUtils.formatPhoneNumber(PrimaryPhoneNumber);
-                    sb.append(System.getProperty("line.separator")).append("Primary: ").append(formattedPrimaryPhoneNumber);
-                }
-                if (AlternatePhoneNumber != null) {
-                    String formattedAltPhoneNumber = clsUtils.formatPhoneNumber(AlternatePhoneNumber);
-                    sb.append(System.getProperty("line.separator")).append("Alternate: ").append(formattedAltPhoneNumber);
-                }
-                break;
-
-            case clsItemTypes.GENERAL_ACCOUNTS:
-                sb.append("Account Number: ").append(GeneralAccountNumber);
-                if (PrimaryPhoneNumber != null) {
-                    String formattedPrimaryPhoneNumber = clsUtils.formatPhoneNumber(PrimaryPhoneNumber);
-                    sb.append(System.getProperty("line.separator")).append("Primary: ").append(formattedPrimaryPhoneNumber);
-                }
-                if (AlternatePhoneNumber != null) {
-                    String formattedAltPhoneNumber = clsUtils.formatPhoneNumber(AlternatePhoneNumber);
-                    sb.append(System.getProperty("line.separator")).append("Alternate: ").append(formattedAltPhoneNumber);
-                }
-                break;
-
-            case clsItemTypes.SOFTWARE:
-                String formattedKeyCode = clsUtils.formatTypicalAccountNumber(SoftwareKeyCode, SoftwareSubgroupLength);
-                sb.append("Software Key Code:\n").append(formattedKeyCode);
-                break;
-*//*            case clsItemTypes.WEBSITES:
-                break;*//*
-
-        }
-        return sb.toString();
-    }*/
-
-/*    public String getWebsiteDetail() {
-        StringBuilder sb = new StringBuilder();
-        sb
-                .append("URL:\n  ").append(WebsiteURL).append(System.getProperty("line.separator"))
-                .append(System.getProperty("line.separator"))
-                .append("User ID: ").append(WebsiteUserID).append(System.getProperty("line.separator"))
-                .append("Password:\n  ").append(WebsitePassword);
-        return sb.toString();
-    }*/
-
 }

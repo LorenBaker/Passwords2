@@ -19,16 +19,16 @@ public class clsLabPasswords {
         return Users;
     }
 
-    public void setUsers(ArrayList<clsUsers> users) {
+/*    public void setUsers(ArrayList<clsUsers> users) {
         this.Users = users;
-    }
+    }*/
 
     public ArrayList<clsItem> getPasswordItems() {
         return PasswordItems;
     }
 
-    public void setPasswordItems(ArrayList<clsItem> mPasswordItems) {
+/*    public void setPasswordItems(ArrayList<clsItem> mPasswordItems) {
         this.PasswordItems = mPasswordItems;
-    }
+    }*/
 
 }

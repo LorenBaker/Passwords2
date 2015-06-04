@@ -10,6 +10,9 @@ import com.dropbox.client2.exception.DropboxException;
 import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
+import com.lbconsulting.password2.database.ItemsTable;
+import com.lbconsulting.password2.database.UsersTable;
+import com.lbconsulting.password2.fragments.fragApplicationPassword;
 
 import de.greenrobot.event.EventBus;
 
@@ -72,16 +75,31 @@ public class CreateNewDropboxFolder extends AsyncTask<Void, Void, String> {
     @Override
     protected void onPostExecute(String result) {
         MySettings.setNetworkBusy(false);
+
         if (result.startsWith("Fail")) {
             MyLog.e("CreateNewDropboxFolder", "onPostExecute: " + result);
             String title = "Failed to create folder";
             EventBus.getDefault().post(new clsEvents.showOkDialog(title, result));
         } else {
             MyLog.i("CreateNewDropboxFolder", "onPostExecute: " + result);
-            MySettings.setDropboxFolderName(mNewDropboxFolderPath);
             String message = "Dropbox folder \"" + mNewDropboxFolderPath + "\" created.";
             Toast.makeText(mContext, message, Toast.LENGTH_SHORT).show();
-            EventBus.getDefault().post(new clsEvents.updateUI());
+
+            // save the new folder's path
+            MySettings.setDropboxFolderName(mNewDropboxFolderPath);
+
+            if (MySettings.getStartupState() != fragApplicationPassword.STATE_STEP_1_SELECT_FOLDER) {
+                // remove all users and items from the database
+                UsersTable.deleteAllUsers(mContext);
+                ItemsTable.deleteAllItems(mContext);
+
+                MySettings.setActiveUserID(-1);
+            }
+
+            // set the next step in the initial startup process
+            MySettings.setStartupState(fragApplicationPassword.STATE_STEP_2_DOES_FILE_EXIST);
+            // return to FRAG_APP_PASSWORD
+            EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_APP_PASSWORD, false));
         }
     }
 

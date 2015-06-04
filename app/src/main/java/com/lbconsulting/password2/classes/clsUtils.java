@@ -25,8 +25,8 @@ import de.greenrobot.event.EventBus;
 public class clsUtils {
 
     public static String encryptString(String plainTextString, String key, boolean makeSHA256Key) {
-        String encryptedString = "";
-        String mKey = "";
+        String encryptedString = null;
+        String mKey;
         if (plainTextString.isEmpty() || key.isEmpty()) {
             return "";
         }
@@ -53,8 +53,8 @@ public class clsUtils {
     }
 
     public static ArrayList<String> encryptStrings(ArrayList<String> plainTextStrings, String key, boolean makeSHA256Key) {
-        String encryptedString = "";
-        String mKey = "";
+        String encryptedString;
+        String mKey;
         ArrayList<String> result = new ArrayList<>();
         if (plainTextStrings.size() == 0 || key.isEmpty()) {
             return result;
@@ -93,7 +93,7 @@ public class clsUtils {
 
     public static String decryptString(String encryptedString, String key, boolean makeSHA256Key) {
         String plainTextString = "";
-        String mKey = "";
+        String mKey;
         if (encryptedString.isEmpty() || key.isEmpty()) {
             return "";
         }
@@ -423,10 +423,6 @@ public class clsUtils {
                 }
 
             default:
-                int numberLength = unformattedPhoneNumber.length();
-                if (numberLength > 9) {
-                    numberLength = 9;
-                }
                 unformattedPhoneNumber = unformattedPhoneNumber.substring(0, 9);
                 return unformattedPhoneNumber;
         }
@@ -434,7 +430,8 @@ public class clsUtils {
     }
 
     public static String formatTypicalAccountNumber(String accountNumber, int subGroupLength) {
-        String formattedNumber = accountNumber;
+        String formattedNumber;
+
         if (subGroupLength < 1) {
             subGroupLength = 1;
         }

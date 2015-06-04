@@ -203,10 +203,6 @@ public class fragSettings extends Fragment implements View.OnClickListener {
             btnSelectUser.setText(btnSelectUserText);
         }
 
-        if (btnSelectDropboxFolder.getVisibility() == View.VISIBLE) {
-
-        }
-
         ckShowVerboseMessages.setChecked(MySettings.isVerbose());
         mUpdatingUI = false;
     }

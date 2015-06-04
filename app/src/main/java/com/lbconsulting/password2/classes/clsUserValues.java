@@ -12,7 +12,7 @@ import com.lbconsulting.password2.database.UsersTable;
 public class clsUserValues {
 
     private Context mContext;
-    Cursor mUserCursor;
+    private  Cursor mUserCursor;
     private ContentValues cv;
 
 

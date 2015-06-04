@@ -16,15 +16,15 @@ import com.lbconsulting.password2.classes.MyLog;
  */
 public class UsersTable {
 
-    public static final int USER_NOT_CREATED = -1;
-    public static final int ILLEGAL_USER_ID = -2;
-    public static final int PROPOSED_USER_IS_NULL = -3;
-    public static final int PROPOSED_USER_IS_EMPTY = -4;
-    public static final int USER_ID_ALREADY_EXISTS = -5;
-    public static final int USER_NAME_ALREADY_EXISTS = -6;
+    private  static final int USER_NOT_CREATED = -1;
+    private  static final int ILLEGAL_USER_ID = -2;
+    private  static final int PROPOSED_USER_IS_NULL = -3;
+    private  static final int PROPOSED_USER_IS_EMPTY = -4;
+    private  static final int USER_ID_ALREADY_EXISTS = -5;
+    private  static final int USER_NAME_ALREADY_EXISTS = -6;
 
-    public static final int UPDATE_ERROR_USER_NOT_FOUND = -7;
-    public static final int UPDATE_ERROR_USER_NAME_EXISTS = -8;
+    private  static final int UPDATE_ERROR_USER_NOT_FOUND = -7;
+    private  static final int UPDATE_ERROR_USER_NAME_EXISTS = -8;
 
     public static final int USER_NOT_DELETED = -9;
 
@@ -245,7 +245,7 @@ public class UsersTable {
         Uri uri = CONTENT_URI;
         String[] projection = new String[]{COL_USER_ID};
         String selection = COL_IS_IN_TABLE + " = ? ";
-        String selectionArgs[] = null;
+        String selectionArgs[];
         if (isInTable) {
             selectionArgs = new String[]{String.valueOf(1)};
         } else {
@@ -358,12 +358,25 @@ public class UsersTable {
         // Get all the users NOT in the table then delete each user
         Cursor cursor = getUsersInTable(context, false);
         if (cursor != null && cursor.getCount() > 0) {
-            long userID = -1;
+            long userID;
             while (cursor.moveToNext()) {
                 userID = cursor.getLong(cursor.getColumnIndex(COL_USER_ID));
                 numberOfDeletedRecords += deleteUser(context, userID);
             }
         }
+
+        return numberOfDeletedRecords;
+    }
+
+    public static int deleteAllUsers(Context context) {
+        PasswordsContentProvider.setSuppressChangeNotification(true);
+        int numberOfDeletedRecords;
+        ContentResolver cr = context.getContentResolver();
+        Uri uri = CONTENT_URI;
+        String where = null;
+        String[] selectionArgs = null;
+        numberOfDeletedRecords = cr.delete(uri, where, selectionArgs);
+        PasswordsContentProvider.setSuppressChangeNotification(false);
 
         return numberOfDeletedRecords;
     }

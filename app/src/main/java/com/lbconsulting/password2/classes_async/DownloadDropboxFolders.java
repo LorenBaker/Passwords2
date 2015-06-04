@@ -139,6 +139,8 @@ public class DownloadDropboxFolders extends AsyncTask<Void, Long, Boolean> {
             if (mErrorMsg == null) {
                 mErrorMsg = e.body.error;
             }
+            MyLog.e("DownloadDropboxFolders", "readFolder: " + mErrorMsg);
+
         } catch (DropboxIOException e) {
             // Happens all the time, probably want to retry automatically.
             mErrorMsg = "Network error.  Try again.";

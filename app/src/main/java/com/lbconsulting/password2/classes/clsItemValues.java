@@ -53,7 +53,8 @@ public class clsItemValues {
         String result = "";
         if (mItemsCursor != null) {
             result = mItemsCursor.getString((mItemsCursor.getColumnIndex(ItemsTable.COL_ITEM_NAME)));
-            result = decryptValue(result);
+            // don't encrypt the item's name ... must be clear to allow for queries."
+            //result = decryptValue(result);
         }
         return result;
     }
@@ -63,7 +64,8 @@ public class clsItemValues {
         if (cv.containsKey(ItemsTable.COL_ITEM_NAME)) {
             cv.remove(ItemsTable.COL_ITEM_NAME);
         }
-        name = encryptValue(name);
+        // don't encrypt the item's name ... must be clear to allow for queries."
+        //name = encryptValue(name);
         cv.put(ItemsTable.COL_ITEM_NAME, name);
     }
 
@@ -75,12 +77,14 @@ public class clsItemValues {
         return result;
     }
 
+/*
     public void putItemTypeID(int itemTypeID) {
         if (cv.containsKey(ItemsTable.COL_ITEM_TYPE_ID)) {
             cv.remove(ItemsTable.COL_ITEM_TYPE_ID);
         }
         cv.put(ItemsTable.COL_ITEM_TYPE_ID, itemTypeID);
     }
+*/
 
     public long getUserID() {
         long result = -1;
@@ -90,12 +94,12 @@ public class clsItemValues {
         return result;
     }
 
-    public void putUserID(long userID) {
+/*    public void putUserID(long userID) {
         if (cv.containsKey(ItemsTable.COL_USER_ID)) {
             cv.remove(ItemsTable.COL_USER_ID);
         }
         cv.put(ItemsTable.COL_USER_ID, userID);
-    }
+    }*/
 
     public String getSoftwareKeyCode() {
         String result = "";
@@ -323,7 +327,7 @@ public class clsItemValues {
         cv.put(ItemsTable.COL_WEBSITE_PASSWORD, websitePassword);
     }
 
-    public void putIsInTable(boolean isInTable) {
+/*    public void putIsInTable(boolean isInTable) {
         if (cv.containsKey(ItemsTable.COL_IS_IN_TABLE)) {
             cv.remove(ItemsTable.COL_IS_IN_TABLE);
         }
@@ -332,7 +336,7 @@ public class clsItemValues {
         } else {
             cv.put(ItemsTable.COL_IS_IN_TABLE, 0);
         }
-    }
+    }*/
 
     @Override
     public String toString() {
@@ -357,7 +361,6 @@ public class clsItemValues {
 
     public String getItemDetail() {
         StringBuilder sb = new StringBuilder();
-        String formattedCreditCardNumber = "";
         clsUtils.creditCard card = null;
         switch (getItemTypeID()) {
             case fragHome.USER_CREDIT_CARD_ITEMS:
@@ -386,7 +389,7 @@ public class clsItemValues {
 
                 break;
 
-            case clsItemTypes.GENERAL_ACCOUNTS:
+            case MySettings.GENERAL_ACCOUNTS:
                 sb.append("Account Number: ").append(getGeneralAccountNumber());
 
                 formattedPrimaryPhoneNumber = clsUtils.formatPhoneNumber(getPrimaryPhoneNumber());
@@ -397,7 +400,7 @@ public class clsItemValues {
 
                 break;
 
-            case clsItemTypes.SOFTWARE:
+            case MySettings.SOFTWARE:
                 String formattedKeyCode = clsUtils.formatTypicalAccountNumber(getSoftwareKeyCode(), getSoftwareSubgroupLength());
                 sb.append("Software Key Code:\n").append(formattedKeyCode);
                 break;

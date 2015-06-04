@@ -7,10 +7,11 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.dropbox.client2.DropboxAPI;
@@ -56,14 +57,13 @@ public class MainActivity extends Activity {
     private android.app.ActionBar mActionBar;
     private boolean mShowActionBarProgress;
 
-    private boolean mTwoPane;
-    private FrameLayout mFragment_container;
-    private FrameLayout mDetail_container;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         MyLog.i("MainActivity", "onCreate");
+
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
         setContentView(R.layout.activity_main);
 
         mActionBar = getActionBar();
@@ -84,21 +84,20 @@ public class MainActivity extends Activity {
             mDBApi = new DropboxAPI<>(session);
         }
 
-        mFragment_container =
-                (FrameLayout) findViewById(R.id.fragment_container);
-        mDetail_container =
-                (FrameLayout) findViewById(R.id.detail_container);
+/*        FrameLayout mFragment_container =
+                (FrameLayout) findViewById(R.id.fragment_container);*/
+/*        mHome_container =
+                (FrameLayout) findViewById(R.id.home_container);
 
-        mTwoPane = mDetail_container != null;
+        mTwoPane = mHome_container != null;*/
     }
 
     //region onEvent
 
-    public void onEvent(clsEvents.test event) {
-        // TODO: Remove text event 
+/*    public void onEvent(clsEvents.test event) {
         //  new SaveChangesToDropbox(this).execute();
         Toast.makeText(this, "Nothing to test!", Toast.LENGTH_SHORT).show();
-    }
+    }*/
 
     public void onEvent(clsEvents.onDropboxDataFileChange event) {
         updatePasswordsData();
@@ -130,6 +129,10 @@ public class MainActivity extends Activity {
         showOkDialog(this, event.getTitle(), event.getMessage());
     }
 
+    public void onEvent(clsEvents.showToast event) {
+        Toast.makeText(this, event.getMessage(), Toast.LENGTH_SHORT).show();
+    }
+
     public void onEvent(clsEvents.showProgressInActionBar event) {
         mShowActionBarProgress = event.isVisible();
         invalidateOptionsMenu();
@@ -139,7 +142,7 @@ public class MainActivity extends Activity {
     //region onBackPressed
     @Override
     public void onBackPressed() {
-        // TODO: Update onBackPressed code. Block user from leaving fragApplicationPassword
+        // TODO: Revise onBackPressed with two panes
         int activeFragmentID = MySettings.getActiveFragmentID();
         switch (activeFragmentID) {
             case MySettings.FRAG_HOME: // 1
@@ -156,7 +159,6 @@ public class MainActivity extends Activity {
                     default:
                         super.onBackPressed();
                         // exit the app
-                        // this disables all onBackPressed when starting up the app
                 }
 
         }
@@ -195,7 +197,7 @@ public class MainActivity extends Activity {
     //endregion
 
     @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         MyLog.i("MainActivity", "onRestoreInstanceState");
     }
@@ -221,6 +223,7 @@ public class MainActivity extends Activity {
 
         // show the appropriate fragment
         int startupState = MySettings.getStartupState();
+
         if (startupState != fragApplicationPassword.STATE_PASSWORD_ONLY
                 && startupState != fragApplicationPassword.STATE_VALIDATING_PASSWORD) {
             MySettings.setStartupState(fragApplicationPassword.STATE_STEP_1_SELECT_FOLDER);
@@ -234,6 +237,7 @@ public class MainActivity extends Activity {
             startPasswordsUpdateService();
             showFragment(MySettings.getActiveFragmentID(), false);
         }
+
     }
 
     private void startPasswordsUpdateService() {
@@ -242,7 +246,7 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
         MyLog.i("MainActivity", "onSaveInstanceState");
         super.onSaveInstanceState(outState);
     }
@@ -276,162 +280,158 @@ public class MainActivity extends Activity {
 
     private void showFragment(int fragmentID, boolean isNewItem) {
         FragmentManager fm = getFragmentManager();
-        if (mTwoPane) {
 
-        } else {
-            // Single pane display
-            switch (fragmentID) {
-                case MySettings.FRAG_HOME:
+        switch (fragmentID) {
+            case MySettings.FRAG_HOME:
+                fm.beginTransaction()
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                        .replace(R.id.fragment_container,
+                                fragHome.newInstance(), "FRAG_HOME")
+                        .commit();
+                MyLog.i("MainActivity", "showFragments: FRAG_HOME");
+                break;
+
+            case MySettings.FRAG_ITEM_DETAIL:
+                // don't replace fragment if restarting from onSaveInstanceState
+                if (!MySettings.getOnSaveInstanceState()) {
                     fm.beginTransaction()
                             .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                             .replace(R.id.fragment_container,
-                                    fragHome.newInstance(), "FRAG_HOME")
+                                    fragItemDetail.newInstance(), "FRAG_ITEM_DETAIL")
                             .commit();
-                    MyLog.i("MainActivity", "showFragments: FRAG_HOME");
-                    break;
+                    MyLog.i("MainActivity", "showFragments: FRAG_ITEM_DETAIL");
+                }
+                break;
 
-                case MySettings.FRAG_ITEM_DETAIL:
-                    // don't replace fragment if restarting from onSaveInstanceState
-                    if (!MySettings.getOnSaveInstanceState()) {
-                        fm.beginTransaction()
-                                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                                .replace(R.id.fragment_container,
-                                        fragItemDetail.newInstance(), "FRAG_ITEM_DETAIL")
-                                .commit();
-                        MyLog.i("MainActivity", "showFragments: FRAG_ITEM_DETAIL");
-                    }
-                    break;
-
-                case MySettings.FRAG_EDIT_CREDIT_CARD:
-                    // don't replace fragment if restarting from onSaveInstanceState
-                    if (!MySettings.getOnSaveInstanceState()) {
-                        fm.beginTransaction()
-                                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                                .replace(R.id.fragment_container,
-                                        fragEdit_creditCard.newInstance(isNewItem), "FRAG_EDIT_CREDIT_CARD")
-                                .commit();
-                        MyLog.i("MainActivity", "showFragments: FRAG_EDIT_CREDIT_CARD");
-                    }
-                    break;
-
-                case MySettings.FRAG_EDIT_GENERAL_ACCOUNT:
-                    // don't replace fragment if restarting from onSaveInstanceState
-                    if (!MySettings.getOnSaveInstanceState()) {
-                        fm.beginTransaction()
-                                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                                .replace(R.id.fragment_container,
-                                        fragEdit_generalAccount.newInstance(isNewItem), "FRAG_EDIT_GENERAL_ACCOUNT")
-                                .commit();
-                        MyLog.i("MainActivity", "showFragments: FRAG_EDIT_GENERAL_ACCOUNT");
-                    }
-                    break;
-
-                case MySettings.FRAG_EDIT_SOFTWARE:
-                    // don't replace fragment if restarting from onSaveInstanceState
-                    if (!MySettings.getOnSaveInstanceState()) {
-                        fm.beginTransaction()
-                                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                                .replace(R.id.fragment_container,
-                                        fragEdit_software.newInstance(isNewItem), "FRAG_EDIT_SOFTWARE")
-                                .commit();
-                        MyLog.i("MainActivity", "showFragments: FRAG_EDIT_SOFTWARE");
-                    }
-                    break;
-
-                case MySettings.FRAG_EDIT_WEBSITE:
-                    // don't replace fragment if restarting from onSaveInstanceState
-                    if (!MySettings.getOnSaveInstanceState()) {
-                        fm.beginTransaction()
-                                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                                .replace(R.id.fragment_container,
-                                        fragEdit_website.newInstance(isNewItem), "FRAG_EDIT_WEBSITE")
-                                .commit();
-                        MyLog.i("MainActivity", "showFragments: FRAG_EDIT_WEBSITE");
-                    }
-                    break;
-
-                case MySettings.FRAG_SETTINGS:
-                    // don't replace fragment if restarting from onSaveInstanceState
-                    // if (!MySettings.getOnSaveInstanceState()) {
+            case MySettings.FRAG_EDIT_CREDIT_CARD:
+                // don't replace fragment if restarting from onSaveInstanceState
+                if (!MySettings.getOnSaveInstanceState()) {
                     fm.beginTransaction()
                             .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                             .replace(R.id.fragment_container,
-                                    fragSettings.newInstance(), "FRAG_SETTINGS")
+                                    fragEdit_creditCard.newInstance(isNewItem), "FRAG_EDIT_CREDIT_CARD")
                             .commit();
-                    MyLog.i("MainActivity", "showFragments: FRAG_SETTINGS");
-                    //}
-                    break;
+                    MyLog.i("MainActivity", "showFragments: FRAG_EDIT_CREDIT_CARD");
+                }
+                break;
 
-                case MySettings.FRAG_SETTINGS_USER:
-                    // don't replace fragment if restarting from onSaveInstanceState
-                    if (!MySettings.getOnSaveInstanceState()) {
-                        fm.beginTransaction()
-                                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                                .replace(R.id.fragment_container,
-                                        fragSettings_user.newInstance(), "FRAG_SETTINGS_USER")
-                                .commit();
-                        MyLog.i("MainActivity", "showFragments: FRAG_SETTINGS_USER");
-                    }
-                    break;
-
-                case MySettings.FRAG_SETTINGS_APP_PASSWORD:
-                    // don't replace fragment if restarting from onSaveInstanceState
-                    if (!MySettings.getOnSaveInstanceState()) {
-                        fm.beginTransaction()
-                                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                                .replace(R.id.fragment_container,
-                                        fragSettings_appPassword.newInstance(), "FRAG_SETTINGS_APP_PASSWORD")
-                                .commit();
-                        MyLog.i("MainActivity", "showFragments: FRAG_SETTINGS_APP_PASSWORD");
-                    }
-                    break;
-
-                case MySettings.FRAG_APP_PASSWORD:
-                    //clearBackStack();
+            case MySettings.FRAG_EDIT_GENERAL_ACCOUNT:
+                // don't replace fragment if restarting from onSaveInstanceState
+                if (!MySettings.getOnSaveInstanceState()) {
                     fm.beginTransaction()
                             .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                             .replace(R.id.fragment_container,
-                                    fragApplicationPassword.newInstance(), "FRAG_APP_PASSWORD")
+                                    fragEdit_generalAccount.newInstance(isNewItem), "FRAG_EDIT_GENERAL_ACCOUNT")
                             .commit();
-                    MyLog.i("MainActivity", "showFragments: FRAG_APP_PASSWORD");
-                    break;
+                    MyLog.i("MainActivity", "showFragments: FRAG_EDIT_GENERAL_ACCOUNT");
+                }
+                break;
 
-                case MySettings.FRAG_SETTINGS_NETWORKING:
-                    // don't replace fragment if restarting from onSaveInstanceState
-                    if (!MySettings.getOnSaveInstanceState()) {
-                        fm.beginTransaction()
-                                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                                .replace(R.id.fragment_container,
-                                        fragSettings_networking.newInstance(), "FRAG_SETTINGS_NETWORKING")
-                                .commit();
-                        MyLog.i("MainActivity", "showFragments: FRAG_SETTINGS_NETWORKING");
-                    }
-                    break;
+            case MySettings.FRAG_EDIT_SOFTWARE:
+                // don't replace fragment if restarting from onSaveInstanceState
+                if (!MySettings.getOnSaveInstanceState()) {
+                    fm.beginTransaction()
+                            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                            .replace(R.id.fragment_container,
+                                    fragEdit_software.newInstance(isNewItem), "FRAG_EDIT_SOFTWARE")
+                            .commit();
+                    MyLog.i("MainActivity", "showFragments: FRAG_EDIT_SOFTWARE");
+                }
+                break;
 
-                case MySettings.FRAG_DROPBOX_LIST:
-                    // don't replace fragment if restarting from onSaveInstanceState
-                    if (!MySettings.getOnSaveInstanceState()) {
-                        fm.beginTransaction()
-                                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                                .replace(R.id.fragment_container,
-                                        fragDropboxList.newInstance(), "FRAG_DROPBOX_LIST")
-                                .commit();
-                        MyLog.i("MainActivity", "showFragments: FRAG_DROPBOX_LIST");
-                    }
-                    break;
+            case MySettings.FRAG_EDIT_WEBSITE:
+                // don't replace fragment if restarting from onSaveInstanceState
+                if (!MySettings.getOnSaveInstanceState()) {
+                    fm.beginTransaction()
+                            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                            .replace(R.id.fragment_container,
+                                    fragEdit_website.newInstance(isNewItem), "FRAG_EDIT_WEBSITE")
+                            .commit();
+                    MyLog.i("MainActivity", "showFragments: FRAG_EDIT_WEBSITE");
+                }
+                break;
 
-                case MySettings.FRAG_NETWORK_LOG:
-                    // don't replace fragment if restarting from onSaveInstanceState
-                    if (!MySettings.getOnSaveInstanceState()) {
-                        fm.beginTransaction()
-                                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                                .replace(R.id.fragment_container,
-                                        fragNetworkLog.newInstance(), "FRAG_DROPBOX_LIST")
-                                .commit();
-                        MyLog.i("MainActivity", "showFragments: FRAG_NETWORK_LOG");
-                    }
-                    break;
-            }
+            case MySettings.FRAG_SETTINGS:
+                // don't replace fragment if restarting from onSaveInstanceState
+                // if (!MySettings.getOnSaveInstanceState()) {
+                fm.beginTransaction()
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                        .replace(R.id.fragment_container,
+                                fragSettings.newInstance(), "FRAG_SETTINGS")
+                        .commit();
+                MyLog.i("MainActivity", "showFragments: FRAG_SETTINGS");
+                //}
+                break;
+
+            case MySettings.FRAG_SETTINGS_USER:
+                // don't replace fragment if restarting from onSaveInstanceState
+                if (!MySettings.getOnSaveInstanceState()) {
+                    fm.beginTransaction()
+                            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                            .replace(R.id.fragment_container,
+                                    fragSettings_user.newInstance(), "FRAG_SETTINGS_USER")
+                            .commit();
+                    MyLog.i("MainActivity", "showFragments: FRAG_SETTINGS_USER");
+                }
+                break;
+
+            case MySettings.FRAG_SETTINGS_APP_PASSWORD:
+                // don't replace fragment if restarting from onSaveInstanceState
+                if (!MySettings.getOnSaveInstanceState()) {
+                    fm.beginTransaction()
+                            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                            .replace(R.id.fragment_container,
+                                    fragSettings_appPassword.newInstance(), "FRAG_SETTINGS_APP_PASSWORD")
+                            .commit();
+                    MyLog.i("MainActivity", "showFragments: FRAG_SETTINGS_APP_PASSWORD");
+                }
+                break;
+
+            case MySettings.FRAG_APP_PASSWORD:
+                //clearBackStack();
+                fm.beginTransaction()
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                        .replace(R.id.fragment_container,
+                                fragApplicationPassword.newInstance(), "FRAG_APP_PASSWORD")
+                        .commit();
+                MyLog.i("MainActivity", "showFragments: FRAG_APP_PASSWORD");
+                break;
+
+            case MySettings.FRAG_SETTINGS_NETWORKING:
+                // don't replace fragment if restarting from onSaveInstanceState
+                if (!MySettings.getOnSaveInstanceState()) {
+                    fm.beginTransaction()
+                            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                            .replace(R.id.fragment_container,
+                                    fragSettings_networking.newInstance(), "FRAG_SETTINGS_NETWORKING")
+                            .commit();
+                    MyLog.i("MainActivity", "showFragments: FRAG_SETTINGS_NETWORKING");
+                }
+                break;
+
+            case MySettings.FRAG_DROPBOX_LIST:
+                // don't replace fragment if restarting from onSaveInstanceState
+                if (!MySettings.getOnSaveInstanceState()) {
+                    fm.beginTransaction()
+                            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                            .replace(R.id.fragment_container,
+                                    fragDropboxList.newInstance(), "FRAG_DROPBOX_LIST")
+                            .commit();
+                    MyLog.i("MainActivity", "showFragments: FRAG_DROPBOX_LIST");
+                }
+                break;
+
+            case MySettings.FRAG_NETWORK_LOG:
+                // don't replace fragment if restarting from onSaveInstanceState
+                if (!MySettings.getOnSaveInstanceState()) {
+                    fm.beginTransaction()
+                            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                            .replace(R.id.fragment_container,
+                                    fragNetworkLog.newInstance(), "FRAG_DROPBOX_LIST")
+                            .commit();
+                    MyLog.i("MainActivity", "showFragments: FRAG_NETWORK_LOG");
+                }
+                break;
         }
     }
 
@@ -481,7 +481,6 @@ public class MainActivity extends Activity {
 
         if (id == R.id.action_save_to_dropbox) {
             // save file and show results dialog
-            // Toast.makeText(this, "TO COME: action_save_to_dropbox", Toast.LENGTH_SHORT).show();
             new SaveChangesToDropbox(this, true).execute();
             return true;
 

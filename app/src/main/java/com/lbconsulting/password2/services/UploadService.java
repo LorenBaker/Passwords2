@@ -92,7 +92,7 @@ public class UploadService extends IntentService {
 
         mDropboxFilename = intent.getStringExtra(ARG_DROPBOX_FILENAME);
         mFilename = mDropboxFilename.substring(mDropboxFilename.lastIndexOf("/") + 1);
-        String parentPath = getParentPath(mDropboxFilename);
+       // String parentPath = getParentPath(mDropboxFilename);
         //mDropboxFilename = parentPath + "/test" + mFilename;
 
         mPassword = intent.getStringExtra(ARG_PASSWORD);
@@ -150,10 +150,10 @@ public class UploadService extends IntentService {
     }
 
     private clsNetworkStatus getNetworkStatus() {
-        boolean isWifiConnected = false;
-        boolean isMobileConnected = false;
-        boolean isOkToUseNetwork = false;
-        NetworkInfo networkInfo = null;
+        boolean isWifiConnected;
+        boolean isMobileConnected;
+        boolean isOkToUseNetwork;
+        NetworkInfo networkInfo;
 
         ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         if (connMgr == null) {

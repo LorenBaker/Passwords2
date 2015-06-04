@@ -7,20 +7,9 @@ import android.content.CursorLoader;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
-import android.os.AsyncTask;
 
 import com.lbconsulting.password2.classes.MyLog;
-import com.lbconsulting.password2.classes.MySettings;
-import com.lbconsulting.password2.classes.clsEvents;
-import com.lbconsulting.password2.classes.clsItemSort;
-import com.lbconsulting.password2.classes.clsUtils;
 import com.lbconsulting.password2.fragments.fragHome;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-
-import de.greenrobot.event.EventBus;
 
 /**
  * SQLite table to hold Password Items data
@@ -34,16 +23,7 @@ public class ItemsTable {
     public static final int PROPOSED_ITEM_IS_EMPTY = -14;
     public static final int ITEM_ID_ALREADY_EXISTS = -15;
     public static final int ITEM_ALREADY_EXISTS = -16;
-
-    public static final int ITEM_NOT_UPDATED = -17;
-    public static final int ITEM_UPDATE_ERROR_ITEM_NOT_FOUND = -18;
-    public static final int ITEM_UPDATE_ERROR_ITEM_NAME_EXISTS = -19;
-
-    public static final int ITEM_NOT_DELETED = -20;
     public static final int ILLEGAL_ITEM_TYPE_ID = -21;
-
-    private static long mFoundNameItemID;
-
     // Password Items data table
     // Version 1
     public static final String TABLE_ITEMS = "tblPasswordItems";
@@ -65,29 +45,25 @@ public class ItemsTable {
     public static final String COL_WEBSITE_USER_ID = "websiteUserID";
     public static final String COL_WEBSITE_PASSWORD = "websitePassword";
     public static final String COL_IS_IN_TABLE = "isInTable";
-    public static final String COL_SORT_KEY = "sortKey";
-
-    public static final String[] PROJECTION_ID_AND_NAME = {COL_ITEM_ID, COL_ITEM_NAME};
     public static final String[] PROJECTION_ALL = {COL_ITEM_ID, COL_ITEM_NAME,
             COL_ITEM_TYPE_ID, COL_USER_ID,
             COL_SOFTWARE_KEY_CODE, COL_SOFTWARE_SUBGROUP_LENGTH, COL_COMMENTS,
             COL_CREDIT_CARD_ACCOUNT_NUMBER, COL_CREDIT_CARD_SECURITY_CODE,
             COL_CREDIT_CARD_EXPIRATION_MONTH, COL_CREDIT_CARD_EXPIRATION_YEAR,
             COL_GENERAL_ACCOUNT_NUMBER, COL_PRIMARY_PHONE_NUMBER, COL_ALTERNATE_PHONE_NUMBER,
-            COL_WEBSITE_URL, COL_WEBSITE_USER_ID, COL_WEBSITE_PASSWORD, COL_IS_IN_TABLE, COL_SORT_KEY};
-
+            COL_WEBSITE_URL, COL_WEBSITE_USER_ID, COL_WEBSITE_PASSWORD, COL_IS_IN_TABLE};
     public static final String CONTENT_PATH = TABLE_ITEMS;
-
     public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + "vnd.lbconsulting."
             + TABLE_ITEMS;
     public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + "vnd.lbconsulting."
             + TABLE_ITEMS;
     public static final Uri CONTENT_URI = Uri.parse("content://" + PasswordsContentProvider.AUTHORITY + "/" + CONTENT_PATH);
-
-    public static final String SORT_ORDER_ITEM_NAME = COL_SORT_KEY + " ASC";
+    public static final String SORT_ORDER_ITEM_NAME = COL_ITEM_NAME + " ASC";
     public static final String SORT_ORDER_ITEM_ID = COL_ITEM_ID + " ASC";
-
-
+    // public static final int ITEM_NOT_UPDATED = -17;
+    private static final int ITEM_UPDATE_ERROR_ITEM_NOT_FOUND = -18;
+    private static final int ITEM_UPDATE_ERROR_ITEM_NAME_EXISTS = -19;
+    private static final int ITEM_NOT_DELETED = -20;
     // Database creation SQL statements
     private static final String CREATE_DATA_TABLE = "create table "
             + TABLE_ITEMS
@@ -109,9 +85,9 @@ public class ItemsTable {
             + COL_WEBSITE_URL + " text DEFAULT '', "
             + COL_WEBSITE_USER_ID + " text  DEFAULT '', "
             + COL_WEBSITE_PASSWORD + " text   DEFAULT '', "
-            + COL_IS_IN_TABLE + " integer DEFAULT 1, "
-            + COL_SORT_KEY + " integer DEFAULT 1 "
+            + COL_IS_IN_TABLE + " integer DEFAULT 1"
             + ");";
+    private static long mFoundNameItemID;
 
     public static void onCreate(SQLiteDatabase database) {
         database.execSQL(CREATE_DATA_TABLE);
@@ -128,7 +104,7 @@ public class ItemsTable {
     // Create Methods
     // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public static long createNewItem(Context context, long userID, long itemID, int itemTypeID, String plainTextItemName) {
+    public static long createNewItem(Context context, long userID, long itemID, int itemTypeID, String itemName) {
 
         if (!UsersTable.userExists(context, userID)) {
             return USER_DOES_NOT_EXIST;
@@ -142,12 +118,12 @@ public class ItemsTable {
             return ILLEGAL_ITEM_TYPE_ID;
         }
 
-        if (plainTextItemName == null) {
+        if (itemName == null) {
             return PROPOSED_ITEM_IS_NULL;
         }
 
-        plainTextItemName = plainTextItemName.trim();
-        if (plainTextItemName.isEmpty()) {
+        itemName = itemName.trim();
+        if (itemName.isEmpty()) {
             return PROPOSED_ITEM_IS_EMPTY;
         }
 
@@ -158,15 +134,13 @@ public class ItemsTable {
             return ITEM_ID_ALREADY_EXISTS;
         }
 
-
         // verify that the User does not already have the proposed itemName the table
-        if (itemNameExists(context, userID, plainTextItemName)) {
+        if (itemNameExists(context, userID, itemName)) {
             // the user already has this item in the table
             return ITEM_ALREADY_EXISTS;
         }
 
         // the item does not exist in the table ... so add it
-
         long newUserID = ITEM_NOT_CREATED;
         try {
             ContentResolver cr = context.getContentResolver();
@@ -175,8 +149,7 @@ public class ItemsTable {
             values.put(COL_USER_ID, userID);
             values.put(COL_ITEM_ID, itemID);
             values.put(COL_ITEM_TYPE_ID, itemTypeID);
-            String encryptedItemName = clsUtils.encryptString(plainTextItemName, MySettings.DB_KEY, false);
-            values.put(COL_ITEM_NAME, encryptedItemName);
+            values.put(COL_ITEM_NAME, itemName);
             Uri newUserUri = cr.insert(uri, values);
             if (newUserUri != null) {
                 newUserID = Long.parseLong(newUserUri.getLastPathSegment());
@@ -214,7 +187,27 @@ public class ItemsTable {
         return cursor;
     }
 
-    public static Cursor getItemWithIdProjection(Context context, long itemID) {
+    private static Cursor getItemWithIdProjection(Context context, long userID, String itemName) {
+        Cursor cursor = null;
+        if (userID > 0) {
+            Uri uri = CONTENT_URI;
+            String[] projection = new String[]{COL_ITEM_ID};
+            String selection = COL_USER_ID + " = ? AND " + COL_ITEM_NAME + " = ?";
+            String selectionArgs[] = new String[]{String.valueOf(userID), itemName};
+            String sortOrder = null;
+            ContentResolver cr = context.getContentResolver();
+            try {
+                cursor = cr.query(uri, projection, selection, selectionArgs, sortOrder);
+            } catch (Exception e) {
+                MyLog.e("ItemsTable", "getItem: Exception; " + e.getMessage());
+            }
+        } else {
+            MyLog.e("ItemsTable", "getItemWithIdProjection: Unable to get item. The userID < 1");
+        }
+        return cursor;
+    }
+
+    private static Cursor getItemWithIdProjection(Context context, long itemID) {
         Cursor cursor = null;
         if (itemID > 0) {
             Uri uri = Uri.withAppendedPath(CONTENT_URI, String.valueOf(itemID));
@@ -234,8 +227,18 @@ public class ItemsTable {
         return cursor;
     }
 
+    private static String getItemName(Context context, long itemID) {
+        String name = "";
+        Cursor cursor = getItem(context, itemID);
+        if (cursor != null && cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            name = cursor.getString(cursor.getColumnIndex(COL_ITEM_NAME));
+        }
 
-    private static Cursor getAllItemsCursor(Context context, long userID) {
+        return name;
+    }
+
+/*    private static Cursor getAllItemsCursor(Context context, long userID) {
         Cursor cursor = null;
         if (context != null && userID > 0) {
             Uri uri = CONTENT_URI;
@@ -253,7 +256,7 @@ public class ItemsTable {
             MyLog.e("ItemsTable", "getAllItemsCursor: Unable to get items. The userID < 1");
         }
         return cursor;
-    }
+    }*/
 
     public static Cursor getAllItemsCursor(Context context, String sortOrder) {
         Cursor cursor = null;
@@ -282,15 +285,15 @@ public class ItemsTable {
         if (userID > 0) {
             Uri uri = CONTENT_URI;
             String[] projection = PROJECTION_ALL;
-            String selection = null;
-            String selectionArgs[] = null;
+            String selection;
+            String selectionArgs[];
 
             if (itemType == fragHome.ALL_USER_ITEMS) {
                 if (search.isEmpty()) {
                     selection = COL_USER_ID + " = ?";
                     selectionArgs = new String[]{String.valueOf(userID)};
                 } else {
-                    selection = COL_USER_ID + " = ? AND " + COL_ITEM_NAME + " Like '%" + search + "%'";
+                    selection = COL_USER_ID + " = ? AND " + COL_ITEM_NAME + " like '%" + search + "%'";
                     selectionArgs = new String[]{String.valueOf(userID)};
                 }
 
@@ -324,55 +327,39 @@ public class ItemsTable {
         return result;
     }
 
-    public static boolean itemNameExists(Context context, long userID, String plainTextItemName) {
+    public static boolean itemNameExists(Context context, long userID, String itemName) {
         boolean result = false;
         mFoundNameItemID = -1;
-        ArrayList<Long> itemIDList = new ArrayList<>();
-
-        plainTextItemName = plainTextItemName.trim();
-        if (!plainTextItemName.isEmpty()) {
+        itemName = itemName.trim();
+        if (!itemName.isEmpty()) {
             // get all user items
-            Cursor cursor = getAllItemsCursor(context, userID);
-            if (cursor != null && cursor.getCount() > 0) {
-                // create an arrayList of ItemIDs where decrypted item names match the plainTextItemName
-                String decryptedItemName;
-                String encryptedItemName;
-                long foundNameItemID;
-                while (cursor.moveToNext()) {
-                    encryptedItemName = cursor.getString(cursor.getColumnIndex(COL_ITEM_NAME));
-                    decryptedItemName = clsUtils.decryptString(encryptedItemName, MySettings.DB_KEY, false);
-                    if (decryptedItemName.equalsIgnoreCase(plainTextItemName)) {
-                        // found the plainTextItemName
-                        foundNameItemID = cursor.getLong(cursor.getColumnIndex(COL_ITEM_ID));
-                        itemIDList.add(foundNameItemID);
-                    }
-                }
+            Cursor cursor = getItemWithIdProjection(context, userID, itemName);
+            if (cursor != null) {
 
-                if (itemIDList.size() == 0) {
-                    // the plainTextItemName is NOT the table
+                if (cursor.getCount() == 0) {
+                    // the itemName is NOT the table
                     result = false;
 
-                } else if (itemIDList.size() == 1) {
-                    // if the arrayList size == 1, the plainTextItemName is in the table ...
+                } else if (cursor.getCount() == 1) {
+                    // if the cursor.getCount() == 1, the itemName is in the table ...
                     // set mFoundNameItemID to the found itemID and  return true
-                    mFoundNameItemID = itemIDList.get(0);
+                    cursor.moveToFirst();
+                    mFoundNameItemID = cursor.getLong(cursor.getColumnIndex(COL_ITEM_ID));
                     result = true;
 
-                } else if (itemIDList.size() > 1) {
-                    // more than one item matches the plainTextItemName ... return true
+                } else if (cursor.getCount() > 1) {
+                    // more than one item matches the itemName ... return true
                     result = true;
                 }
-
             }
             if (cursor != null) {
                 cursor.close();
             }
-
         }
         return result;
     }
 
-    private static Cursor getAllNamesAndIDsCursor(Context context) {
+/*    private static Cursor getAllNamesAndIDsCursor(Context context) {
         Cursor cursor = null;
 
         Uri uri = CONTENT_URI;
@@ -388,14 +375,14 @@ public class ItemsTable {
         }
 
         return cursor;
-    }
+    }*/
 
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Update Methods
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static int updateItem(Context context, long itemID, ContentValues newFieldValues) {
-        int numberOfUpdatedRecords = ITEM_NOT_UPDATED;
+        int numberOfUpdatedRecords;
 
         if (itemID < 1) {
             return ILLEGAL_ITEM_ID;
@@ -444,7 +431,7 @@ public class ItemsTable {
     }
 
     public static int updateItems(Context context, long itemID, ContentValues newFieldValues) {
-        int numberOfUpdatedRecords = ITEM_NOT_UPDATED;
+        int numberOfUpdatedRecords;
 
         if (itemID < 1) {
             return ILLEGAL_ITEM_ID;
@@ -475,61 +462,11 @@ public class ItemsTable {
         return cr.update(uri, cv, selection, selectionArgs);
     }
 
-
-    public static void updateItemSortKey(Context context, long itemID, int sortKey) {
-        ContentValues cv = new ContentValues();
-        cv.put(COL_SORT_KEY, sortKey);
-        updateItem(context, itemID, cv);
-    }
-
-    public static void sortItemsAsync(Context context, long userID) {
-        new sortTableItemsAsync(context, userID).execute();
-    }
-
-    private static void sortItems(Context context, long userID) {
-
-        // get all the items and create a sorting list
-        ArrayList<clsItemSort> sortingList = new ArrayList<>();
-        Cursor allItemsCursor = getAllItemsCursor(context, userID);
-        String plainTextName;
-        String encryptedTextName;
-        clsItemSort item;
-        while (allItemsCursor.moveToNext()) {
-            encryptedTextName = allItemsCursor.getString(allItemsCursor.getColumnIndex(COL_ITEM_NAME));
-            plainTextName = clsUtils.decryptString(encryptedTextName, MySettings.DB_KEY, false);
-            item = new clsItemSort(
-                    allItemsCursor.getLong(allItemsCursor.getColumnIndex(COL_ITEM_ID)),
-                    plainTextName);
-            sortingList.add(item);
-        }
-
-        if (allItemsCursor != null) {
-            allItemsCursor.close();
-        }
-
-        // sort the list
-        Collections.sort(sortingList, new Comparator<clsItemSort>() {
-            @Override
-            public int compare(clsItemSort item1, clsItemSort item2) {
-                return item1.getItemName().compareTo(item2.getItemName());
-            }
-        });
-
-        // update the Items table with new sort keys
-        PasswordsContentProvider.setSuppressChangeNotification(true);
-        int sortKey = 0;
-        for (clsItemSort sortedItem : sortingList) {
-            updateItemSortKey(context, sortedItem.getItemID(), sortKey);
-            sortKey++;
-        }
-        PasswordsContentProvider.setSuppressChangeNotification(false);
-    }
-
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Delete Methods
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public static int deleteItem(Context context, long itemID) {
+    public static int deleteItem(final Context context, final long itemID) {
         int numberOfDeletedRecords = ITEM_NOT_DELETED;
         if (itemID > 0) {
             ContentResolver cr = context.getContentResolver();
@@ -537,8 +474,10 @@ public class ItemsTable {
             String where = COL_ITEM_ID + " = ?";
             String[] selectionArgs = {String.valueOf(itemID)};
             numberOfDeletedRecords = cr.delete(uri, where, selectionArgs);
+
         } else {
-            MyLog.e("ItemsTable", "deleteItem: Unable to delete item. itemID is not greater than 0.");
+            MyLog.e("ItemsTable",
+                    "deleteItem: onClick YES: Unable to delete item. itemID is not greater than 0.");
         }
 
         return numberOfDeletedRecords;
@@ -560,7 +499,7 @@ public class ItemsTable {
     }
 
     public static int deleteItemsNotInTable(Context context) {
-        int numberOfDeletedRecords = ITEM_NOT_DELETED;
+        int numberOfDeletedRecords;
 
         ContentResolver cr = context.getContentResolver();
         Uri uri = CONTENT_URI;
@@ -571,38 +510,17 @@ public class ItemsTable {
         return numberOfDeletedRecords;
     }
 
-    private static class sortTableItemsAsync extends AsyncTask<Void, Void, Void> {
-        Context mContext;
-        long mUserID;
+    public static int deleteAllItems(Context context) {
+        PasswordsContentProvider.setSuppressChangeNotification(true);
+        int numberOfDeletedRecords;
+        ContentResolver cr = context.getContentResolver();
+        Uri uri = CONTENT_URI;
+        String where = null;
+        String[] selectionArgs = null;
+        numberOfDeletedRecords = cr.delete(uri, where, selectionArgs);
 
-        public sortTableItemsAsync(Context context, long userID) {
-            // We set the context this way so we don't accidentally leak activities
-            mContext = context.getApplicationContext();
-            mUserID = userID;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            MyLog.d("sortTableItemsAsync", "onPreExecute");
-            EventBus.getDefault().post(new clsEvents.showProgressInActionBar(true));
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            MyLog.i("sortTableItemsAsync", "doInBackground");
-            sortItems(mContext, mUserID);
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            MyLog.i("sortTableItemsAsync", "onPostExecute");
-            EventBus.getDefault().post(new clsEvents.updateUI());
-            EventBus.getDefault().post(new clsEvents.showProgressInActionBar(false));
-
-        }
+        PasswordsContentProvider.setSuppressChangeNotification(false);
+        return numberOfDeletedRecords;
     }
 
 }

@@ -29,10 +29,10 @@ import com.lbconsulting.password2.adapters.ItemsCursorAdapter;
 import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
-import com.lbconsulting.password2.classes.clsItemTypes;
 import com.lbconsulting.password2.classes.clsListViewPosition;
 import com.lbconsulting.password2.classes.clsUserValues;
 import com.lbconsulting.password2.database.ItemsTable;
+import com.lbconsulting.password2.database.UsersTable;
 
 import de.greenrobot.event.EventBus;
 
@@ -43,6 +43,7 @@ public class fragHome extends Fragment
         implements View.OnClickListener, AdapterView.OnItemClickListener,
         LoaderManager.LoaderCallbacks<Cursor> {
 
+   // private static final String ARG_IS_TWO_PANE = "argIsTwoPane";
 
     public static final int USER_CREDIT_CARD_ITEMS = 1;
     private static final int USER_GENERAL_ACCOUNT_ITEMS = 2;
@@ -66,7 +67,7 @@ public class fragHome extends Fragment
     //endregion
 
     private long mActiveUserID;
-    private int mActiveListView = clsItemTypes.CREDIT_CARDS;
+    private int mActiveListView = MySettings.CREDIT_CARDS;
     private boolean mHideCreditCards;
     private boolean mHideGeneralAccounts;
     private boolean mHideWebsites;
@@ -89,19 +90,33 @@ public class fragHome extends Fragment
     private boolean mFirstTimeLoading_Software = true;
     private boolean mFirstTimeLoading_AllUserItems = true;
 
+    private boolean mIsTwoPane;
+
 
     public fragHome() {
 
     }
 
     public static fragHome newInstance() {
+
         return new fragHome();
+/*        Bundle args = new Bundle();
+        args.putBoolean(ARG_IS_TWO_PANE, isTwoPane);
+        fragment.setArguments(args);
+        return fragment;*/
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         MyLog.i("fragHome", "onCreate()");
+/*
+
+        if (getArguments() != null) {
+            mIsTwoPane = getArguments().getBoolean(ARG_IS_TWO_PANE);
+        }
+*/
+
         EventBus.getDefault().register(this);
         setHasOptionsMenu(true);
     }
@@ -135,7 +150,6 @@ public class fragHome extends Fragment
         mActiveListView = MySettings.getActiveListViewID();
         txtSearch.setText(MySettings.getSearchText());
 
-        MySettings.setActiveFragmentID(MySettings.FRAG_HOME);
         MySettings.setActiveItemID(-1);
 
         mLoaderManager = getLoaderManager();
@@ -286,7 +300,7 @@ public class fragHome extends Fragment
         inflater.inflate(R.menu.menu_frag_home, menu);
         super.onCreateOptionsMenu(menu, inflater);
 
-        if (mActiveListView == clsItemTypes.ALL_ITEMS) {
+        if (mActiveListView == MySettings.ALL_ITEMS) {
             menu.findItem(R.id.action_show_categories).setVisible(true);
             menu.findItem(R.id.action_show_search).setVisible(false);
         } else {
@@ -324,26 +338,27 @@ public class fragHome extends Fragment
                         int selectedItemType = -1;
 
                         // Creating and Building the Dialog
+                        String[] itemTypes = getActivity().getResources().getStringArray(R.array.item_types);
                         Dialog itemTypesDialog;
                         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                         builder.setTitle("Select Item Type");
-                        builder.setSingleChoiceItems(clsItemTypes.ITEM_TYPES, selectedItemType, new DialogInterface.OnClickListener() {
+                        builder.setSingleChoiceItems(itemTypes, selectedItemType, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int position) {
                                 int itemType = position + 1;
                                 switch (itemType) {
-                                    case clsItemTypes.CREDIT_CARDS:
+                                    case MySettings.CREDIT_CARDS:
                                         createNewCreditCard(newItemID);
                                         break;
 
-                                    case clsItemTypes.GENERAL_ACCOUNTS:
+                                    case MySettings.GENERAL_ACCOUNTS:
                                         createNewGeneralAccount(newItemID);
                                         break;
 
-                                    case clsItemTypes.SOFTWARE:
+                                    case MySettings.SOFTWARE:
                                         createNewSoftware(newItemID);
                                         break;
 
-                                    case clsItemTypes.WEBSITES:
+                                    case MySettings.WEBSITES:
                                         createNewWebsite(newItemID);
                                         break;
                                 }
@@ -357,7 +372,7 @@ public class fragHome extends Fragment
                     return true;
 
                 case R.id.action_show_search:
-                    setupDisplay(clsItemTypes.ALL_ITEMS);
+                    setupDisplay(MySettings.ALL_ITEMS);
                     getActivity().invalidateOptionsMenu();
                     return true;
 
@@ -376,7 +391,7 @@ public class fragHome extends Fragment
     private void createNewCreditCard(long newItemID) {
         String newItemName = getActivity().getString(R.string.new_credit_card_name);
         long itemID = ItemsTable.createNewItem(getActivity(), mActiveUserID,
-                newItemID, clsItemTypes.CREDIT_CARDS, newItemName);
+                newItemID, MySettings.CREDIT_CARDS, newItemName);
         if (itemID > 0 && itemID == newItemID) {
             MySettings.setActiveItemID(itemID);
             EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_EDIT_CREDIT_CARD, true));
@@ -388,7 +403,7 @@ public class fragHome extends Fragment
     private void createNewGeneralAccount(long newItemID) {
         String newItemName = getActivity().getString(R.string.new_general_account_name);
         long itemID = ItemsTable.createNewItem(getActivity(), mActiveUserID,
-                newItemID, clsItemTypes.GENERAL_ACCOUNTS, newItemName);
+                newItemID, MySettings.GENERAL_ACCOUNTS, newItemName);
         if (itemID > 0 && itemID == newItemID) {
             MySettings.setActiveItemID(itemID);
             EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_EDIT_GENERAL_ACCOUNT, true));
@@ -400,7 +415,7 @@ public class fragHome extends Fragment
     private void createNewSoftware(long newItemID) {
         String newItemName = getActivity().getString(R.string.new_software_name);
         long itemID = ItemsTable.createNewItem(getActivity(), mActiveUserID,
-                newItemID, clsItemTypes.SOFTWARE, newItemName);
+                newItemID, MySettings.SOFTWARE, newItemName);
         if (itemID > 0 && itemID == newItemID) {
             MySettings.setActiveItemID(itemID);
             EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_EDIT_SOFTWARE, true));
@@ -412,7 +427,7 @@ public class fragHome extends Fragment
     private void createNewWebsite(long newItemID) {
         String newItemName = getActivity().getString(R.string.new_website_name);
         long itemID = ItemsTable.createNewItem(getActivity(), mActiveUserID,
-                newItemID, clsItemTypes.WEBSITES, newItemName);
+                newItemID, MySettings.WEBSITES, newItemName);
         if (itemID > 0 && itemID == newItemID) {
             MySettings.setActiveItemID(itemID);
             EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_EDIT_WEBSITE, true));
@@ -454,7 +469,9 @@ public class fragHome extends Fragment
     public void onResume() {
         super.onResume();
         MyLog.i("fragHome", "onResume()");
-        MySettings.setActiveFragmentID(MySettings.FRAG_HOME);
+        if(!mIsTwoPane) {
+            MySettings.setActiveFragmentID(MySettings.FRAG_HOME);
+        }
         setupDisplay(mActiveListView);
         mFirstTimeLoading_CreditCards = true;
         mFirstTimeLoading_GeneralAccounts = true;
@@ -496,19 +513,19 @@ public class fragHome extends Fragment
             switch (v.getId()) {
 
                 case R.id.btnCreditCards:
-                    setupDisplay(clsItemTypes.CREDIT_CARDS);
+                    setupDisplay(MySettings.CREDIT_CARDS);
                     break;
 
                 case R.id.btnGeneralAccounts:
-                    setupDisplay(clsItemTypes.GENERAL_ACCOUNTS);
+                    setupDisplay(MySettings.GENERAL_ACCOUNTS);
                     break;
 
                 case R.id.btnSoftware:
-                    setupDisplay(clsItemTypes.SOFTWARE);
+                    setupDisplay(MySettings.SOFTWARE);
                     break;
 
                 case R.id.btnWebsites:
-                    setupDisplay(clsItemTypes.WEBSITES);
+                    setupDisplay(MySettings.WEBSITES);
                     break;
             }
         }
@@ -561,7 +578,7 @@ public class fragHome extends Fragment
                 lvGeneralAccounts.setVisibility(View.GONE);
                 lvWebsites.setVisibility(View.GONE);
                 lvSoftware.setVisibility(View.GONE);
-                mActiveListView = clsItemTypes.CREDIT_CARDS;
+                mActiveListView = MySettings.CREDIT_CARDS;
                 hideKeyBoard(txtSearch);
                 mFirstTimeDisplayed = false;
                 mLastCategoryShown = USER_CREDIT_CARD_ITEMS;
@@ -605,7 +622,7 @@ public class fragHome extends Fragment
                 lvCreditCards.setVisibility(View.GONE);
                 lvWebsites.setVisibility(View.GONE);
                 lvSoftware.setVisibility(View.GONE);
-                mActiveListView = clsItemTypes.GENERAL_ACCOUNTS;
+                mActiveListView = MySettings.GENERAL_ACCOUNTS;
                 hideKeyBoard(txtSearch);
                 mFirstTimeDisplayed = false;
                 mLastCategoryShown = USER_GENERAL_ACCOUNT_ITEMS;
@@ -648,7 +665,7 @@ public class fragHome extends Fragment
                 lvCreditCards.setVisibility(View.GONE);
                 lvGeneralAccounts.setVisibility(View.GONE);
                 lvSoftware.setVisibility(View.GONE);
-                mActiveListView = clsItemTypes.WEBSITES;
+                mActiveListView = MySettings.WEBSITES;
                 hideKeyBoard(txtSearch);
                 mFirstTimeDisplayed = false;
                 mLastCategoryShown = USER_WEBSITE_ITEMS;
@@ -691,7 +708,7 @@ public class fragHome extends Fragment
                 lvCreditCards.setVisibility(View.GONE);
                 lvGeneralAccounts.setVisibility(View.GONE);
                 lvWebsites.setVisibility(View.GONE);
-                mActiveListView = clsItemTypes.SOFTWARE;
+                mActiveListView = MySettings.SOFTWARE;
                 hideKeyBoard(txtSearch);
                 mFirstTimeDisplayed = false;
                 mLastCategoryShown = USER_SOFTWARE_ITEMS;
@@ -709,7 +726,7 @@ public class fragHome extends Fragment
                 lvGeneralAccounts.setVisibility(View.GONE);
                 lvWebsites.setVisibility(View.GONE);
                 lvSoftware.setVisibility(View.GONE);
-                mActiveListView = clsItemTypes.ALL_ITEMS;
+                mActiveListView = MySettings.ALL_ITEMS;
                 showKeyBoard(txtSearch);
                 break;
         }
@@ -762,7 +779,7 @@ public class fragHome extends Fragment
                 break;
 
             case ALL_USER_ITEMS:
-                MyLog.i("fragHome", "onCreateLoader. Loading ALL_USER_ITEMS");
+                   MyLog.i("fragHome", "onCreateLoader. Loading ALL_USER_ITEMS");
                 cursorLoader = ItemsTable.getUserItemsCursorLoader(getActivity(), mActiveUserID,
                         ALL_USER_ITEMS, txtSearch.getText().toString(), sortOrder);
                 break;

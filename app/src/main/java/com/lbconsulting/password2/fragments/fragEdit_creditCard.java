@@ -474,9 +474,9 @@ public class fragEdit_creditCard extends Fragment implements TextWatcher {
         mActiveItem.putAlternatePhoneNumber(unformattedAlternatePhoneNumber);
         mActiveItem.update();
 
-        if (mIsItemNameDirty) {
+/*        if (mIsItemNameDirty) {
             ItemsTable.sortItemsAsync(getActivity(), mActiveItem.getUserID());
-        }
+        }*/
 
         // save the changes to Dropbox
         EventBus.getDefault().post(new clsEvents.saveChangesToDropbox());
@@ -513,7 +513,6 @@ public class fragEdit_creditCard extends Fragment implements TextWatcher {
 
             // Do Fragment menu item stuff here
             case R.id.action_save:
-                //Toast.makeText(getActivity(), "TO COME: action_save Click", Toast.LENGTH_SHORT).show();
                 if (txtItemName.hasFocus()) {
                     validateItemName();
                     mNameValidated = true;
@@ -522,13 +521,12 @@ public class fragEdit_creditCard extends Fragment implements TextWatcher {
                 return true;
 
             case R.id.action_cancel:
-                // Toast.makeText(getActivity(), "TO COME: action_cancel Click", Toast.LENGTH_SHORT).show();
                 mIsDirty = false;
                 if (mIsNewPasswordItem) {
                     // delete the newly created password item
                     ItemsTable.deleteItem(getActivity(), mActiveItem.getItemID());
                 }
-                EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_ITEM_DETAIL, false));
+                EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_HOME, false));
                 return true;
 
             case R.id.action_clear:

@@ -6,8 +6,8 @@ package com.lbconsulting.password2.classes;
  * It is used to facilitate filling the SQLite database sort order key
  */
 public class clsItemSort {
-    long mItemID;
-    String mItemName;
+   private long mItemID;
+    private String mItemName;
 
     public clsItemSort(long itemID, String itemName){
         this.mItemID = itemID;

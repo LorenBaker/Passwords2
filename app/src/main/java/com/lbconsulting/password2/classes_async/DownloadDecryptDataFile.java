@@ -302,19 +302,19 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
 
     private void updateSQLiteDatabase(clsLabPasswords passwordsData) {
 
-         final int ITEM_NAME = 0;
-         final int SOFTWARE_KEY_CODE = 1;
-         final int COMMENTS = 2;
-         final int CREDIT_CARD_ACCOUNT_NUMBER = 3;
-         final int CREDIT_CARD_SECURITY_CODE = 4;
-         final int CREDIT_CARD_EXPIRATION_MONTH = 5;
-         final int CREDIT_CARD_EXPIRATION_YEAR = 6;
-         final int GENERAL_ACCOUNT_NUMBER = 7;
-         final int PRIMARY_PHONE_NUMBER = 8;
-         final int ALTERNATE_PHONE_NUMBER = 9;
-         final int WEBSITE_URL = 10;
-         final int WEBSITE_USER_ID = 11;
-         final int WEBSITE_PASSWORD = 12;
+        // final int ITEM_NAME = 0;
+        final int SOFTWARE_KEY_CODE = 0;
+        final int COMMENTS = 1;
+        final int CREDIT_CARD_ACCOUNT_NUMBER = 2;
+        final int CREDIT_CARD_SECURITY_CODE = 3;
+        final int CREDIT_CARD_EXPIRATION_MONTH = 4;
+        final int CREDIT_CARD_EXPIRATION_YEAR = 5;
+        final int GENERAL_ACCOUNT_NUMBER = 6;
+        final int PRIMARY_PHONE_NUMBER = 7;
+        final int ALTERNATE_PHONE_NUMBER = 8;
+        final int WEBSITE_URL = 9;
+        final int WEBSITE_USER_ID = 10;
+        final int WEBSITE_PASSWORD = 11;
 
         MyLog.i("DownloadDecryptDataFile", "Found " + passwordsData.getUsers().size() + " users; "
                 + passwordsData.getPasswordItems().size() + " items.");
@@ -349,17 +349,17 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
 
 
         long lastItemID = 0;
-        ArrayList<clsItemSort> sortingList = null;
+        //ArrayList<clsItemSort> sortingList = null;
         ArrayList<String> plainTextArray;
 
         for (clsItem item : passwordsData.getPasswordItems()) {
             if (item.getID() > lastItemID) {
                 lastItemID = item.getID();
             }
-            sortingList = new ArrayList<>();
+           // sortingList = new ArrayList<>();
             plainTextArray = new ArrayList<>();
 
-            plainTextArray.add(item.getName());
+            //plainTextArray.add(item.getName());
             plainTextArray.add(item.getSoftwareKeyCode());
             plainTextArray.add(item.getComments());
             plainTextArray.add(item.getCreditCardAccountNumber());
@@ -378,7 +378,8 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
 
             if (!ItemsTable.itemIdExists(mContext, itemID)) {
                 // the item is not in the database ... so add it
-                long newItemID = ItemsTable.createNewItem(mContext, item.getUser_ID(), itemID, item.getItemType_ID(), encryptedArray.get(ITEM_NAME));
+                long newItemID = ItemsTable.createNewItem(mContext,
+                        item.getUser_ID(), itemID, item.getItemType_ID(), item.getName());
                 if (newItemID != itemID) {
                     MyLog.e("DownloadDecryptDataFile", "updateSQLiteDatabase: ERROR creating item with ID = " + itemID);
                     // continue to the next item
@@ -388,7 +389,7 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
 
             ContentValues cv = new ContentValues();
             cv.put(ItemsTable.COL_IS_IN_TABLE, 1);
-            cv.put(ItemsTable.COL_ITEM_NAME, encryptedArray.get(ITEM_NAME));
+            cv.put(ItemsTable.COL_ITEM_NAME, item.getName());
             cv.put(ItemsTable.COL_ITEM_TYPE_ID, item.getItemType_ID());
             cv.put(ItemsTable.COL_USER_ID, item.getUser_ID());
             cv.put(ItemsTable.COL_SOFTWARE_KEY_CODE, encryptedArray.get(SOFTWARE_KEY_CODE));
@@ -406,10 +407,10 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
             cv.put(ItemsTable.COL_WEBSITE_PASSWORD, encryptedArray.get(WEBSITE_PASSWORD));
             ItemsTable.updateItems(mContext, itemID, cv);
 
-            sortingList.add(new clsItemSort(item.getID(), item.getName()));
+           // sortingList.add(new clsItemSort(item.getID(), item.getName()));
         }
 
-        if (sortingList != null && sortingList.size() > 0) {
+/*        if (sortingList != null && sortingList.size() > 0) {
             Collections.sort(sortingList, new Comparator<clsItemSort>() {
                 @Override
                 public int compare(clsItemSort item1, clsItemSort item2) {
@@ -422,7 +423,7 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
                 ItemsTable.updateItemSortKey(mContext, item.getItemID(), sortKey);
                 sortKey++;
             }
-        }
+        }*/
         MySettings.setLastItemAndUserIDs(lastItemID, lastUserID);
 
         // remove any users or items that are no longer in the database

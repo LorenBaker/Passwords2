@@ -13,7 +13,9 @@ import com.lbconsulting.password2.classes.clsEvents;
 import com.lbconsulting.password2.classes.clsItem;
 import com.lbconsulting.password2.classes.clsItemValues;
 import com.lbconsulting.password2.classes.clsLabPasswords;
+import com.lbconsulting.password2.classes.clsNetworkStatus;
 import com.lbconsulting.password2.classes.clsUsers;
+import com.lbconsulting.password2.classes.clsUtils;
 import com.lbconsulting.password2.database.ItemsTable;
 import com.lbconsulting.password2.database.UsersTable;
 import com.lbconsulting.password2.services.UploadService;
@@ -37,7 +39,7 @@ public class SaveChangesToDropbox extends AsyncTask<Void, Void, String> {
     public SaveChangesToDropbox(Context context, boolean showResultsDialog) {
         // We set the context this way so we don't accidentally leak activities
         mContext = context.getApplicationContext();
-        mShowResultsDialog=showResultsDialog;
+        mShowResultsDialog = showResultsDialog;
     }
 
     @Override
@@ -121,7 +123,6 @@ public class SaveChangesToDropbox extends AsyncTask<Void, Void, String> {
             }
         }
 
-        itemValues = null;
         if (itemsCursor != null) {
             itemsCursor.close();
         }
@@ -159,10 +160,17 @@ public class SaveChangesToDropbox extends AsyncTask<Void, Void, String> {
                 uploadServiceIntent.putExtra(UploadService.ARG_NETWORKING_PREFERENCE, MySettings.getNetworkPreference());
                 mContext.startService(uploadServiceIntent);
 
-                if(mShowResultsDialog) {
-                    String title ="Uploading file";
-                    String msg = "A refreshed Passwords data file was sent to the background upload service.\n\n"
-                            +"More information can be found in the Network Log";
+                clsNetworkStatus status = clsUtils.getNetworkStatus(mContext, MySettings.getNetworkPreference());
+
+                if (mShowResultsDialog) {
+                    String title = "Uploading file";
+                    String msg = "A refreshed Passwords data file was sent to the background upload service.\n\n";
+                    if (status.isOkToUseNetwork()) {
+                        msg = msg + "More information can be found in the Network Log";
+                    } else {
+                        msg = msg + "The file will be uploaded when the network becomes available.";
+                    }
+
                     EventBus.getDefault().post(new clsEvents.showOkDialog(title, msg));
                 }
 

@@ -15,8 +15,8 @@ import java.security.NoSuchAlgorithmException;
 public class MySettings {
 
     public static final String NOT_AVAILABLE = "N/A...N/A";
-    public static final long DEFAULT_LONGEVITY_MILLISECONDS = 15 * 60000; // 15 minutes
-    public static final String DROPBOX_FILENAME = "PasswordsDatafile.txt";
+    private  static final long DEFAULT_LONGEVITY_MILLISECONDS = 15 * 60000; // 15 minutes
+    private  static final String DROPBOX_FILENAME = "PasswordsDatafile.txt";
     public static final int MAX_NUMBER_OF_BACKUP_FILES = 5;
     public static final String ARG_IS_DIRTY = "arg_isDirty";
     public static final String DB_KEY = "9f9130ba72070ad6bb86efae49f11e10";
@@ -49,6 +49,12 @@ public class MySettings {
     public static final int JCB = 3;
     public static final int MASTERCARD = 4;
     public static final int VISA = 5;
+
+    public static final int CREDIT_CARDS = 1;
+    public static final int GENERAL_ACCOUNTS = 2;
+    public static final int SOFTWARE = 3;
+    public static final int WEBSITES = 4;
+    public static final int ALL_ITEMS = 5;
 
     public static final int BTN_CREDIT_CARDS = 0;
     public static final int BTN_GENERAL_ACCOUNTS = 1;
@@ -87,29 +93,29 @@ public class MySettings {
     private static final String SETTING_LISTS_START_CLOSED = "listsStartClosed";
     private static final String SETTING_DROPBOX_FOLDER_NAME = "dropboxFolderName";
 
-    public static final String SETTING_NETWORK_PREFERENCE = "networkPreference";
-    public static final String SETTING_DROPBOX_FILE_REV = "dropboxFileRev";
+    private  static final String SETTING_NETWORK_PREFERENCE = "networkPreference";
+    private  static final String SETTING_DROPBOX_FILE_REV = "dropboxFileRev";
 
     public static final String SETTING_OK_TO_USE_NETWORK = "okToUseNetwork";
     public static final String SETTING_IS_MOBILE_CONNECTED = "isMobileConnected";
     public static final String SETTING_IS_WIFI_CONNECTED = "isWifiConnected";
-    public static final String SETTING_NETWORK_BUSY = "networkBusy";
-    public static final String SETTING_SYNC_PERIODICITY = "syncPeriodicity";
+    private  static final String SETTING_NETWORK_BUSY = "networkBusy";
+    private  static final String SETTING_SYNC_PERIODICITY = "syncPeriodicity";
 
 
-    public static final String SETTING_LV_INDEX_ALL_USER_ITEMS = "listViewIndexAllUserItems";
-    public static final String SETTING_LV_INDEX_CREDIT_CARDS = "listViewIndexCreditCards";
-    public static final String SETTING_LV_INDEX_GENERAL_ACCOUNTS = "listViewIndexGeneralAccounts";
-    public static final String SETTING_LV_INDEX_WEBSITES = "listViewIndexWebsites";
-    public static final String SETTING_LV_INDEX_SOFTWARE = "listViewIndexSoftware";
+    private  static final String SETTING_LV_INDEX_ALL_USER_ITEMS = "listViewIndexAllUserItems";
+    private  static final String SETTING_LV_INDEX_CREDIT_CARDS = "listViewIndexCreditCards";
+    private  static final String SETTING_LV_INDEX_GENERAL_ACCOUNTS = "listViewIndexGeneralAccounts";
+    private  static final String SETTING_LV_INDEX_WEBSITES = "listViewIndexWebsites";
+    private  static final String SETTING_LV_INDEX_SOFTWARE = "listViewIndexSoftware";
 
-    public static final String SETTING_LV_TOP_ALL_USER_ITEMS = "listViewTopAllUserItems";
-    public static final String SETTING_LV_TOP_CREDIT_CARDS = "listViewTopCreditCards";
-    public static final String SETTING_LV_TOP_GENERAL_ACCOUNTS = "listViewTopGeneralAccounts";
-    public static final String SETTING_LV_TOP_WEBSITES = "listViewTopWebsites";
-    public static final String SETTING_LV_TOP_SOFTWARE = "listViewTopSoftware";
+    private  static final String SETTING_LV_TOP_ALL_USER_ITEMS = "listViewTopAllUserItems";
+    private  static final String SETTING_LV_TOP_CREDIT_CARDS = "listViewTopCreditCards";
+    private  static final String SETTING_LV_TOP_GENERAL_ACCOUNTS = "listViewTopGeneralAccounts";
+    private  static final String SETTING_LV_TOP_WEBSITES = "listViewTopWebsites";
+    private  static final String SETTING_LV_TOP_SOFTWARE = "listViewTopSoftware";
 
-    public static final String SETTING_ENCRYPTION_TEST = "encryptionTest";
+    private  static final String SETTING_ENCRYPTION_TEST = "encryptionTest";
     private static final String ENCRYPTION_TEST_TEXT = "This is a test, only a test.";
 
     private static final String DEFAULT_DROPBOX_PATH = "No Folder Selected";
@@ -466,7 +472,7 @@ public class MySettings {
     public static int getActiveListViewID() {
         SharedPreferences passwordsSavedState =
                 mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
-        return passwordsSavedState.getInt(SETTING_ACTIVE_LIST_VIEW_ID, clsItemTypes.CREDIT_CARDS);
+        return passwordsSavedState.getInt(SETTING_ACTIVE_LIST_VIEW_ID, MySettings.CREDIT_CARDS);
     }
 
     public static void setActiveListViewID(int activeListViewID) {
@@ -587,7 +593,7 @@ public class MySettings {
                 mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
 
         String encryptedIVPassword = passwordsSavedState.getString(SETTING_APP_PASSWORD, NOT_AVAILABLE);
-        if (!encryptedIVPassword.equals(NOT_AVAILABLE)) {
+        if (encryptedIVPassword != null && !encryptedIVPassword.equals(NOT_AVAILABLE)) {
             appPassword = clsUtils.decryptString(encryptedIVPassword, mKey, false);
 
         }
@@ -598,7 +604,7 @@ public class MySettings {
         return appPassword;
     }
 
-    public static long getPasswordSavedTime() {
+    private  static long getPasswordSavedTime() {
         SharedPreferences passwordsSavedState =
                 mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
         return passwordsSavedState.getLong(SETTING_APP_PASSWORD_SAVED_TIME, -1);
