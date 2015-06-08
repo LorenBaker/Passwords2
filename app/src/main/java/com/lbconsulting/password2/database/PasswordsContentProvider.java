@@ -123,11 +123,12 @@ public class PasswordsContentProvider extends ContentProvider {
         }
 
         if (db != null) {
-            String groupBy = null;
-            String having = null;
+/*            String groupBy = null;
+            String having = null;*/
             Cursor cursor = null;
             try {
-                cursor = queryBuilder.query(db, projection, selection, selectionArgs, groupBy, having, sortOrder);
+                //cursor = queryBuilder.query(db, projection, selection, selectionArgs, groupBy, having, sortOrder);
+                cursor = queryBuilder.query(db, projection, selection, selectionArgs, null, null, sortOrder);
             } catch (Exception e) {
                 MyLog.e("PasswordsContentProvider", "query: " + e.toString());
                 e.printStackTrace();
@@ -147,7 +148,7 @@ public class PasswordsContentProvider extends ContentProvider {
 
         SQLiteDatabase db;
         long newRowId;
-        String nullColumnHack = null;
+        //String nullColumnHack = null;
 
         // Open a WritableDatabase database to support the insert transaction
         db = database.getWritableDatabase();
@@ -155,7 +156,8 @@ public class PasswordsContentProvider extends ContentProvider {
         int uriType = sURIMatcher.match(uri);
         switch (uriType) {
             case USERS_MULTI_ROWS:
-                newRowId = db.insertOrThrow(UsersTable.TABLE_USERS, nullColumnHack, values);
+                //newRowId = db.insertOrThrow(UsersTable.TABLE_USERS, nullColumnHack, values);
+                newRowId = db.insertOrThrow(UsersTable.TABLE_USERS, null, values);
                 if (newRowId > 0) {
                     // Construct and return the URI of the newly inserted row.
                     Uri newRowUri = ContentUris.withAppendedId(UsersTable.CONTENT_URI, newRowId);
@@ -172,7 +174,7 @@ public class PasswordsContentProvider extends ContentProvider {
                         "Method insert: Cannot insert a new row with a single row URI. Illegal URI: " + uri);
 
             case ITEMS_MULTI_ROWS:
-                newRowId = db.insertOrThrow(ItemsTable.TABLE_ITEMS, nullColumnHack, values);
+                newRowId = db.insertOrThrow(ItemsTable.TABLE_ITEMS, null, values);
                 if (newRowId > 0) {
                     // Construct and return the URI of the newly inserted row.
                     Uri newRowUri = ContentUris.withAppendedId(ItemsTable.CONTENT_URI, newRowId);
@@ -189,7 +191,7 @@ public class PasswordsContentProvider extends ContentProvider {
                         "Method insert: Cannot insert a new row with a single row URI. Illegal URI: " + uri);
 
             case NETWORK_LOG_MULTI_ROWS:
-                newRowId = db.insertOrThrow(NetworkLogTable.TABLE_NETWORK_LOG, nullColumnHack, values);
+                newRowId = db.insertOrThrow(NetworkLogTable.TABLE_NETWORK_LOG, null, values);
                 if (newRowId > 0) {
                     // Construct and return the URI of the newly inserted row.
                     Uri newRowUri = ContentUris.withAppendedId(NetworkLogTable.CONTENT_URI, newRowId);

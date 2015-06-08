@@ -20,6 +20,7 @@ import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
 import com.lbconsulting.password2.classes.clsItemValues;
+import com.lbconsulting.password2.classes.clsUtils;
 import com.lbconsulting.password2.database.ItemsTable;
 
 import de.greenrobot.event.EventBus;
@@ -253,6 +254,10 @@ public class fragEdit_website extends Fragment implements TextWatcher {
                 txtUserID.setText("");
                 txtPassword.setText("");
                 mIsDirty = true;
+                return true;
+
+            case R.id.action_change_item_type:
+                clsUtils.changeItemType(getActivity(), mActiveItem);
                 return true;
 
             case android.R.id.home:

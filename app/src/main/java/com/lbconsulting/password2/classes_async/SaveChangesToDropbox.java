@@ -33,8 +33,8 @@ import de.greenrobot.event.EventBus;
  */
 public class SaveChangesToDropbox extends AsyncTask<Void, Void, String> {
 
-    private Context mContext;
-    private boolean mShowResultsDialog;
+    private final Context mContext;
+    private final boolean mShowResultsDialog;
 
     public SaveChangesToDropbox(Context context, boolean showResultsDialog) {
         // We set the context this way so we don't accidentally leak activities

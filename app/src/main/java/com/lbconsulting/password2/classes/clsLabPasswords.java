@@ -7,8 +7,8 @@ import java.util.ArrayList;
  */
 public class clsLabPasswords {
 
-    private ArrayList<clsUsers> Users = new ArrayList<>();
-    private ArrayList<clsItem> PasswordItems = new ArrayList<>();
+    private final ArrayList<clsUsers> Users = new ArrayList<>();
+    private final ArrayList<clsItem> PasswordItems = new ArrayList<>();
 
 
     public clsLabPasswords(){

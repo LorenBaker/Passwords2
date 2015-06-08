@@ -62,6 +62,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         MyLog.i("MainActivity", "onCreate");
 
+        MySettings.setContext(this);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         setContentView(R.layout.activity_main);
@@ -70,7 +71,6 @@ public class MainActivity extends Activity {
         mShowActionBarProgress = false;
 
         EventBus.getDefault().register(this);
-        MySettings.setContext(this);
 
         AppKeyPair appKeys = new AppKeyPair(APP_KEY, APP_SECRET);
         AndroidAuthSession session = new AndroidAuthSession(appKeys);
@@ -460,9 +460,9 @@ public class MainActivity extends Activity {
     }
 
     private void showHelpAndAboutMenus(Menu menu) {
-        int HelpMenu = 5;
-        int AboutMenu = 6;
-        menu.getItem(HelpMenu).setVisible(true);
+       // int HelpMenu = 5;
+        int AboutMenu = 5;
+        //menu.getItem(HelpMenu).setVisible(true);
         menu.getItem(AboutMenu).setVisible(true);
     }
 
@@ -498,10 +498,10 @@ public class MainActivity extends Activity {
             showFragment(MySettings.FRAG_NETWORK_LOG, false);
             return true;
 
-        } else if (id == R.id.action_help) {
+/*        } else if (id == R.id.action_help) {
             // TODO: make help fragment
             Toast.makeText(this, "TO COME: action_help", Toast.LENGTH_SHORT).show();
-            return true;
+            return true;*/
 
         } else if (id == R.id.action_about) {
             // TODO: make about fragment

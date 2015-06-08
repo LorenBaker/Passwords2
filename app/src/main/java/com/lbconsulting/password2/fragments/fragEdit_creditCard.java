@@ -182,19 +182,20 @@ public class fragEdit_creditCard extends Fragment implements TextWatcher {
     }
 
     private int findSpinnerPosition(String creditCardAccountNumber) {
-        clsUtils.creditCard card = clsUtils.getCreditCardType(creditCardAccountNumber);
+        String [] creditCardNames = getActivity().getResources().getStringArray(R.array.credit_card_names);
+        clsUtils.creditCard card = clsUtils.getCreditCardType(getActivity(), creditCardAccountNumber);
         int position = Spinner.INVALID_POSITION;
-        if (card.getCardType().equals(MySettings.CreditCardNames[0])) {
+        if (card.getCardType().equals(creditCardNames[0])) {
             position = 0; // American Express
-        } else if (card.getCardType().equals(MySettings.CreditCardNames[1])) {
+        } else if (card.getCardType().equals(creditCardNames[1])) {
             position = 1; // Diners Club
-        } else if (card.getCardType().equals(MySettings.CreditCardNames[2])) {
+        } else if (card.getCardType().equals(creditCardNames[2])) {
             position = 2; // Discover
-        } else if (card.getCardType().equals(MySettings.CreditCardNames[3])) {
+        } else if (card.getCardType().equals(creditCardNames[3])) {
             position = 3; // JCB
-        } else if (card.getCardType().equals(MySettings.CreditCardNames[4])) {
+        } else if (card.getCardType().equals(creditCardNames[4])) {
             position = 4; // MasterCard
-        } else if (card.getCardType().equals(MySettings.CreditCardNames[5])) {
+        } else if (card.getCardType().equals(creditCardNames[5])) {
             position = 5; // VISA
         }
         return position;
@@ -221,8 +222,10 @@ public class fragEdit_creditCard extends Fragment implements TextWatcher {
         txtItemName.addTextChangedListener(this);
 
         spnCreditCardType = (Spinner) rootView.findViewById(R.id.spnCreditCardType);
+
+        String [] creditCardNames = getActivity().getResources().getStringArray(R.array.credit_card_names);
         final ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(getActivity(),
-                android.R.layout.simple_spinner_item, MySettings.CreditCardNames);
+                android.R.layout.simple_spinner_item, creditCardNames);
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spnCreditCardType.setAdapter(dataAdapter);
         spnCreditCardType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -354,7 +357,7 @@ public class fragEdit_creditCard extends Fragment implements TextWatcher {
 
     private void validateCreditCard() {
         mCreditCardNumber = makeCreditCardNumber();
-        clsUtils.creditCard card = clsUtils.getCreditCardType(mCreditCardNumber);
+        clsUtils.creditCard card = clsUtils.getCreditCardType(getActivity(), mCreditCardNumber);
         boolean creditCardTypeResult = !card.getCardType().equals(MySettings.UNKNOWN);
         if (creditCardTypeResult) {
             boolean luhnTestResult = clsUtils.luhnTest(mCreditCardNumber);
@@ -546,6 +549,9 @@ public class fragEdit_creditCard extends Fragment implements TextWatcher {
                 mIsDirty = true;
                 return true;
 
+            case R.id.action_change_item_type:
+                clsUtils.changeItemType(getActivity(), mActiveItem);
+                return true;
 
             case android.R.id.home:
                 EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_HOME, false));

@@ -5,8 +5,8 @@ package com.lbconsulting.password2.classes;
  */
 public class clsListViewPosition {
 
-    private int mIndex;
-    private int mTop;
+    private final int mIndex;
+    private final int mTop;
 
     public clsListViewPosition(int index, int top) {
         mIndex = index;

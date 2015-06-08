@@ -32,7 +32,6 @@ import com.lbconsulting.password2.classes.clsEvents;
 import com.lbconsulting.password2.classes.clsListViewPosition;
 import com.lbconsulting.password2.classes.clsUserValues;
 import com.lbconsulting.password2.database.ItemsTable;
-import com.lbconsulting.password2.database.UsersTable;
 
 import de.greenrobot.event.EventBus;
 
@@ -89,8 +88,6 @@ public class fragHome extends Fragment
     private boolean mFirstTimeLoading_Websites = true;
     private boolean mFirstTimeLoading_Software = true;
     private boolean mFirstTimeLoading_AllUserItems = true;
-
-    private boolean mIsTwoPane;
 
 
     public fragHome() {
@@ -469,9 +466,9 @@ public class fragHome extends Fragment
     public void onResume() {
         super.onResume();
         MyLog.i("fragHome", "onResume()");
-        if(!mIsTwoPane) {
+/*        if(!mIsTwoPane) {
             MySettings.setActiveFragmentID(MySettings.FRAG_HOME);
-        }
+        }*/
         setupDisplay(mActiveListView);
         mFirstTimeLoading_CreditCards = true;
         mFirstTimeLoading_GeneralAccounts = true;

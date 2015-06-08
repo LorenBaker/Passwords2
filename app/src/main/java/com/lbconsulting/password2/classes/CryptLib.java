@@ -135,17 +135,12 @@ public class CryptLib {
                 // transformation
                 // (decryption)
                 _out = new String(decryptedVal);
-            } catch (InvalidKeyException e) {
+            } catch (InvalidKeyException | IllegalArgumentException
+                    | InvalidAlgorithmParameterException | BadPaddingException
+                    | IllegalBlockSizeException e) {
                 e.printStackTrace();
-            } catch (IllegalArgumentException e){
-                e.printStackTrace();
-            } catch (InvalidAlgorithmParameterException e) {
-                e.printStackTrace();
-            } catch (IllegalBlockSizeException e) {
-                e.printStackTrace();
-            } catch (BadPaddingException e) {
-                e.printStackTrace();
-            }catch (Exception e ){
+
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }

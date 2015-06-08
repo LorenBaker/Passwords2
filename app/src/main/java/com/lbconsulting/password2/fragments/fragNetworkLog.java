@@ -33,8 +33,6 @@ public class fragNetworkLog extends Fragment
 
     private  static final int NETWORK_LOG = 20;
 
-    private ListView lvNetworkLog;
-
     private LoaderManager mLoaderManager = null;
     // The callbacks through which we will interact with the LoaderManager.
     private LoaderManager.LoaderCallbacks<Cursor> mNetworkLogCallbacks;
@@ -89,7 +87,7 @@ public class fragNetworkLog extends Fragment
         MyLog.i("fragNetworkLog", "onCreateView()");
         View rootView = inflater.inflate(R.layout.frag_network_log, container, false);
 
-        lvNetworkLog = (ListView) rootView.findViewById(R.id.lvNetworkLog);
+        ListView lvNetworkLog = (ListView) rootView.findViewById(R.id.lvNetworkLog);
         mNetworkLogCursorAdapter = new NetworkLogCursorAdapter(getActivity(), null, 0, "NetworkLog");
         mNetworkLogCallbacks = this;
         lvNetworkLog.setAdapter(mNetworkLogCursorAdapter);

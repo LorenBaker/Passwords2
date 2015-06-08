@@ -11,7 +11,7 @@ import com.lbconsulting.password2.database.UsersTable;
  */
 public class clsUserValues {
 
-    private Context mContext;
+    private final Context mContext;
     private  Cursor mUserCursor;
     private ContentValues cv;
 

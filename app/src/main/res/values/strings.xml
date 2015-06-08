@@ -1,45 +1,59 @@
 <resources>
     <string name="app_name">Passwords</string>
-    <string name="title_password_item_detail">Password Item Detail</string>
 
-    <string name="tvFirstTimeMessage_text_Step1">Step 1: Select Dropbox folder.</string>
-    <string name="tvFirstTimeMessage_text_Step3A">Step 2: Enter your password, then click OK.</string>
-    <string name="tvFirstTimeMessage_text_Step5A">Step 3: Select user.\n\n</string>
-    <string name="tvFirstTimeMessage_text_Step3B">Step 2: Create new user.</string>
-    <string name="tvFirstTimeMessage_text_Step4B">Step 3: Create your application password.</string>
-
+    <string name="action_about_title">About</string>
+    <string name="action_change_item_category_title">Change Category</string>
+    <string name="action_clear_title">Clear Entries</string>
+    <string name="action_discard_title">Discard</string>
+    <string name="action_new_title">New</string>
+    <string name="action_progress_bar_title">Loading…</string>
+    <string name="action_purge_log_title">Purge Log</string>
+    <string name="action_refresh_title">Refresh</string>
+    <string name="action_save_title">Save</string>
+    <string name="action_settings_title">Settings</string>
+    <string name="action_show_categories_title">Categories</string>
+    <string name="action_show_network_log_title">Network Log</string>
+    <string name="actionBarTitle_gettingStarted">Getting Started</string>
     <string name="actionBarTitle_Settings">Settings</string>
     <string name="actionBarTitle_userSettings">User Settings</string>
     <string name="btnAppPasswordSettings_text">Application Password Settings</string>
+    <string name="btnCallAlternate_text">Call Alternate</string>
+    <string name="btnCallPrimary_text">Call Primary</string>
     <string name="btnCancel_text">Cancel</string>
     <string name="btnChangeAppPassword_text">Change Application Password</string>
+    <string name="btnCopyAccountNumber_text">Copy Account Number</string>
+    <string name="btnCopyPassword_text">Copy Password</string>
     <string name="btnCreateNewUser_text">Create New User</string>
     <string name="btnCreditCards_text">Credit Cards</string>
     <string name="btnDeleteUser_text">Delete User:\u0020</string>
-    <string name="btnDisplay_setText_Display">Display</string>
     <string name="btnDisplay_setText_Hide">Hide</string>
     <string name="btnDisplay_text">Display</string>
     <string name="btnEditUserName_text">Edit User Name:\u0020</string>
     <string name="btnGeneralAccounts_text">General Accounts</string>
+    <string name="btnGoToWebsite_text">Go To Website</string>
     <string name="btnHideItemCategories_text">Select Hidden Item Categories</string>
     <string name="btnNetworkingSettings_text">Networking Settings</string>
     <string name="btnNetworkPreferences_text">Select Network Preference\nUse network\u0020</string>
     <string name="btnNo_text">No</string>
     <string name="btnOK_text">OK</string>
+    <string name="btnSave_text">Save</string>
+    <string name="btnSelect_text">Select</string>
     <string name="btnSelectDropboxFolder_text_default">Select Dropbox Folder\nCurrent Folder:\n</string>
     <string name="btnSelectDropboxFolder_text_state1">Select Dropbox Folder</string>
     <string name="btnSelectPasswordLongevity_text">"Select Password Longevity\nCurrent Longevity: "</string>
     <string name="btnSelectUser_dialog_setTitle">Select User</string>
     <string name="btnSelectUser_text">Select User\nCurrent user:\u0020</string>
     <string name="btnSoftware_text">Software</string>
+    <string name="btnSyncPeriodicity_text">Sync Periodicity\nCheck for updates\u0020</string>
     <string name="btnUserSettings_text">User Settings: New, Edit, Delete</string>
     <string name="btnWebsites_text">Websites</string>
     <string name="btnYes_text">Yes</string>
+    <string name="ckShowVerboseMessages_text">Show verbose Toast messages</string>
     <string name="deleteUser_dialog_message">Do you want to permanently delete user\u0020\"</string>
     <string name="deleteUser_dialog_title">Delete user?</string>
     <string name="downloadError_fileDeleted">Passwords data file has been deleted.</string>
     <string name="downloadError_fileDownloadStarted">File download started. No other status available.</string>
-    <string name="downloadError_fileDownloadSuccess">File downloaded successfully, but the database was not updated?</string>
+    <string name="downloadError_fileDownloadSuccess">File downloaded successfully, but the database was not updated.</string>
     <string name="downloadError_fileFoundButEmpty">Passwords data file found, but is empty!</string>
     <string name="downloadError_fileNotFound">Unable to find the Passwords data file.</string>
     <string name="downloadError_invalidPassword">Unable to decrypt the Passwords data file. Please make sure you are using the correct application password.</string>
@@ -48,10 +62,19 @@
     <string name="downloadError_passwordKeyIsEmpty">Password key is empty.</string>
     <string name="downloadError_unableToParseJason">Unable to parse the Json string.</string>
     <string name="downloadSuccess_databaseUpdatedSuccess">Passwords database successfully updated.</string>
+    <string name="edit_alternate_text">Alternate:</string>
+    <string name="edit_credit_card_code_text">Code:</string>
+    <string name="edit_credit_card_expires_text">Expires:</string>
+    <string name="edit_primary_text">Primary:</string>
+    <string name="edit_general_account_password_title">Password:</string>
+    <string name="edit_website_URL_title">URL:</string>
+    <string name="edit_website_userID_title">User ID:</string>
     <string name="editUserName_dialog_title">Edit User Name</string>
-    <string name="editUserName_editText_hint">Edit User Name</string>
     <string name="enterNewUserName_dialog_title">Enter New User Name</string>
+    <string name="forward_slash">/</string>
+    <string name="general_account_title">Account:</string>
     <string name="HideItemCategoriesDialog_title">Hide Item Categories</string>
+    <string name="hyphen">–</string>
     <string name="invalid_password_message1">The application password must be at least ten characters long, have a minimum of one lower case, one upper case, and one number</string>
     <string name="invalid_password_message2">The proposed password is empty!\n\n</string>
     <string name="invalid_password_message3">"The proposed password's length of "</string>
@@ -60,6 +83,10 @@
     <string name="network_mobile_connected">Network mobile connected.</string>
     <string name="network_okToUseNetwork">"Passwords is OK to use the network.\n"</string>
     <string name="network_wifi_connected">Network connected to Wi-Fi.</string>
+    <string name="new_credit_card_name">New Credit Card</string>
+    <string name="new_general_account_name">New General Account</string>
+    <string name="new_software_name">New Software</string>
+    <string name="new_website_name">New Website</string>
     <string name="newDropboxFolderDialog_title">Enter Dropbox Folder Name</string>
     <string name="newDropboxFolderDialogPositiveButton_text">Create Folder</string>
     <string name="newDropboxFolderEditText_hint">New Dropbox Folder Name</string>
@@ -68,16 +95,32 @@
     <string name="noUsersExist_dialog_message">Please select \" Create New User\"</string>
     <string name="noUsersExist_dialog_title">No Users Exist</string>
     <string name="PasswordLongevityDialog_title">App Password Longevity</string>
-    <string name="txtAppPassword_hint">Password</string>
-    <string name="UserNotSelected_text">Not Selected</string>
-    <string name="btnSyncPeriodicity_text">Sync Periodicity\nCheck for updates\u0020</string>
-    <string name="tvProgressBarCaption_text">Syncing with Dropbox \n . . . Please wait</string>
     <string name="select_user_dialog_title">Select User</string>
-    <string name="actionBarTitle_gettingStarted">Getting Started</string>
-    <string name="new_credit_card_name">New Credit Card</string>
-    <string name="new_general_account_name">New General Account</string>
-    <string name="new_software_name">New Software</string>
-    <string name="new_website_name">New Website</string>
+    <string name="title_password_item_detail">Password Item Detail</string>
+    <string name="tvFirstTimeMessage_text_Step1">Step 1: Select Dropbox folder.</string>
+    <string name="tvFirstTimeMessage_text_Step3A">Step 2: Enter your password, then click OK.</string>
+    <string name="tvFirstTimeMessage_text_Step3B">Step 2: Create new user.</string>
+    <string name="tvFirstTimeMessage_text_Step4B">Step 3: Create your application password.</string>
+    <string name="tvFirstTimeMessage_text_Step5A">Step 3: Select user.\n\n</string>
+    <string name="tvFolderName_text">Folder Name</string>
+    <string name="tvItemName_text">Password Item Name</string>
+    <string name="tvProgressBarCaption_text">Syncing with Dropbox \n . . . Please wait</string>
+    <string name="txtAccountNumber_hint">Account Number</string>
+    <string name="txtAlternatePhoneNumber_hint">Alternate Phone Number</string>
+    <string name="txtAppPassword_hint">Password</string>
+    <string name="txtComments_hint">Comments</string>
+    <string name="txtConfirmAppPassword_hint">Confirm Password</string>
+    <string name="txtExpirationMonth_hint">Month</string>
+    <string name="txtExpirationYear_hint">Year</string>
+    <string name="txtItemName_hint">Item Name</string>
+    <string name="txtKeyCode_hint">Key Code</string>
+    <string name="txtPrimaryPhoneNumber_hint">Primary Phone Number</string>
+    <string name="txtSearch_hint">Search</string>
+    <string name="txtSecurityCode_hint">Security Code</string>
+    <string name="txtUserID_hint">User ID</string>
+    <string name="txtWebsiteURL_hint">Website URL</string>
+    <string name="UserNotSelected_text">Not Selected</string>
+
 
 
     <string-array name="longevityItems_list">
@@ -117,6 +160,16 @@
         <item>General Accounts</item>
         <item>Software</item>
         <item>Websites</item>
+    </string-array>
+
+    <!--CreditCardNames = {"American Express", "Diners Club", "Discover", "JCB", "MasterCard", "VISA"};-->
+    <string-array name="credit_card_names">
+        <item>American Express</item>
+        <item>Diners Club</item>
+        <item>Discover</item>
+        <item>JCB</item>
+        <item>MasterCard</item>
+        <item>VISA</item>
     </string-array>
 
 </resources>

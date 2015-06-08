@@ -28,7 +28,6 @@ import de.greenrobot.event.EventBus;
  * This service poles Dropbox for changes in the Passwords data file
  */
 public class UpdateService extends Service {
-    private Looper mServiceLooper;
     private ServiceHandler mServiceHandler;
 
     private volatile boolean taskRunning = true;
@@ -68,7 +67,7 @@ public class UpdateService extends Service {
             isOkToUseNetwork = true;
 
             // Check for any network connection
-        } else if (userNetworkingPreference == MySettings.NETWORK_ANY && (isWifiConnected||isMobileConnected)) {
+        } else if (userNetworkingPreference == MySettings.NETWORK_ANY && (isWifiConnected || isMobileConnected)) {
             // The device is connected to a network ... so,
             // Allow the download of data.
             isOkToUseNetwork = true;
@@ -96,33 +95,39 @@ public class UpdateService extends Service {
         thread.start();
 
         // Get the HandlerThread's Looper and use it for our Handler
-        mServiceLooper = thread.getLooper();
+        Looper mServiceLooper = thread.getLooper();
         mServiceHandler = new ServiceHandler(mServiceLooper);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        mSlowInterval = MySettings.getSyncPeriodicityMinutes();
-        MyLog.i("UpdateService", "onStartCommand: Periodicity = " + mSlowInterval + " minutes.");
+        try {
+            mSlowInterval = MySettings.getSyncPeriodicityMinutes();
+            MyLog.i("UpdateService", "onStartCommand: Periodicity = " + mSlowInterval + " minutes.");
 
-        // convert minutes to milliseconds
-        mSlowInterval = mSlowInterval * 60000;
-        mFastInterval = 15000; // 15 seconds
-        if (mSlowInterval < mFastInterval) {
-            mSlowInterval = 4 * mFastInterval;
+            // convert minutes to milliseconds
+            mSlowInterval = mSlowInterval * 60000;
+            mFastInterval = 15000; // 15 seconds
+            if (mSlowInterval < mFastInterval) {
+                mSlowInterval = 4 * mFastInterval;
+            }
+            INTERVAL = mSlowInterval;
+            mDBApi = MainActivity.getDropboxAPI();
+            mDropboxFullFilename = MySettings.getDropboxFilename();
+
+            // For each start request, send a message to start a job and deliver the
+            // start ID so we know which request we're stopping when we finish the job
+            Message msg = mServiceHandler.obtainMessage();
+            msg.arg1 = startId;
+            mServiceHandler.sendMessage(msg);
+        } catch (Exception e) {
+            MyLog.e("UpdateService", "onStartCommand: Exception: " + e.getMessage());
+            e.printStackTrace();
         }
-        INTERVAL = mSlowInterval;
-        mDBApi = MainActivity.getDropboxAPI();
-        mDropboxFullFilename = MySettings.getDropboxFilename();
-
-        // For each start request, send a message to start a job and deliver the
-        // start ID so we know which request we're stopping when we finish the job
-        Message msg = mServiceHandler.obtainMessage();
-        msg.arg1 = startId;
-        mServiceHandler.sendMessage(msg);
 
         // If we get killed, after returning from here, restart
-        return START_STICKY;
+        //return START_STICKY;
+        return START_NOT_STICKY;
     }
 
     @Override

@@ -21,13 +21,11 @@ import java.util.Calendar;
  */
 public class NetworkLogCursorAdapter extends CursorAdapter {
 
-    private   Context mContext;
-    private   SimpleDateFormat mDateFormatter;
-    private   NumberFormat mNumberFormatter;
+    private final SimpleDateFormat mDateFormatter;
+    private final NumberFormat mNumberFormatter;
 
     public NetworkLogCursorAdapter(Context context, Cursor c, int flags, String NetworkLogsTitle) {
         super(context, c, flags);
-        this.mContext = context;
         mDateFormatter = new SimpleDateFormat("M/d/yy   hh:mm a");
         mNumberFormatter = NumberFormat.getInstance();
         MyLog.i("NetworkLogCursorAdapter", "NetworkLogCursorAdapter constructor. " + NetworkLogsTitle);
@@ -36,8 +34,7 @@ public class NetworkLogCursorAdapter extends CursorAdapter {
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
         LayoutInflater inflater = LayoutInflater.from(context);
-        View view = inflater.inflate(R.layout.row_lv_network_log, parent, false);
-        return view;
+        return inflater.inflate(R.layout.row_lv_network_log, parent, false);
     }
 
     @Override

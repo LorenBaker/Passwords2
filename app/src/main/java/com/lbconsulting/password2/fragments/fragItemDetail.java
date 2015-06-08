@@ -49,7 +49,6 @@ public class fragItemDetail extends Fragment implements View.OnClickListener {
     private Button btnGoToWebsite;
     private EditText txtComments;
     private ImageButton btnEditItem;
-    private ImageButton btnEditWebsite;
     private TextView tvItemDetail;
     private TextView tvPasswordItemName;
 
@@ -82,7 +81,7 @@ public class fragItemDetail extends Fragment implements View.OnClickListener {
         btnCopyPassword = (Button) rootView.findViewById(R.id.btnCopyPassword);
         btnGoToWebsite = (Button) rootView.findViewById(R.id.btnGoToWebsite);
         btnEditItem = (ImageButton) rootView.findViewById(R.id.btnEditItem);
-        btnEditWebsite = (ImageButton) rootView.findViewById(R.id.btnEditWebsite);
+        ImageButton btnEditWebsite = (ImageButton) rootView.findViewById(R.id.btnEditWebsite);
 
         btnCallAlternate.setOnClickListener(this);
         btnCallPrimary.setOnClickListener(this);
@@ -128,7 +127,7 @@ public class fragItemDetail extends Fragment implements View.OnClickListener {
         mActiveItem = new clsItemValues(getActivity(), mActiveItemID);
         // fill the UI views
         tvPasswordItemName.setText(mActiveItem.getItemName());
-        tvItemDetail.setText(mActiveItem.getItemDetail());
+        tvItemDetail.setText(mActiveItem.getItemDetail(getActivity()));
         tvWebsiteDetail.setText(mActiveItem.getWebsiteDetail());
         // don't change comments if the user has made edits
         if (!mIsDirty) {

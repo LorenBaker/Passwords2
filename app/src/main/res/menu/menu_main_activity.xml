@@ -4,7 +4,7 @@
 
     <item
         android:id="@+id/action_progress_bar"
-        android:title="Loading..."
+        android:title="@string/action_progress_bar_title"
         android:visible="false"
         android:orderInCategory="5"
         android:showAsAction="ifRoom"
@@ -12,38 +12,33 @@
 
     <item
         android:id="@+id/action_settings"
-        android:title="Settings"
+        android:title="@string/action_settings_title"
         android:orderInCategory="10"
         android:showAsAction="never" />
 
     <item
         android:id="@+id/action_refresh_from_dropbox"
-        android:title="Refresh"
+        android:title="@string/action_refresh_title"
         android:orderInCategory="1000"
         android:icon="@drawable/ic_action_refresh"
         android:showAsAction="never" />
 
     <item
         android:id="@+id/action_save_to_dropbox"
-        android:title="Save"
+        android:title="@string/action_save_title"
         android:orderInCategory="1010"
         android:icon="@drawable/ic_action_save_light"
         android:showAsAction="never" />
 
     <item
         android:id="@+id/action_show_network_log"
-        android:title="Network Log"
+        android:title="@string/action_show_network_log_title"
         android:orderInCategory="1015"
         android:showAsAction="never" />
 
     <item
-        android:id="@+id/action_help"
-        android:title="Help"
-        android:orderInCategory="1020"
-        android:showAsAction="never" />
-    <item
         android:id="@+id/action_about"
-        android:title="About"
+        android:title="@string/action_about_title"
         android:orderInCategory="1030"
         android:showAsAction="never" />
 

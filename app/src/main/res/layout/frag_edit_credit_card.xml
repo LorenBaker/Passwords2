@@ -13,7 +13,7 @@
         android:selectAllOnFocus="true"
         android:nextFocusDown="@+id/txtCreditCardPart1"
         style="@style/txtPasswordStyle"
-        android:hint="Item Name" />
+        android:hint="@string/txtItemName_hint" />
 
 
     <ScrollView
@@ -51,7 +51,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="&#8211;" />
+                    android:text="@string/hyphen" />
 
                 <EditText
                     android:id="@+id/txtCreditCardPart2"
@@ -68,7 +68,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="&#8211;" />
+                    android:text="@string/hyphen" />
 
                 <EditText
                     android:id="@+id/txtCreditCardPart3"
@@ -86,7 +86,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="&#8211;" />
+                    android:text="@string/hyphen" />
 
                 <EditText
                     android:id="@+id/txtCreditCardPart4"
@@ -118,7 +118,7 @@
                     android:layout_weight="8"
                     android:layout_height="wrap_content"
                     style="@style/tvPasswordStyle"
-                    android:text="Expires:" />
+                    android:text="@string/edit_credit_card_expires_text" />
 
                 <EditText
                     android:id="@+id/txtExpirationMonth"
@@ -129,13 +129,13 @@
                     android:gravity="right"
                     android:nextFocusDown="@+id/txtExpirationYear"
                     style="@style/txtPasswordStyle"
-                    android:hint="Month" />
+                    android:hint="@string/txtExpirationMonth_hint" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="/" />
+                    android:text="@string/forward_slash" />
                 <EditText
                     android:id="@+id/txtExpirationYear"
                     android:layout_width="0dp"
@@ -144,7 +144,7 @@
                     android:inputType="number"
                     android:nextFocusDown="@+id/txtSecurityCode"
                     style="@style/txtPasswordStyle"
-                    android:hint="Year" />
+                    android:hint="@string/txtExpirationYear_hint" />
 
 
             </LinearLayout>
@@ -159,7 +159,7 @@
                     android:layout_weight="8"
                     android:layout_height="wrap_content"
                     style="@style/tvPasswordStyle"
-                    android:text="Code:" />
+                    android:text="@string/edit_credit_card_code_text" />
 
                 <EditText
                     android:id="@+id/txtSecurityCode"
@@ -169,7 +169,7 @@
                     android:inputType="number"
                     android:nextFocusDown="@+id/txtPrimaryPhoneNumber"
                     style="@style/txtPasswordStyle"
-                    android:hint="Security Code" />
+                    android:hint="@string/txtSecurityCode_hint" />
 
 
             </LinearLayout>
@@ -184,7 +184,7 @@
                     android:layout_weight="8"
                     android:layout_height="wrap_content"
                     style="@style/tvPasswordStyle"
-                    android:text="Primary:" />
+                    android:text="@string/edit_primary_text" />
 
                 <EditText
                     android:id="@+id/txtPrimaryPhoneNumber"
@@ -194,7 +194,7 @@
                     android:inputType="phone"
                     android:nextFocusDown="@+id/txtAlternatePhoneNumber"
                     style="@style/txtPasswordStyle"
-                    android:hint="Primary Phone Number" />
+                    android:hint="@string/txtPrimaryPhoneNumber_hint" />
 
             </LinearLayout>
 
@@ -208,7 +208,7 @@
                     android:layout_weight="8"
                     android:layout_height="wrap_content"
                     style="@style/tvPasswordStyle"
-                    android:text="Alternate:" />
+                    android:text="@string/edit_alternate_text" />
 
                 <EditText
                     android:id="@+id/txtAlternatePhoneNumber"
@@ -217,7 +217,7 @@
                     android:layout_height="wrap_content"
                     android:inputType="phone"
                     style="@style/txtPasswordStyle"
-                    android:hint="Alternate Phone Number" />
+                    android:hint="@string/txtAlternatePhoneNumber_hint" />
 
             </LinearLayout>
 

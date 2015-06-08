@@ -8,7 +8,7 @@
         android:id="@+id/txtSearch"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:hint="Search"
+        android:hint="@string/txtSearch_hint"
         android:selectAllOnFocus="true"
         android:drawableLeft="@drawable/ic_action_search_dark"
         android:visibility="gone"/>

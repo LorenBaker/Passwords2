@@ -5,10 +5,10 @@ package com.lbconsulting.password2.classes;
  */
 public class clsItem {
 
-    private long ID;
+    private final long ID;
     private String Name;
     private int ItemType_ID;
-    private long User_ID;
+    private final long User_ID;
     private String SoftwareKeyCode;
     private int SoftwareSubgroupLength;
     private String Comments;

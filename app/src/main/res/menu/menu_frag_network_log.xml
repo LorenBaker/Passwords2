@@ -3,7 +3,7 @@
     tools:context=".MainActivity">
 
     <item android:id="@+id/action_purge_log"
-        android:title="Purge Log"
+        android:title="@string/action_purge_log_title"
         android:orderInCategory="910"
         android:showAsAction="never"/>
 

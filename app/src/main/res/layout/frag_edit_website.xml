@@ -12,7 +12,7 @@
         android:selectAllOnFocus="true"
         android:inputType="textCapWords"
         style="@style/txtPasswordStyle"
-        android:hint="Item Name" />
+        android:hint="@string/txtItemName_hint" />
 
 
     <ScrollView
@@ -35,7 +35,7 @@
                     android:layout_weight="8"
                     android:layout_height="wrap_content"
                     style="@style/tvPasswordStyle"
-                    android:text="URL:" />
+                    android:text="@string/edit_website_URL_title" />
 
                 <EditText
                     android:id="@+id/txtWebsiteURL"
@@ -45,7 +45,7 @@
                     android:inputType="textUri"
                     android:gravity="left"
                     style="@style/txtPasswordStyle"
-                    android:hint="Website URL" />
+                    android:hint="@string/txtWebsiteURL_hint" />
 
 
             </LinearLayout>
@@ -60,7 +60,7 @@
                     android:layout_weight="8"
                     android:layout_height="wrap_content"
                     style="@style/tvPasswordStyle"
-                    android:text="User ID:" />
+                    android:text="@string/edit_website_userID_title" />
 
                 <EditText
                     android:id="@+id/txtUserID"
@@ -69,7 +69,7 @@
                     android:layout_height="wrap_content"
                     android:inputType="textNoSuggestions"
                     style="@style/txtPasswordStyle"
-                    android:hint="User ID" />
+                    android:hint="@string/txtUserID_hint" />
 
             </LinearLayout>
 
@@ -83,7 +83,7 @@
                     android:layout_weight="8"
                     android:layout_height="wrap_content"
                     style="@style/tvPasswordStyle"
-                    android:text="Password" />
+                    android:text="@string/edit_general_account_password_title" />
 
                 <EditText
                     android:id="@+id/txtAppPassword"
@@ -92,7 +92,7 @@
                     android:layout_height="wrap_content"
                     android:inputType="textNoSuggestions"
                     style="@style/txtPasswordStyle"
-                    android:hint="Password" />
+                    android:hint="@string/txtAppPassword_hint" />
 
             </LinearLayout>
 

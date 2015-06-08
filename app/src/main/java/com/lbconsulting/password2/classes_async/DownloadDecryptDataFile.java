@@ -22,7 +22,6 @@ import com.lbconsulting.password2.classes.MyLog;
 import com.lbconsulting.password2.classes.MySettings;
 import com.lbconsulting.password2.classes.clsEvents;
 import com.lbconsulting.password2.classes.clsItem;
-import com.lbconsulting.password2.classes.clsItemSort;
 import com.lbconsulting.password2.classes.clsLabPasswords;
 import com.lbconsulting.password2.classes.clsNetworkStatus;
 import com.lbconsulting.password2.classes.clsUserValues;
@@ -42,8 +41,6 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -57,7 +54,7 @@ import de.greenrobot.event.EventBus;
  * control for an app that downloads a file from Dropbox.
  */
 
-public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
+public class DownloadDecryptDataFile extends AsyncTask<Void, String, Integer> {
 
     private final int FILE_DOWNLOAD_START = 0;
     private final int FILE_NOT_FOUND = -1;
@@ -118,6 +115,11 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
         return mDownloadStatus;
     }
 
+    @Override
+    protected void onProgressUpdate(String... values) {
+        EventBus.getDefault().post(new clsEvents.showOkDialog("Debugging", values[0]));
+    }
+
     private String readFile() {
         String errorMsg;
         try {
@@ -156,6 +158,7 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
             NetworkLogTable.createNewLog(mContext, NetworkLogTable.DOWNLOAD, networkUsed, existingEntry);
 
             return IOUtils.toString(inputStream);
+
 
         } catch (DropboxUnlinkedException e) {
             // The AuthSession wasn't properly authenticated or user unlinked.
@@ -250,6 +253,7 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
                 mDownloadStatus = INVALID_PASSWORD;
                 MySettings.resetEncryptionTestText();
             }
+
 
         } catch (InvalidKeyException e) {
             MyLog.e("DownloadDecryptDataFile", "decryptFile: InvalidKeyException");
@@ -349,17 +353,14 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
 
 
         long lastItemID = 0;
-        //ArrayList<clsItemSort> sortingList = null;
         ArrayList<String> plainTextArray;
 
         for (clsItem item : passwordsData.getPasswordItems()) {
             if (item.getID() > lastItemID) {
                 lastItemID = item.getID();
             }
-           // sortingList = new ArrayList<>();
             plainTextArray = new ArrayList<>();
 
-            //plainTextArray.add(item.getName());
             plainTextArray.add(item.getSoftwareKeyCode());
             plainTextArray.add(item.getComments());
             plainTextArray.add(item.getCreditCardAccountNumber());
@@ -381,7 +382,8 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
                 long newItemID = ItemsTable.createNewItem(mContext,
                         item.getUser_ID(), itemID, item.getItemType_ID(), item.getName());
                 if (newItemID != itemID) {
-                    MyLog.e("DownloadDecryptDataFile", "updateSQLiteDatabase: ERROR creating item with ID = " + itemID);
+                    MyLog.e("DownloadDecryptDataFile", "updateSQLiteDatabase: ERROR creating item with ID = " + itemID
+                            + "; item name: " + item.getName());
                     // continue to the next item
                     continue;
                 }
@@ -406,24 +408,8 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
             cv.put(ItemsTable.COL_WEBSITE_USER_ID, encryptedArray.get(WEBSITE_USER_ID));
             cv.put(ItemsTable.COL_WEBSITE_PASSWORD, encryptedArray.get(WEBSITE_PASSWORD));
             ItemsTable.updateItems(mContext, itemID, cv);
-
-           // sortingList.add(new clsItemSort(item.getID(), item.getName()));
         }
 
-/*        if (sortingList != null && sortingList.size() > 0) {
-            Collections.sort(sortingList, new Comparator<clsItemSort>() {
-                @Override
-                public int compare(clsItemSort item1, clsItemSort item2) {
-                    return item1.getItemName().compareTo(item2.getItemName());
-                }
-            });
-
-            int sortKey = 0;
-            for (clsItemSort item : sortingList) {
-                ItemsTable.updateItemSortKey(mContext, item.getItemID(), sortKey);
-                sortKey++;
-            }
-        }*/
         MySettings.setLastItemAndUserIDs(lastItemID, lastUserID);
 
         // remove any users or items that are no longer in the database
@@ -447,13 +433,15 @@ public class DownloadDecryptDataFile extends AsyncTask<Void, Void, Integer> {
         timeDeltaSeconds = timeDeltaSeconds / 1000;
         String strTimeDeltaSeconds = String.format("%.02f", timeDeltaSeconds);
         MyLog.i("DownloadDecryptDataFile", "onPostExecute: Execution time = " + strTimeDeltaSeconds + " seconds.");
+
         switch (result) {
             case DATABASE_UPDATED_SUCCESS:
                 MyLog.i("DownloadDecryptDataFile", "onPostExecute: DATABASE_UPDATED_SUCCESS");
                 EventBus.getDefault().post(new clsEvents.onPasswordsDatabaseUpdated());
                 if (mIsVerbose) {
                     Toast.makeText(mContext,
-                            mContext.getString(R.string.downloadSuccess_databaseUpdatedSuccess),
+                            mContext.getString(R.string.downloadSuccess_databaseUpdatedSuccess)
+                                    + " in " + strTimeDeltaSeconds + " seconds.",
                             Toast.LENGTH_SHORT).show();
                 }
                 break;

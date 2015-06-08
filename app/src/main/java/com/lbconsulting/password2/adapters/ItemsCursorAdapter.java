@@ -10,8 +10,6 @@ import android.widget.TextView;
 
 import com.lbconsulting.password2.R;
 import com.lbconsulting.password2.classes.MyLog;
-import com.lbconsulting.password2.classes.MySettings;
-import com.lbconsulting.password2.classes.clsUtils;
 import com.lbconsulting.password2.database.ItemsTable;
 
 /**
@@ -19,11 +17,8 @@ import com.lbconsulting.password2.database.ItemsTable;
  */
 public class ItemsCursorAdapter extends CursorAdapter {
 
-    private Context mContext;
-
     public ItemsCursorAdapter(Context context, Cursor c, int flags, String itemsName) {
         super(context, c, flags);
-        this.mContext = context;
         MyLog.i("ItemsCursorAdapter", "ItemsCursorAdapter constructor. " + itemsName);
     }
 

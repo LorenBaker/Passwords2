@@ -235,7 +235,7 @@ public class fragSettings_user extends Fragment implements View.OnClickListener 
 
                 // Set an EditText view to get user input
                 final EditText editUserNameInput = new EditText(getActivity());
-                editUserNameInput.setHint(getActivity().getString(R.string.editUserName_editText_hint));
+                editUserNameInput.setHint(getActivity().getString(R.string.btnEditUserName_text));
                 editUserNameInput.setText(mActiveUser.getUserName());
 
                 editUserNameInput.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);

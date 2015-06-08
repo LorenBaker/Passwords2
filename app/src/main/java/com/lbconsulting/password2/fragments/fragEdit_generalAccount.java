@@ -99,7 +99,7 @@ public class fragEdit_generalAccount extends Fragment implements TextWatcher {
         });
         txtItemName.addTextChangedListener(this);
 
-        txtAccountNumber = (EditText) rootView.findViewById(R.id.txtKeyCode);
+        txtAccountNumber = (EditText) rootView.findViewById(R.id.txtAccountNumber);
         txtAccountNumber.addTextChangedListener(this);
 
         txtPrimaryPhoneNumber = (EditText) rootView.findViewById(R.id.txtPrimaryPhoneNumber);
@@ -284,6 +284,10 @@ public class fragEdit_generalAccount extends Fragment implements TextWatcher {
                 txtPrimaryPhoneNumber.setText("");
                 txtAlternatePhoneNumber.setText("");
                 mIsDirty = true;
+                return true;
+
+            case R.id.action_change_item_type:
+                clsUtils.changeItemType(getActivity(), mActiveItem);
                 return true;
 
 

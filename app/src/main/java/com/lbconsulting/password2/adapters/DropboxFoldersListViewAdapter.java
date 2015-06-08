@@ -18,8 +18,8 @@ import java.util.ArrayList;
  */
 public class DropboxFoldersListViewAdapter extends ArrayAdapter<clsDropboxFolder> {
 
-    private Context mContext;
-    private ArrayList<clsDropboxFolder> mItems;
+    private final Context mContext;
+    private final ArrayList<clsDropboxFolder> mItems;
 
     // View lookup cache
     private static class ViewHolder {

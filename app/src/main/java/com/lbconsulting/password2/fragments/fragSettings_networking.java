@@ -33,7 +33,6 @@ public class fragSettings_networking extends Fragment implements View.OnClickLis
     private String[] mSyncPreferenceList;
     private int mNetworkPreference;
     private String[] mUpdatePeriodicity_list;
-    private int mUpdatePeriodicityMinutes;
     private int mSelectedPeriodicityPosition;
 
     public fragSettings_networking() {
@@ -105,7 +104,7 @@ public class fragSettings_networking extends Fragment implements View.OnClickLis
             btnNetworkPreferences.setText(getActivity().getString(R.string.btnNetworkPreferences_text)
                     + mSyncPreferenceList[mNetworkPreference]);
 
-            mUpdatePeriodicityMinutes = MySettings.getSyncPeriodicityMinutes();
+            int mUpdatePeriodicityMinutes = MySettings.getSyncPeriodicityMinutes();
 
             switch (mUpdatePeriodicityMinutes) {
                 case MySettings.NETWORK_UPDATE_1_MIN:

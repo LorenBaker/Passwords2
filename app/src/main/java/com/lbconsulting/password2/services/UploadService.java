@@ -34,16 +34,9 @@ public class UploadService extends IntentService {
     private volatile boolean mUploadingDataFile = false;
     private volatile String mFileRev = "";
     private volatile int mUploadAttempts;
-    private final int MAX_UPLOAD_ATTEMPTS = 3;
 
 
     private String mDropboxFilename;
-    private String mFilename;
-    private String mPassword;
-    private String mFileString;
-    private String mAppKey;
-    private String mAppSecret;
-    private String mAccessToken;
     private int mUserNetworkingPreference;
     private DropboxAPI<AndroidAuthSession> mDBApi = null;
     private clsNetworkStatus mNetworkStatus;
@@ -91,15 +84,15 @@ public class UploadService extends IntentService {
         MyLog.i("UPLOAD Service", "onHandleIntent");
 
         mDropboxFilename = intent.getStringExtra(ARG_DROPBOX_FILENAME);
-        mFilename = mDropboxFilename.substring(mDropboxFilename.lastIndexOf("/") + 1);
+        //String mFilename = mDropboxFilename.substring(mDropboxFilename.lastIndexOf("/") + 1);
        // String parentPath = getParentPath(mDropboxFilename);
         //mDropboxFilename = parentPath + "/test" + mFilename;
 
-        mPassword = intent.getStringExtra(ARG_PASSWORD);
-        mFileString = intent.getStringExtra(ARG_FILE_STRING);
-        mAppKey = intent.getStringExtra(ARG_APP_KEY);
-        mAppSecret = intent.getStringExtra(ARG_APP_SECRET);
-        mAccessToken = intent.getStringExtra(ARG_ACCESS_TOKEN);
+        String mPassword = intent.getStringExtra(ARG_PASSWORD);
+        String mFileString = intent.getStringExtra(ARG_FILE_STRING);
+        String mAppKey = intent.getStringExtra(ARG_APP_KEY);
+        String mAppSecret = intent.getStringExtra(ARG_APP_SECRET);
+        String mAccessToken = intent.getStringExtra(ARG_ACCESS_TOKEN);
         mUserNetworkingPreference = intent.getIntExtra(ARG_NETWORKING_PREFERENCE, MySettings.NETWORK_ANY);
 
         AppKeyPair appKeys = new AppKeyPair(mAppKey, mAppSecret);
@@ -191,13 +184,13 @@ public class UploadService extends IntentService {
         return result;
     }
 
-    public String getParentPath(String path) {
+/*    public String getParentPath(String path) {
         String parentPath = path.substring(0, path.lastIndexOf("/"));
         if (parentPath.equals("")) {
             parentPath = "/";
         }
         return parentPath;
-    }
+    }*/
 
     private void uploadToDropbox() {
 
@@ -243,6 +236,7 @@ public class UploadService extends IntentService {
                 mEncryptedFileString = null;
                 mTaskRunning = false;
             } else {
+                int MAX_UPLOAD_ATTEMPTS = 3;
                 if (mUploadAttempts <= MAX_UPLOAD_ATTEMPTS) {
                     // try to upload again
                     try {

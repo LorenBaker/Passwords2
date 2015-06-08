@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         style="@style/tvBoldCenter"
         android:background="@drawable/rec_genoa_whitesmoke_stroke"
-        android:hint="Folder Name" />
+        android:hint="@string/tvFolderName_text" />
 
     <ProgressBar
         android:id="@+id/pbDropboxList"
@@ -39,7 +39,7 @@
             android:layout_height="wrap_content"
             style="@android:style/Holo.ButtonBar"
             android:background="@drawable/rec_genoa_whitesmoke_stroke"
-            android:text="Cancel"/>
+            android:text="@string/btnCancel_text"/>
 
         <Button
             android:id="@+id/btnSelect"
@@ -48,7 +48,7 @@
             android:layout_height="wrap_content"
             style="@android:style/Holo.ButtonBar"
             android:background="@drawable/rec_genoa_whitesmoke_stroke"
-            android:text="Select"/>
+            android:text="@string/btnSelect_text"/>
 
         </LinearLayout>
 

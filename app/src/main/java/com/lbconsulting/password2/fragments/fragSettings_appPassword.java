@@ -282,7 +282,7 @@ public class fragSettings_appPassword extends Fragment implements View.OnClickLi
                             txtAppPassword.setInputType(InputType.TYPE_CLASS_TEXT |
                                     InputType.TYPE_TEXT_VARIATION_PASSWORD);
 
-                            btnPasswordDisplay.setText(getString(R.string.btnDisplay_setText_Display));
+                            btnPasswordDisplay.setText(getString(R.string.btnDisplay_text));
                         } else {
                             txtAppPassword.setInputType(InputType.TYPE_CLASS_TEXT |
                                     InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
@@ -300,7 +300,7 @@ public class fragSettings_appPassword extends Fragment implements View.OnClickLi
                             txtConfirmAppPassword.setInputType(InputType.TYPE_CLASS_TEXT |
                                     InputType.TYPE_TEXT_VARIATION_PASSWORD);
 
-                            btnConfirmPasswordDisplay.setText(getString(R.string.btnDisplay_setText_Display));
+                            btnConfirmPasswordDisplay.setText(getString(R.string.btnDisplay_text));
                         } else {
                             txtConfirmAppPassword.setInputType(InputType.TYPE_CLASS_TEXT |
                                     InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);

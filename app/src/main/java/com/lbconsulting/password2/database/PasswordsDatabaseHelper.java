@@ -40,9 +40,9 @@ public class PasswordsDatabaseHelper extends SQLiteOpenHelper {
         ItemsTable.onUpgrade(database, oldVersion, newVersion);
     }
 
-    public static SQLiteDatabase getDatabase() {
+/*    public static SQLiteDatabase getDatabase() {
         return dBase;
-    }
+    }*/
 
     public static boolean deleteDatabase(){
         return mContext.deleteDatabase(DATABASE_NAME); // true if deleted

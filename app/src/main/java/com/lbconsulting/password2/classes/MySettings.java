@@ -10,14 +10,14 @@ import java.security.NoSuchAlgorithmException;
 
 
 /**
- * Created by Loren on 3/5/2015.
+ * This class holds the apps settings
  */
 public class MySettings {
 
     public static final String NOT_AVAILABLE = "N/A...N/A";
-    private  static final long DEFAULT_LONGEVITY_MILLISECONDS = 15 * 60000; // 15 minutes
-    private  static final String DROPBOX_FILENAME = "PasswordsDatafile.txt";
-    public static final int MAX_NUMBER_OF_BACKUP_FILES = 5;
+    private static final long DEFAULT_LONGEVITY_MILLISECONDS = 15 * 60000; // 15 minutes
+    private static final String DROPBOX_FILENAME = "PasswordsDatafile.txt";
+    // --Commented out by Inspection (6/8/2015 8:28 AM):public static final int MAX_NUMBER_OF_BACKUP_FILES = 5;
     public static final String ARG_IS_DIRTY = "arg_isDirty";
     public static final String DB_KEY = "9f9130ba72070ad6bb86efae49f11e10";
 
@@ -40,9 +40,9 @@ public class MySettings {
     public static final int FRAG_NETWORK_LOG = 13;
 
 
-    public static final String[] CreditCardNames = {"American Express", "Diners Club", "Discover", "JCB", "MasterCard", "VISA"};
+    //public static final String[] CreditCardNames = {"American Express", "Diners Club", "Discover", "JCB", "MasterCard", "VISA"};
     public static final String UNKNOWN = "UNKNOWN";
-    public static final int UNKNOWN_CARD = -1;
+    // --Commented out by Inspection (6/8/2015 8:28 AM):public static final int UNKNOWN_CARD = -1;
     public static final int AMERICAN_EXPRESS = 0;
     public static final int DINERS_CLUB = 1;
     public static final int DISCOVER = 2;
@@ -93,29 +93,29 @@ public class MySettings {
     private static final String SETTING_LISTS_START_CLOSED = "listsStartClosed";
     private static final String SETTING_DROPBOX_FOLDER_NAME = "dropboxFolderName";
 
-    private  static final String SETTING_NETWORK_PREFERENCE = "networkPreference";
-    private  static final String SETTING_DROPBOX_FILE_REV = "dropboxFileRev";
+    private static final String SETTING_NETWORK_PREFERENCE = "networkPreference";
+    private static final String SETTING_DROPBOX_FILE_REV = "dropboxFileRev";
 
-    public static final String SETTING_OK_TO_USE_NETWORK = "okToUseNetwork";
-    public static final String SETTING_IS_MOBILE_CONNECTED = "isMobileConnected";
-    public static final String SETTING_IS_WIFI_CONNECTED = "isWifiConnected";
-    private  static final String SETTING_NETWORK_BUSY = "networkBusy";
-    private  static final String SETTING_SYNC_PERIODICITY = "syncPeriodicity";
+    // --Commented out by Inspection (6/8/2015 8:29 AM):public static final String SETTING_OK_TO_USE_NETWORK = "okToUseNetwork";
+    // --Commented out by Inspection (6/8/2015 8:29 AM):public static final String SETTING_IS_MOBILE_CONNECTED = "isMobileConnected";
+    // --Commented out by Inspection (6/8/2015 8:30 AM):public static final String SETTING_IS_WIFI_CONNECTED = "isWifiConnected";
+    private static final String SETTING_NETWORK_BUSY = "networkBusy";
+    private static final String SETTING_SYNC_PERIODICITY = "syncPeriodicity";
 
 
-    private  static final String SETTING_LV_INDEX_ALL_USER_ITEMS = "listViewIndexAllUserItems";
-    private  static final String SETTING_LV_INDEX_CREDIT_CARDS = "listViewIndexCreditCards";
-    private  static final String SETTING_LV_INDEX_GENERAL_ACCOUNTS = "listViewIndexGeneralAccounts";
-    private  static final String SETTING_LV_INDEX_WEBSITES = "listViewIndexWebsites";
-    private  static final String SETTING_LV_INDEX_SOFTWARE = "listViewIndexSoftware";
+    private static final String SETTING_LV_INDEX_ALL_USER_ITEMS = "listViewIndexAllUserItems";
+    private static final String SETTING_LV_INDEX_CREDIT_CARDS = "listViewIndexCreditCards";
+    private static final String SETTING_LV_INDEX_GENERAL_ACCOUNTS = "listViewIndexGeneralAccounts";
+    private static final String SETTING_LV_INDEX_WEBSITES = "listViewIndexWebsites";
+    private static final String SETTING_LV_INDEX_SOFTWARE = "listViewIndexSoftware";
 
-    private  static final String SETTING_LV_TOP_ALL_USER_ITEMS = "listViewTopAllUserItems";
-    private  static final String SETTING_LV_TOP_CREDIT_CARDS = "listViewTopCreditCards";
-    private  static final String SETTING_LV_TOP_GENERAL_ACCOUNTS = "listViewTopGeneralAccounts";
-    private  static final String SETTING_LV_TOP_WEBSITES = "listViewTopWebsites";
-    private  static final String SETTING_LV_TOP_SOFTWARE = "listViewTopSoftware";
+    private static final String SETTING_LV_TOP_ALL_USER_ITEMS = "listViewTopAllUserItems";
+    private static final String SETTING_LV_TOP_CREDIT_CARDS = "listViewTopCreditCards";
+    private static final String SETTING_LV_TOP_GENERAL_ACCOUNTS = "listViewTopGeneralAccounts";
+    private static final String SETTING_LV_TOP_WEBSITES = "listViewTopWebsites";
+    private static final String SETTING_LV_TOP_SOFTWARE = "listViewTopSoftware";
 
-    private  static final String SETTING_ENCRYPTION_TEST = "encryptionTest";
+    private static final String SETTING_ENCRYPTION_TEST = "encryptionTest";
     private static final String ENCRYPTION_TEST_TEXT = "This is a test, only a test.";
 
     private static final String DEFAULT_DROPBOX_PATH = "No Folder Selected";
@@ -123,6 +123,7 @@ public class MySettings {
     private static Context mContext;
 
     public static void setContext(Context context) {
+        //mContext = context.getApplicationContext();
         mContext = context;
     }
 
@@ -288,7 +289,7 @@ public class MySettings {
     public static int getSyncPeriodicityMinutes() {
         SharedPreferences passwordsSavedState =
                 mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
-        return passwordsSavedState.getInt(SETTING_SYNC_PERIODICITY, NETWORK_UPDATE_5_MIN);
+        return  passwordsSavedState.getInt(SETTING_SYNC_PERIODICITY, NETWORK_UPDATE_5_MIN);
     }
 
     public static void setSyncPeriodicity(int periodicityMin) {
@@ -306,7 +307,7 @@ public class MySettings {
     private static long getLastItemID() {
         SharedPreferences passwordsSavedState =
                 mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
-        return passwordsSavedState.getLong(SETTING_LAST_ITEM_ID, -1);
+        return passwordsSavedState.getLong(SETTING_LAST_ITEM_ID, 0);
     }
 
     private static void setLastItemID(long lastItemID) {
@@ -427,7 +428,7 @@ public class MySettings {
         editor.apply();
     }
 
-    public static void setHideCategories(boolean hideCreditCards, boolean hideGeneralAccounts,
+/*    public static void setHideCategories(boolean hideCreditCards, boolean hideGeneralAccounts,
                                          boolean hideWebsites, boolean hideSoftware) {
         SharedPreferences passwordsSavedState =
                 mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
@@ -437,7 +438,7 @@ public class MySettings {
         editor.putBoolean(SETTING_HIDE_WEBSITES, hideWebsites);
         editor.putBoolean(SETTING_HIDE_SOFTWARE, hideSoftware);
         editor.apply();
-    }
+    }*/
     //endregion
 
     //region Active Settings
@@ -604,7 +605,7 @@ public class MySettings {
         return appPassword;
     }
 
-    private  static long getPasswordSavedTime() {
+    private static long getPasswordSavedTime() {
         SharedPreferences passwordsSavedState =
                 mContext.getSharedPreferences(PASSWORDS_SAVED_STATES, 0);
         return passwordsSavedState.getLong(SETTING_APP_PASSWORD_SAVED_TIME, -1);
@@ -619,9 +620,9 @@ public class MySettings {
         editor.apply();
     }
 
-    public static void resetAppPassword() {
+/*    public static void resetAppPassword() {
         setAppPassword(NOT_AVAILABLE);
-    }
+    }*/
 
     public static int getStartupState() {
         SharedPreferences passwordsSavedState =

@@ -13,7 +13,7 @@ public class clsEvents {
     }
 
     public static class onFileRevChange {
-        String mFileRev;
+        final String mFileRev;
 
         public onFileRevChange(String fileRev) {
             mFileRev = fileRev;
@@ -35,7 +35,7 @@ public class clsEvents {
     }
 
     public static class showProgressInActionBar {
-        boolean mIsVisible;
+        final boolean mIsVisible;
 
         public showProgressInActionBar(boolean isVisible) {
             mIsVisible = isVisible;
@@ -47,8 +47,8 @@ public class clsEvents {
     }
 
     public static class showFragment {
-        int mFragmentID;
-        boolean mIsNewPasswordItem;
+        final int mFragmentID;
+        final boolean mIsNewPasswordItem;
 
         public showFragment(int fragmentID, boolean isNewPasswordItem) {
             mFragmentID = fragmentID;
@@ -70,7 +70,7 @@ public class clsEvents {
     }
 
     public static class setActionBarTitle {
-        String mTitle;
+        final String mTitle;
 
         public setActionBarTitle(String title) {
             mTitle = title;
@@ -87,8 +87,8 @@ public class clsEvents {
     }
 
     public static class showOkDialog {
-        String mTitle;
-        String mMessage;
+        final String mTitle;
+        final String mMessage;
 
         public showOkDialog( String title, String message) {
             mTitle = title;
@@ -105,7 +105,7 @@ public class clsEvents {
     }
 
     public static class showToast {
-        String mMessage;
+        final String mMessage;
 
         public showToast( String message) {
             mMessage = message;

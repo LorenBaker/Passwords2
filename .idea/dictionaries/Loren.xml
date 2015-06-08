@@ -2,6 +2,7 @@
   <dictionary name="Loren">
     <words>
       <w>lbconsulting</w>
+      <w>nocase</w>
     </words>
   </dictionary>
 </component>

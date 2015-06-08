@@ -23,9 +23,9 @@ public class CreateNewDropboxFolder extends AsyncTask<Void, Void, String> {
     private final String mNewDropboxFolderPath;
 
 
-    public interface folderFinishedListener {
+/*    public interface folderFinishedListener {
         void onFolderDownloadComplete(Boolean result);
-    }
+    }*/
 
     public CreateNewDropboxFolder(Context context, DropboxAPI<?> api, String selectedFolderPath, String newDropboxFolderPath) {
         // We set the context this way so we don't accidentally leak activities

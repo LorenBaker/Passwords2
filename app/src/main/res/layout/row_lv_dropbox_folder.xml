@@ -22,7 +22,7 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         style="@style/tvPasswordStyle"
-        android:text="Folder Name" />
+        android:text="@string/tvFolderName_text" />
 
 
     </LinearLayout>

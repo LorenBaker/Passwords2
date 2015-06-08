@@ -345,6 +345,9 @@ public class fragEdit_software extends Fragment {
                 mIsDirty = true;
                 return true;
 
+            case R.id.action_change_item_type:
+                clsUtils.changeItemType(getActivity(), mActiveItem);
+                return true;
 
             case android.R.id.home:
                 EventBus.getDefault().post(new clsEvents.showFragment(MySettings.FRAG_HOME, false));

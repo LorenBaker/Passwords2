@@ -45,6 +45,7 @@ public class ItemsTable {
     public static final String COL_WEBSITE_USER_ID = "websiteUserID";
     public static final String COL_WEBSITE_PASSWORD = "websitePassword";
     public static final String COL_IS_IN_TABLE = "isInTable";
+
     public static final String[] PROJECTION_ALL = {COL_ITEM_ID, COL_ITEM_NAME,
             COL_ITEM_TYPE_ID, COL_USER_ID,
             COL_SOFTWARE_KEY_CODE, COL_SOFTWARE_SUBGROUP_LENGTH, COL_COMMENTS,
@@ -52,6 +53,7 @@ public class ItemsTable {
             COL_CREDIT_CARD_EXPIRATION_MONTH, COL_CREDIT_CARD_EXPIRATION_YEAR,
             COL_GENERAL_ACCOUNT_NUMBER, COL_PRIMARY_PHONE_NUMBER, COL_ALTERNATE_PHONE_NUMBER,
             COL_WEBSITE_URL, COL_WEBSITE_USER_ID, COL_WEBSITE_PASSWORD, COL_IS_IN_TABLE};
+
     public static final String CONTENT_PATH = TABLE_ITEMS;
     public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + "vnd.lbconsulting."
             + TABLE_ITEMS;
@@ -60,10 +62,13 @@ public class ItemsTable {
     public static final Uri CONTENT_URI = Uri.parse("content://" + PasswordsContentProvider.AUTHORITY + "/" + CONTENT_PATH);
     public static final String SORT_ORDER_ITEM_NAME = COL_ITEM_NAME + " ASC";
     public static final String SORT_ORDER_ITEM_ID = COL_ITEM_ID + " ASC";
+
     // public static final int ITEM_NOT_UPDATED = -17;
     private static final int ITEM_UPDATE_ERROR_ITEM_NOT_FOUND = -18;
     private static final int ITEM_UPDATE_ERROR_ITEM_NAME_EXISTS = -19;
     private static final int ITEM_NOT_DELETED = -20;
+    private static long mFoundNameItemID;
+
     // Database creation SQL statements
     private static final String CREATE_DATA_TABLE = "create table "
             + TABLE_ITEMS
@@ -87,7 +92,6 @@ public class ItemsTable {
             + COL_WEBSITE_PASSWORD + " text   DEFAULT '', "
             + COL_IS_IN_TABLE + " integer DEFAULT 1"
             + ");";
-    private static long mFoundNameItemID;
 
     public static void onCreate(SQLiteDatabase database) {
         database.execSQL(CREATE_DATA_TABLE);
@@ -172,12 +176,13 @@ public class ItemsTable {
         if (itemID > 0) {
             Uri uri = Uri.withAppendedPath(CONTENT_URI, String.valueOf(itemID));
             String[] projection = PROJECTION_ALL;
-            String selection = null;
+/*            String selection = null;
             String selectionArgs[] = null;
-            String sortOrder = null;
+            String sortOrder = null;*/
             ContentResolver cr = context.getContentResolver();
             try {
-                cursor = cr.query(uri, projection, selection, selectionArgs, sortOrder);
+                //cursor = cr.query(uri, projection, selection, selectionArgs, sortOrder);
+                cursor = cr.query(uri, projection, null, null, null);
             } catch (Exception e) {
                 MyLog.e("ItemsTable", "getItem: Exception; " + e.getMessage());
             }
@@ -194,10 +199,10 @@ public class ItemsTable {
             String[] projection = new String[]{COL_ITEM_ID};
             String selection = COL_USER_ID + " = ? AND " + COL_ITEM_NAME + " = ?";
             String selectionArgs[] = new String[]{String.valueOf(userID), itemName};
-            String sortOrder = null;
+            //String sortOrder = null;
             ContentResolver cr = context.getContentResolver();
             try {
-                cursor = cr.query(uri, projection, selection, selectionArgs, sortOrder);
+                cursor = cr.query(uri, projection, selection, selectionArgs, null);
             } catch (Exception e) {
                 MyLog.e("ItemsTable", "getItem: Exception; " + e.getMessage());
             }
@@ -212,12 +217,12 @@ public class ItemsTable {
         if (itemID > 0) {
             Uri uri = Uri.withAppendedPath(CONTENT_URI, String.valueOf(itemID));
             String[] projection = new String[]{COL_ITEM_ID};
-            String selection = null;
+/*            String selection = null;
             String selectionArgs[] = null;
-            String sortOrder = null;
+            String sortOrder = null;*/
             ContentResolver cr = context.getContentResolver();
             try {
-                cursor = cr.query(uri, projection, selection, selectionArgs, sortOrder);
+                cursor = cr.query(uri, projection, null, null, null);
             } catch (Exception e) {
                 MyLog.e("ItemsTable", "getItemWithIdProjection: Exception; " + e.getMessage());
             }
@@ -227,47 +232,17 @@ public class ItemsTable {
         return cursor;
     }
 
-    private static String getItemName(Context context, long itemID) {
-        String name = "";
-        Cursor cursor = getItem(context, itemID);
-        if (cursor != null && cursor.getCount() > 0) {
-            cursor.moveToFirst();
-            name = cursor.getString(cursor.getColumnIndex(COL_ITEM_NAME));
-        }
-
-        return name;
-    }
-
-/*    private static Cursor getAllItemsCursor(Context context, long userID) {
-        Cursor cursor = null;
-        if (context != null && userID > 0) {
-            Uri uri = CONTENT_URI;
-            String[] projection = PROJECTION_ID_AND_NAME;
-            String selection = COL_USER_ID + " = ?";
-            String selectionArgs[] = new String[]{String.valueOf(userID)};
-            String sortOrder = null;
-            ContentResolver cr = context.getContentResolver();
-            try {
-                cursor = cr.query(uri, projection, selection, selectionArgs, sortOrder);
-            } catch (Exception e) {
-                MyLog.e("ItemsTable", "getAllItemsCursor: Exception; " + e.getMessage());
-            }
-        } else {
-            MyLog.e("ItemsTable", "getAllItemsCursor: Unable to get items. The userID < 1");
-        }
-        return cursor;
-    }*/
 
     public static Cursor getAllItemsCursor(Context context, String sortOrder) {
         Cursor cursor = null;
         if (context != null) {
             Uri uri = CONTENT_URI;
             String[] projection = PROJECTION_ALL;
-            String selection = null;
-            String selectionArgs[] = null;
+/*            String selection = null;
+            String selectionArgs[] = null;*/
             ContentResolver cr = context.getContentResolver();
             try {
-                cursor = cr.query(uri, projection, selection, selectionArgs, sortOrder);
+                cursor = cr.query(uri, projection, null, null, sortOrder);
             } catch (Exception e) {
                 MyLog.e("ItemsTable", "getAllItemsCursor: Exception; " + e.getMessage());
             }
@@ -359,23 +334,6 @@ public class ItemsTable {
         return result;
     }
 
-/*    private static Cursor getAllNamesAndIDsCursor(Context context) {
-        Cursor cursor = null;
-
-        Uri uri = CONTENT_URI;
-        String[] projection = PROJECTION_ID_AND_NAME;
-        String selection = null;
-        String selectionArgs[] = null;
-        String sortOrder = null;
-        ContentResolver cr = context.getContentResolver();
-        try {
-            cursor = cr.query(uri, projection, selection, selectionArgs, sortOrder);
-        } catch (Exception e) {
-            MyLog.e("ItemsTable", "getAllNamesAndIDsCursor: Exception; " + e.getMessage());
-        }
-
-        return cursor;
-    }*/
 
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Update Methods
@@ -423,9 +381,9 @@ public class ItemsTable {
         // Update the item's fields
         ContentResolver cr = context.getContentResolver();
         Uri uri = Uri.withAppendedPath(CONTENT_URI, String.valueOf(itemID));
-        String selection = null;
-        String[] selectionArgs = null;
-        numberOfUpdatedRecords = cr.update(uri, newFieldValues, selection, selectionArgs);
+/*        String selection = null;
+        String[] selectionArgs = null;*/
+        numberOfUpdatedRecords = cr.update(uri, newFieldValues, null, null);
 
         return numberOfUpdatedRecords;
     }
@@ -440,26 +398,24 @@ public class ItemsTable {
         // Update the item's fields
         ContentResolver cr = context.getContentResolver();
         Uri uri = Uri.withAppendedPath(CONTENT_URI, String.valueOf(itemID));
-        String selection = null;
-        String[] selectionArgs = null;
-        numberOfUpdatedRecords = cr.update(uri, newFieldValues, selection, selectionArgs);
+/*        String selection = null;
+        String[] selectionArgs = null;*/
+        numberOfUpdatedRecords = cr.update(uri, newFieldValues, null, null);
 
         return numberOfUpdatedRecords;
     }
 
-    public static int setAllItemsInTable(Context context, boolean isInTable) {
+    public static void setAllItemsInTable(Context context, boolean isInTable) {
         // Update the user's fields
         ContentResolver cr = context.getContentResolver();
         Uri uri = CONTENT_URI;
-        String selection = null;
-        String[] selectionArgs = null;
         ContentValues cv = new ContentValues();
         if (isInTable) {
             cv.put(COL_IS_IN_TABLE, 1);
         } else {
             cv.put(COL_IS_IN_TABLE, 0);
         }
-        return cr.update(uri, cv, selection, selectionArgs);
+        cr.update(uri, cv, null, null);
     }
 
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -515,9 +471,7 @@ public class ItemsTable {
         int numberOfDeletedRecords;
         ContentResolver cr = context.getContentResolver();
         Uri uri = CONTENT_URI;
-        String where = null;
-        String[] selectionArgs = null;
-        numberOfDeletedRecords = cr.delete(uri, where, selectionArgs);
+        numberOfDeletedRecords = cr.delete(uri, null, null);
 
         PasswordsContentProvider.setSuppressChangeNotification(false);
         return numberOfDeletedRecords;

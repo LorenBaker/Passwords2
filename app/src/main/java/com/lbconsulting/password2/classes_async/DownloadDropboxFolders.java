@@ -30,20 +30,19 @@ import de.greenrobot.event.EventBus;
 
 public class DownloadDropboxFolders extends AsyncTask<Void, Long, Boolean> {
 
-    private final Context mContext;
     private final DropboxAPI<?> mDBApi;
     private final String mDropboxFolderPath;
     private final HashMap<String, clsDropboxFolder> mFolderHashMap;
 
-    public interface folderFinishedListener {
+/*    public interface folderFinishedListener {
         void onFolderDownloadComplete(Boolean result);
-    }
+    }*/
 
     public DownloadDropboxFolders(Context context, DropboxAPI<?> api, String dropboxFolderPath,
                                   HashMap<String, clsDropboxFolder> folderHashMap) {
 
         // We set the context this way so we don't accidentally leak activities
-        mContext = context.getApplicationContext();
+        //Context mContext = context.getApplicationContext();
         mDBApi = api;
         mDropboxFolderPath = dropboxFolderPath;
         mFolderHashMap = folderHashMap;

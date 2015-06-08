@@ -51,7 +51,7 @@
                 android:id="@+id/btnCopyAccountNumber"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Copy Account Number" />
+                android:text="@string/btnCopyAccountNumber_text" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -63,14 +63,14 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Call Primary" />
+                    android:text="@string/btnCallPrimary_text" />
 
                 <Button
                     android:id="@+id/btnCallAlternate"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Call Alternate" />
+                    android:text="@string/btnCallAlternate_text" />
 
             </LinearLayout>
 
@@ -107,14 +107,14 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Copy Password" />
+                    android:text="@string/btnCopyPassword_text" />
 
                 <Button
                     android:id="@+id/btnGoToWebsite"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Go To Website" />
+                    android:text="@string/btnGoToWebsite_text" />
 
             </LinearLayout>
 
@@ -125,7 +125,7 @@
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:background="@drawable/rec_opal_no_stroke"
-                android:hint="Comments"
+                android:hint="@string/txtComments_hint"
                 android:inputType="textCapSentences|textMultiLine" />
 
 

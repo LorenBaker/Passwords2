@@ -1,6 +1,9 @@
 package com.lbconsulting.password2.classes;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.widget.Spinner;
@@ -218,6 +221,42 @@ public class clsUtils {
         return unformattedKeycode;
     }
 
+    public static void changeItemType(Context context, final clsItemValues activeItem) {
+        // Strings to Show In Dialog with Radio Buttons
+
+        // Creating and Building the Dialog
+        String[] itemTypes = context.getResources().getStringArray(R.array.item_types);
+        Dialog itemTypesDialog;
+        final AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Select Item Type");
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.setSingleChoiceItems(itemTypes, activeItem.getItemTypeID() - 1, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int position) {
+                int newItemType = position + 1;
+                activeItem.putItemTypeID(newItemType);
+                activeItem.update();
+
+                // show the edit fragment of the new item type
+                // From MySettings
+                // public static final int FRAG_EDIT_CREDIT_CARD = 111;
+                // public static final int FRAG_EDIT_GENERAL_ACCOUNT = 112;
+                // public static final int FRAG_EDIT_SOFTWARE = 113;
+                // public static final int FRAG_EDIT_WEBSITE = 114;
+                int frag = newItemType + 110;
+                EventBus.getDefault().post(new clsEvents.showFragment(frag, false));
+                dialog.dismiss();
+            }
+        });
+        itemTypesDialog = builder.create();
+        itemTypesDialog.show();
+
+    }
+
 
     public static class creditCard {
         private String cardType = MySettings.UNKNOWN;
@@ -253,32 +292,33 @@ public class clsUtils {
         }
     }
 
-    public static creditCard getCreditCardType(String creditCardNumber) {
+    public static creditCard getCreditCardType(Context context, String creditCardNumber) {
         creditCard card = new creditCard();
+        String [] creditCardNames = context.getResources().getStringArray(R.array.credit_card_names);
         if (creditCardNumber != null && !creditCardNumber.isEmpty()) {
             if (isVISACard(creditCardNumber)) {
                 card.setCardPosition(MySettings.VISA);
-                card.setCardType(MySettings.CreditCardNames[MySettings.VISA]);
+                card.setCardType(creditCardNames[MySettings.VISA]);
                 card.setFormattedCardNumber(formatTypicalAccountNumber(creditCardNumber, 4));
             } else if (isMasterCard(creditCardNumber)) {
                 card.setCardPosition(MySettings.MASTERCARD);
-                card.setCardType(MySettings.CreditCardNames[MySettings.MASTERCARD]);
+                card.setCardType(creditCardNames[MySettings.MASTERCARD]);
                 card.setFormattedCardNumber(formatTypicalAccountNumber(creditCardNumber, 4));
             } else if (isAmericanExpress(creditCardNumber)) {
                 card.setCardPosition(MySettings.AMERICAN_EXPRESS);
-                card.setCardType(MySettings.CreditCardNames[MySettings.AMERICAN_EXPRESS]);
+                card.setCardType(creditCardNames[MySettings.AMERICAN_EXPRESS]);
                 card.setFormattedCardNumber(formatAmericanExpress(creditCardNumber));
             } else if (isDiscoverCard(creditCardNumber)) {
                 card.setCardPosition(MySettings.DISCOVER);
-                card.setCardType(MySettings.CreditCardNames[MySettings.DISCOVER]);
+                card.setCardType(creditCardNames[MySettings.DISCOVER]);
                 card.setFormattedCardNumber(formatTypicalAccountNumber(creditCardNumber, 4));
             } else if (isDinersClubCard(creditCardNumber)) {
                 card.setCardPosition(MySettings.DINERS_CLUB);
-                card.setCardType(MySettings.CreditCardNames[MySettings.DINERS_CLUB]);
+                card.setCardType(creditCardNames[MySettings.DINERS_CLUB]);
                 card.setFormattedCardNumber(formatDinersClub(creditCardNumber));
             } else if (isJCBCard(creditCardNumber)) {
                 card.setCardPosition(MySettings.JCB);
-                card.setCardType(MySettings.CreditCardNames[MySettings.JCB]);
+                card.setCardType(creditCardNames[MySettings.JCB]);
                 card.setFormattedCardNumber(formatTypicalAccountNumber(creditCardNumber, 4));
             } else {
                 card.setCardPosition(Spinner.INVALID_POSITION);
@@ -612,7 +652,7 @@ public class clsUtils {
     }*/
 
 
-    private static boolean comparePasswordItems(ArrayList<clsItem> passwordsItemsList1,
+/*    private static boolean comparePasswordItems(ArrayList<clsItem> passwordsItemsList1,
                                                 ArrayList<clsItem> passwordsItemsList2) {
         boolean result = false;
         int index = 0;
@@ -654,10 +694,10 @@ public class clsUtils {
             result = true;
         }
         return result;
-    }
+    }*/
 
 
-    private static boolean compareUsers(ArrayList<clsUsers> userList1,
+/*    private static boolean compareUsers(ArrayList<clsUsers> userList1,
                                         ArrayList<clsUsers> userList2) {
         boolean result = false;
         int index = 0;
@@ -681,6 +721,6 @@ public class clsUtils {
         }
         return result;
 
-    }
+    }*/
 
 }

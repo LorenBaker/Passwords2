@@ -1,0 +1,230 @@
+com.dropbox.client2.DropboxAPI:
+    private static final int REVISION_DEFAULT_LIMIT
+    private static final int SEARCH_DEFAULT_LIMIT
+    private static final int UPLOAD_SO_TIMEOUT_MS
+com.dropbox.client2.DropboxAPI$Account:
+    328:328:boolean isOverQuota()
+com.dropbox.client2.DropboxAPI$ChunkedUploader:
+    private static final int DEFAULT_CHUNK_SIZE
+com.dropbox.client2.DropboxAPI$DropboxLink:
+    1323:1330:private DropboxAPI$DropboxLink(java.lang.String,boolean)
+com.dropbox.client2.android.AuthActivity:
+    private static final java.lang.String DEFAULT_WEB_HOST
+    private static final java.lang.String SIS_KEY_AUTH_STATE_NONCE
+com.dropbox.client2.session.AbstractSession:
+    private static final java.lang.String API_SERVER
+    private static final java.lang.String CONTENT_SERVER
+    private static final java.lang.String WEB_SERVER
+    private static final int KEEP_ALIVE_DURATION_SECS
+    private static final int KEEP_ALIVE_MONITOR_INTERVAL_SECS
+    private static final int DEFAULT_TIMEOUT_MILLIS
+com.google.gson.DefaultDateTypeAdapter:
+    53:54:DefaultDateTypeAdapter(int)
+com.google.gson.FieldAttributes:
+    146:146:java.lang.Object get(java.lang.Object)
+    155:155:boolean isSynthetic()
+com.google.gson.Gson:
+    static final boolean DEFAULT_JSON_NON_EXECUTABLE
+    private static final java.lang.String JSON_NON_EXECUTABLE_PREFIX
+com.google.gson.JsonArray:
+    45:49:com.google.gson.JsonArray deepCopy()
+    33:33:bridge synthetic com.google.gson.JsonElement deepCopy()
+com.google.gson.JsonElement:
+    abstract com.google.gson.JsonElement deepCopy()
+com.google.gson.JsonNull:
+    45:45:com.google.gson.JsonNull deepCopy()
+    26:26:bridge synthetic com.google.gson.JsonElement deepCopy()
+com.google.gson.JsonObject:
+    38:42:com.google.gson.JsonObject deepCopy()
+    32:32:bridge synthetic com.google.gson.JsonElement deepCopy()
+com.google.gson.JsonPrimitive:
+    90:90:com.google.gson.JsonPrimitive deepCopy()
+    33:33:bridge synthetic com.google.gson.JsonElement deepCopy()
+com.google.gson.internal.Excluder:
+    private static final double IGNORE_VERSIONS
+com.google.gson.internal.bind.TypeAdapters$23:
+    private static final java.lang.String YEAR
+    private static final java.lang.String MONTH
+    private static final java.lang.String DAY_OF_MONTH
+    private static final java.lang.String HOUR_OF_DAY
+    private static final java.lang.String MINUTE
+    private static final java.lang.String SECOND
+com.lbconsulting.password2.classes.MyLog:
+    private static final java.lang.String TAG
+com.lbconsulting.password2.classes.MySettings:
+    private static final long DEFAULT_LONGEVITY_MILLISECONDS
+    private static final java.lang.String DROPBOX_FILENAME
+    private static final java.lang.String PASSWORDS_SAVED_STATES
+    private static final java.lang.String SETTING_DROPBOX_ACCESS_TOKEN
+    private static final java.lang.String SETTING_IS_VERBOSE
+    private static final java.lang.String SETTING_LAST_ITEM_ID
+    private static final java.lang.String SETTING_LAST_USER_ID
+    private static final java.lang.String SETTING_ACTIVE_FRAGMENT_ID
+    private static final java.lang.String SETTING_ACTIVE_ITEM_ID
+    private static final java.lang.String SETTING_ACTIVE_LIST_VIEW_ID
+    private static final java.lang.String SETTING_ACTIVE_USER_ID
+    private static final java.lang.String SETTING_APP_PASSWORD
+    private static final java.lang.String SETTING_APP_PASSWORD_SAVED_TIME
+    private static final java.lang.String SETTING_STARTUP_STATE
+    private static final java.lang.String SETTING_APP_PASSWORD_LONGEVITY
+    private static final java.lang.String SETTING_ON_SAVE_INSTANCE_STATE
+    private static final java.lang.String SETTING_SEARCH_TEXT
+    private static final java.lang.String SETTING_HIDE_CREDIT_CARDS
+    private static final java.lang.String SETTING_HIDE_GENERAL_ACCOUNTS
+    private static final java.lang.String SETTING_HIDE_WEBSITES
+    private static final java.lang.String SETTING_HIDE_SOFTWARE
+    private static final java.lang.String SETTING_LISTS_START_CLOSED
+    private static final java.lang.String SETTING_DROPBOX_FOLDER_NAME
+    private static final java.lang.String SETTING_NETWORK_PREFERENCE
+    private static final java.lang.String SETTING_DROPBOX_FILE_REV
+    private static final java.lang.String SETTING_NETWORK_BUSY
+    private static final java.lang.String SETTING_SYNC_PERIODICITY
+    private static final java.lang.String SETTING_LV_INDEX_ALL_USER_ITEMS
+    private static final java.lang.String SETTING_LV_INDEX_CREDIT_CARDS
+    private static final java.lang.String SETTING_LV_INDEX_GENERAL_ACCOUNTS
+    private static final java.lang.String SETTING_LV_INDEX_WEBSITES
+    private static final java.lang.String SETTING_LV_INDEX_SOFTWARE
+    private static final java.lang.String SETTING_LV_TOP_ALL_USER_ITEMS
+    private static final java.lang.String SETTING_LV_TOP_CREDIT_CARDS
+    private static final java.lang.String SETTING_LV_TOP_GENERAL_ACCOUNTS
+    private static final java.lang.String SETTING_LV_TOP_WEBSITES
+    private static final java.lang.String SETTING_LV_TOP_SOFTWARE
+    private static final java.lang.String SETTING_ENCRYPTION_TEST
+    private static final java.lang.String ENCRYPTION_TEST_TEXT
+    private static final java.lang.String DEFAULT_DROPBOX_PATH
+    private static final java.lang.String mKey
+com.lbconsulting.password2.classes.clsUtils:
+    private static final java.lang.String VISACreditCardPattern
+    private static final java.lang.String MasterCardCreditCardPattern
+    private static final java.lang.String AmericanExpressCreditCardPattern
+    private static final java.lang.String DiscoverCreditCardPattern
+    private static final java.lang.String DinersClubCreditCardPattern
+    private static final java.lang.String JCBCreditCardPattern
+com.lbconsulting.password2.database.ItemsTable:
+    private static final int ITEM_UPDATE_ERROR_ITEM_NOT_FOUND
+    private static final int ITEM_UPDATE_ERROR_ITEM_NAME_EXISTS
+    private static final int ITEM_NOT_DELETED
+    private static final java.lang.String CREATE_DATA_TABLE
+com.lbconsulting.password2.database.NetworkLogTable:
+    private static final java.lang.String COL_CLIENT_M_TIME
+    private static final java.lang.String COL_HASH
+    private static final java.lang.String COL_ICON
+    private static final java.lang.String COL_IS_DELETED
+    private static final java.lang.String COL_IS_DIR
+    private static final java.lang.String COL_IS_READ_ONLY
+    private static final java.lang.String COL_MIME_TYPE
+    private static final java.lang.String COL_MODIFIED
+    private static final java.lang.String COL_PATH
+    private static final java.lang.String COL_ROOT
+    private static final java.lang.String COL_THUMB_EXISTS
+    private static final java.lang.String CREATE_DATA_TABLE
+    311:315:private static java.util.ArrayList getStartingAndEndingDates(java.lang.String)
+    320:340:private static java.util.ArrayList getStartingAndEndingDates(int,int)
+    354:366:private static int purgeLogsPriorTo(android.content.Context,int,int)
+com.lbconsulting.password2.database.PasswordsContentProvider:
+    private static final int USERS_MULTI_ROWS
+    private static final int USERS_SINGLE_ROW
+    private static final int ITEMS_MULTI_ROWS
+    private static final int ITEMS_SINGLE_ROW
+    private static final int NETWORK_LOG_MULTI_ROWS
+    private static final int NETWORK_LOG_SINGLE_ROW
+com.lbconsulting.password2.database.PasswordsDatabaseHelper:
+    private static final java.lang.String DATABASE_NAME
+    private static final int DATABASE_VERSION
+com.lbconsulting.password2.database.UsersTable:
+    private static final int USER_NOT_CREATED
+    private static final int ILLEGAL_USER_ID
+    private static final int PROPOSED_USER_IS_NULL
+    private static final int PROPOSED_USER_IS_EMPTY
+    private static final int USER_ID_ALREADY_EXISTS
+    private static final int USER_NAME_ALREADY_EXISTS
+    private static final int UPDATE_ERROR_USER_NOT_FOUND
+    private static final int UPDATE_ERROR_USER_NAME_EXISTS
+    private static final java.lang.String CREATE_DATA_TABLE
+com.lbconsulting.password2.fragments.fragEdit_creditCard:
+    private static final java.lang.String ARG_ACTIVE_CARD_TYPE
+    private static final java.lang.String ARG_CREDIT_CARD_NUMBER
+    private static final java.lang.String ARG_IS_NEW_PASSWORD_ITEM
+com.lbconsulting.password2.fragments.fragEdit_generalAccount:
+    private static final java.lang.String ARG_ACCOUNT_NUMBER
+    private static final java.lang.String ARG_IS_NEW_PASSWORD_ITEM
+com.lbconsulting.password2.fragments.fragEdit_software:
+    private static final java.lang.String ARG_ACCOUNT_NUMBER
+    private static final java.lang.String ARG_IS_NEW_PASSWORD_ITEM
+com.lbconsulting.password2.fragments.fragEdit_website:
+    private static final java.lang.String ARG_IS_NEW_PASSWORD_ITEM
+com.lbconsulting.password2.fragments.fragHome:
+    private static final int USER_GENERAL_ACCOUNT_ITEMS
+    private static final int USER_SOFTWARE_ITEMS
+com.lbconsulting.password2.fragments.fragNetworkLog:
+    private static final int NETWORK_LOG
+com.lbconsulting.password2.services.UploadService:
+    private static final java.lang.String UNKNOWN
+de.greenrobot.event.EventBus$PostCallback
+de.greenrobot.event.SubscriberMethodFinder:
+    private static final java.lang.String ON_EVENT_METHOD_NAME
+    private static final int BRIDGE
+    private static final int SYNTHETIC
+    private static final int MODIFIERS_IGNORE
+org.apache.commons.io.CopyUtils:
+    private static final int DEFAULT_BUFFER_SIZE
+org.apache.commons.io.FileSystemUtils:
+    private static final int INIT_PROBLEM
+    private static final int OTHER
+    private static final int WINDOWS
+    private static final int UNIX
+    private static final int POSIX_UNIX
+org.apache.commons.io.FileUtils:
+    private static final long FILE_COPY_BUFFER_SIZE
+org.apache.commons.io.FilenameUtils:
+    private static final char UNIX_SEPARATOR
+    private static final char WINDOWS_SEPARATOR
+org.apache.commons.io.IOUtils:
+    private static final int EOF
+    private static final int DEFAULT_BUFFER_SIZE
+    private static final int SKIP_BUFFER_SIZE
+org.apache.commons.io.input.ReaderInputStream:
+    private static final int DEFAULT_BUFFER_SIZE
+org.apache.commons.io.input.Tailer:
+    private static final int DEFAULT_DELAY_MILLIS
+    private static final java.lang.String RAF_MODE
+    private static final int DEFAULT_BUFSIZE
+org.apache.commons.io.input.XmlStreamReader:
+    private static final int BUFFER_SIZE
+    private static final java.lang.String UTF_8
+    private static final java.lang.String US_ASCII
+    private static final java.lang.String UTF_16BE
+    private static final java.lang.String UTF_16LE
+    private static final java.lang.String UTF_32BE
+    private static final java.lang.String UTF_32LE
+    private static final java.lang.String UTF_16
+    private static final java.lang.String UTF_32
+    private static final java.lang.String EBCDIC
+    private static final java.lang.String RAW_EX_1
+    private static final java.lang.String RAW_EX_2
+    private static final java.lang.String HTTP_EX_1
+    private static final java.lang.String HTTP_EX_2
+    private static final java.lang.String HTTP_EX_3
+org.apache.commons.io.output.LockableFileWriter:
+    private static final java.lang.String LCK
+org.apache.commons.io.output.WriterOutputStream:
+    private static final int DEFAULT_BUFFER_SIZE
+org.apache.commons.io.output.XmlStreamWriter:
+    private static final int BUFFER_SIZE
+org.json.simple.parser.Yylex:
+    public static final int YYEOF
+    private static final int ZZ_BUFFERSIZE
+    public static final int YYINITIAL
+    public static final int STRING_BEGIN
+    private static final java.lang.String ZZ_CMAP_PACKED
+    private static final java.lang.String ZZ_ACTION_PACKED_0
+    private static final java.lang.String ZZ_ROWMAP_PACKED_0
+    private static final int ZZ_UNKNOWN_ERROR
+    private static final int ZZ_NO_MATCH
+    private static final int ZZ_PUSHBACK_2BIG
+    private static final java.lang.String ZZ_ATTRIBUTE_PACKED_0
+    Yylex(java.io.InputStream)
+    public final void yyclose()
+    public final int yystate()
+    public final int yylength()
+    public void yypushback(int)

@@ -3,7 +3,6 @@ package com.lbconsulting.password2.database;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.CursorLoader;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
@@ -25,8 +24,6 @@ public class UsersTable {
 
     private  static final int UPDATE_ERROR_USER_NOT_FOUND = -7;
     private  static final int UPDATE_ERROR_USER_NAME_EXISTS = -8;
-
-    public static final int USER_NOT_DELETED = -9;
 
     // Users data table
     // Version 1
@@ -135,12 +132,13 @@ public class UsersTable {
         if (userID > 0) {
             Uri uri = Uri.withAppendedPath(CONTENT_URI, String.valueOf(userID));
             String[] projection = PROJECTION_ALL;
-            String selection = null;
+/*            String selection = null;
             String selectionArgs[] = null;
-            String sortOrder = null;
+            String sortOrder = null;*/
             ContentResolver cr = context.getContentResolver();
             try {
-                cursor = cr.query(uri, projection, selection, selectionArgs, sortOrder);
+                //cursor = cr.query(uri, projection, selection, selectionArgs, sortOrder);
+                cursor = cr.query(uri, projection, null, null, null);
             } catch (Exception e) {
                 MyLog.e("UsersTable", "getUser: Exception; " + e.getMessage());
             }
@@ -156,10 +154,10 @@ public class UsersTable {
             String[] projection = PROJECTION_ALL;
             String selection = COL_USER_NAME + " = ?";
             String selectionArgs[] = new String[]{userName};
-            String sortOrder = null;
+           // String sortOrder = null;
             ContentResolver cr = context.getContentResolver();
             try {
-                cursor = cr.query(uri, projection, selection, selectionArgs, sortOrder);
+                cursor = cr.query(uri, projection, selection, selectionArgs, null);
             } catch (Exception e) {
                 MyLog.e("UsersTable", "getUser: Exception; " + e.getMessage());
             }
@@ -167,7 +165,7 @@ public class UsersTable {
         return cursor;
     }
 
-    public static String getUserName(Context context, long userID) {
+/*    public static String getUserName(Context context, long userID) {
         String userName = "";
         Cursor cursor = getUser(context, userID);
         if (cursor != null) {
@@ -178,17 +176,17 @@ public class UsersTable {
             cursor.close();
         }
         return userName;
-    }
+    }*/
 
     public static Cursor getAllUsersCursor(Context context, String sortOrder) {
         Cursor cursor = null;
         Uri uri = CONTENT_URI;
         String[] projection = PROJECTION_ALL;
-        String selection = null;
-        String selectionArgs[] = null;
+/*        String selection = null;
+        String selectionArgs[] = null;*/
         ContentResolver cr = context.getContentResolver();
         try {
-            cursor = cr.query(uri, projection, selection, selectionArgs, sortOrder);
+            cursor = cr.query(uri, projection, null, null, sortOrder);
         } catch (Exception e) {
             MyLog.e("UsersTable", "getAllUsersCursor: Exception; " + e.getMessage());
         }
@@ -196,19 +194,19 @@ public class UsersTable {
         return cursor;
     }
 
-    public static CursorLoader getAllUsersCursorLoader(Context context, String sortOrder) {
+/*    public static CursorLoader getAllUsersCursorLoader(Context context, String sortOrder) {
         CursorLoader cursorLoader = null;
         Uri uri = CONTENT_URI;
         String[] projection = PROJECTION_ALL;
-        String selection = null;
-        String selectionArgs[] = null;
+*//*        String selection = null;
+        String selectionArgs[] = null;*//*
         try {
-            cursorLoader = new CursorLoader(context, uri, projection, selection, selectionArgs, sortOrder);
+            cursorLoader = new CursorLoader(context, uri, projection, null, null, sortOrder);
         } catch (Exception e) {
             MyLog.e("UsersTable", "getAllUsersCursorLoader: Exception; " + e.getMessage());
         }
         return cursorLoader;
-    }
+    }*/
 
     public static boolean userExists(Context context, long userID) {
         boolean userExists = false;
@@ -282,9 +280,7 @@ public class UsersTable {
             return UPDATE_ERROR_USER_NOT_FOUND;
         }
 
-        if (userCursor != null) {
-            userCursor.close();
-        }
+        userCursor.close();
 
         // if updating the user's name, verify that it does not already exist in the table
         if (newFieldValues.containsKey(COL_USER_NAME)) {
@@ -315,24 +311,24 @@ public class UsersTable {
         // Update the user's fields
         ContentResolver cr = context.getContentResolver();
         Uri uri = Uri.withAppendedPath(CONTENT_URI, String.valueOf(userID));
-        String selection = null;
-        String[] selectionArgs = null;
-        return cr.update(uri, newFieldValues, selection, selectionArgs);
+/*        String selection = null;
+        String[] selectionArgs = null;*/
+        return cr.update(uri, newFieldValues, null, null);
     }
 
     public static int setAllUsersInTable(Context context, boolean isInTable) {
         // Update the user's fields
         ContentResolver cr = context.getContentResolver();
         Uri uri = CONTENT_URI;
-        String selection = null;
-        String[] selectionArgs = null;
+/*        String selection = null;
+        String[] selectionArgs = null;*/
         ContentValues cv = new ContentValues();
         if (isInTable) {
             cv.put(COL_IS_IN_TABLE, 1);
         } else {
             cv.put(COL_IS_IN_TABLE, 0);
         }
-        return cr.update(uri, cv, selection, selectionArgs);
+        return cr.update(uri, cv, null, null);
     }
 
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -373,9 +369,9 @@ public class UsersTable {
         int numberOfDeletedRecords;
         ContentResolver cr = context.getContentResolver();
         Uri uri = CONTENT_URI;
-        String where = null;
-        String[] selectionArgs = null;
-        numberOfDeletedRecords = cr.delete(uri, where, selectionArgs);
+/*        String where = null;
+        String[] selectionArgs = null;*/
+        numberOfDeletedRecords = cr.delete(uri, null, null);
         PasswordsContentProvider.setSuppressChangeNotification(false);
 
         return numberOfDeletedRecords;

@@ -108,7 +108,7 @@ public class NetworkLogTable {
     // Create Methods
     // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public static long createNewLog(Context context, int actionStyle, int network, DropboxAPI.Entry entry) {
+    public static void createNewLog(Context context, int actionStyle, int network, DropboxAPI.Entry entry) {
 
         ContentValues values = new ContentValues();
         values.put(COL_DATE_TIME, System.currentTimeMillis());
@@ -149,18 +149,13 @@ public class NetworkLogTable {
         }
         values.put(COL_THUMB_EXISTS, booleanResult);
 
-        long newLogID = 0;
         try {
             ContentResolver cr = context.getContentResolver();
             Uri uri = CONTENT_URI;
-            Uri newLogUri = cr.insert(uri, values);
-            if (newLogUri != null) {
-                newLogID = Long.parseLong(newLogUri.getLastPathSegment());
-            }
+            cr.insert(uri, values);
         } catch (Exception e) {
             MyLog.e("NetworkLogTable", "createNewLog: Exception" + e.getMessage());
         }
-        return newLogID;
     }
 
 
@@ -169,42 +164,43 @@ public class NetworkLogTable {
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-    public static Cursor getLogCursor(Context context, long logID) {
+/*    public static Cursor getLogCursor(Context context, long logID) {
         Cursor cursor = null;
         if (logID > 0) {
             Uri uri = Uri.withAppendedPath(CONTENT_URI, String.valueOf(logID));
             String[] projection = PROJECTION_ALL;
-            String selection = null;
+*//*            String selection = null;
             String selectionArgs[] = null;
-            String sortOrder = null;
+            String sortOrder = null;*//*
             ContentResolver cr = context.getContentResolver();
             try {
-                cursor = cr.query(uri, projection, selection, selectionArgs, sortOrder);
+                // cursor = cr.query(uri, projection, selection, selectionArgs, sortOrder);
+                cursor = cr.query(uri, projection, null, null, null);
             } catch (Exception e) {
                 MyLog.e("NetworkLogTable", "getLogCursor: Exception; " + e.getMessage());
             }
         }
         return cursor;
-    }
+    }*/
 
-    public static Cursor getLogsCursor(Context context, String rev) {
+/*    public static Cursor getLogsCursor(Context context, String rev) {
         Cursor cursor = null;
         Uri uri = CONTENT_URI;
         String[] projection = PROJECTION_ALL;
         String selection = COL_REV + " = ? ";
         String selectionArgs[] = new String[]{rev};
-        String sortOrder = null;
+       // String sortOrder = null;
         ContentResolver cr = context.getContentResolver();
         try {
-            cursor = cr.query(uri, projection, selection, selectionArgs, sortOrder);
+            cursor = cr.query(uri, projection, selection, selectionArgs, null);
         } catch (Exception e) {
             MyLog.e("NetworkLogTable", "getLogsCursor: Exception; " + e.getMessage());
         }
 
         return cursor;
-    }
+    }*/
 
-    public static Cursor getLogsCursor(Context context, int month, int year) {
+/*    public static Cursor getLogsCursor(Context context, int month, int year) {
 
         ArrayList<Long> dates = getStartingAndEndingDates(month, year);
 
@@ -213,33 +209,33 @@ public class NetworkLogTable {
         String[] projection = PROJECTION_ALL;
         String selection = COL_DATE_TIME + " > ? AND " + COL_DATE_TIME + " < ?";
         String selectionArgs[] = new String[]{String.valueOf(dates.get(0)), String.valueOf(dates.get(1))};
-        String sortOrder = null;
+       // String sortOrder = null;
         ContentResolver cr = context.getContentResolver();
         try {
-            cursor = cr.query(uri, projection, selection, selectionArgs, sortOrder);
+            cursor = cr.query(uri, projection, selection, selectionArgs, null);
         } catch (Exception e) {
             MyLog.e("NetworkLogTable", "getLogsCursor: Exception; " + e.getMessage());
         }
 
         return cursor;
-    }
+    }*/
 
-    public static Cursor getAllLogsCursor(Context context) {
+/*    public static Cursor getAllLogsCursor(Context context) {
         Cursor cursor = null;
         Uri uri = CONTENT_URI;
         String[] projection = PROJECTION_ALL;
-        String selection = null;
-        String selectionArgs[] = null;
+*//*        String selection = null;
+        String selectionArgs[] = null;*//*
         String sortOrder = SORT_ORDER_DATE;
         ContentResolver cr = context.getContentResolver();
         try {
-            cursor = cr.query(uri, projection, selection, selectionArgs, sortOrder);
+            cursor = cr.query(uri, projection, null, null, sortOrder);
         } catch (Exception e) {
             MyLog.e("NetworkLogTable", "getAllLogsCursor: Exception; " + e.getMessage());
         }
 
         return cursor;
-    }
+    }*/
 
 
     public static CursorLoader getAllLogsCursorLoader(Context context, String sortOrder) {
@@ -249,14 +245,14 @@ public class NetworkLogTable {
         String selection = null;
         String selectionArgs[] = null;
         try {
-            cursorLoader = new CursorLoader(context, uri, projection, selection, selectionArgs, sortOrder);
+            cursorLoader = new CursorLoader(context, uri, projection, null, null, sortOrder);
         } catch (Exception e) {
             MyLog.e("NetworkLogTable", "getAllLogsCursorLoader: Exception; " + e.getMessage());
         }
         return cursorLoader;
     }
 
-    public static CursorLoader getLogsCursorLoader(Context context, Calendar startingDate) {
+/*    public static CursorLoader getLogsCursorLoader(Context context, Calendar startingDate) {
         CursorLoader cursorLoader = null;
         Uri uri = CONTENT_URI;
         String[] projection = PROJECTION_ALL;
@@ -270,10 +266,10 @@ public class NetworkLogTable {
             MyLog.e("NetworkLogTable", "getLogsCursorLoader: Exception; " + e.getMessage());
         }
         return cursorLoader;
-    }
+    }*/
 
 
-    public static CursorLoader getLogsCursorLoader(Context context, String month_year) {
+/*    public static CursorLoader getLogsCursorLoader(Context context, String month_year) {
 
         ArrayList<Long> dates = getStartingAndEndingDates(month_year);
 
@@ -289,9 +285,9 @@ public class NetworkLogTable {
             MyLog.e("NetworkLogTable", "getLogsCursorLoader: Exception; " + e.getMessage());
         }
         return cursorLoader;
-    }
+    }*/
 
-    public static CursorLoader getLogsCursorLoader(Context context, int month, int year) {
+/*    public static CursorLoader getLogsCursorLoader(Context context, int month, int year) {
 
         ArrayList<Long> dates = getStartingAndEndingDates(month, year);
 
@@ -307,7 +303,7 @@ public class NetworkLogTable {
             MyLog.e("NetworkLogTable", "getLogsCursorLoader: Exception; " + e.getMessage());
         }
         return cursorLoader;
-    }
+    }*/
 
     private static ArrayList<Long> getStartingAndEndingDates(String month_year) {
 

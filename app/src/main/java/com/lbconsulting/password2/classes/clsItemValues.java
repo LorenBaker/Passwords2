@@ -12,9 +12,9 @@ import com.lbconsulting.password2.fragments.fragHome;
  */
 public class clsItemValues {
 
-    private Context mContext;
+    private final Context mContext;
     private Cursor mItemsCursor;
-    private ContentValues cv;
+    private final ContentValues cv;
 
     public clsItemValues(Context context, Cursor itemCursor) {
         mContext = context;
@@ -77,14 +77,12 @@ public class clsItemValues {
         return result;
     }
 
-/*
     public void putItemTypeID(int itemTypeID) {
         if (cv.containsKey(ItemsTable.COL_ITEM_TYPE_ID)) {
             cv.remove(ItemsTable.COL_ITEM_TYPE_ID);
         }
         cv.put(ItemsTable.COL_ITEM_TYPE_ID, itemTypeID);
     }
-*/
 
     public long getUserID() {
         long result = -1;
@@ -359,13 +357,13 @@ public class clsItemValues {
     }
 
 
-    public String getItemDetail() {
+    public String getItemDetail(Context context) {
         StringBuilder sb = new StringBuilder();
         clsUtils.creditCard card = null;
         switch (getItemTypeID()) {
             case fragHome.USER_CREDIT_CARD_ITEMS:
                 if (!getCreditCardAccountNumber().isEmpty()) {
-                    card = clsUtils.getCreditCardType(getCreditCardAccountNumber());
+                    card = clsUtils.getCreditCardType(context, getCreditCardAccountNumber());
                 }
                 String cardType = "UNKNOWN";
                 String formattedCardNumber = "";
